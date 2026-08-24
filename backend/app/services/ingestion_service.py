@@ -319,14 +319,35 @@ class IngestionService:
             return None
 
     def _parse_csv(self, content: bytes) -> list[dict]:
-        """Parse CSV content into list of dicts."""
-        text = content.decode("utf-8", errors="replace")
+        """Parse CSV content into list of dicts with BOM sanitization & dynamic column mapping."""
+        text = content.decode("utf-8", errors="replace").lstrip("\ufeff")
         reader = csv.DictReader(io.StringIO(text))
+        raw_rows = list(reader)
+        if not raw_rows:
+            return []
+
+        # Apply ColumnDetector for automatic schema mapping
+        try:
+            from app.services.column_detector import ColumnDetector
+            detector = ColumnDetector()
+            mapping = detector.detect_mapping(raw_rows[:10])
+        except Exception:
+            mapping = {}
+
         records = []
-        for row in reader:
-            # Clean up keys — strip whitespace, lowercase
-            cleaned = {k.strip().lower().replace(" ", "_"): v.strip() if isinstance(v, str) else v
-                       for k, v in row.items() if k}
+        for row in raw_rows:
+            cleaned = {}
+            for k, v in row.items():
+                if k:
+                    cleaned_key = k.strip().lower().replace(" ", "_")
+                    cleaned[cleaned_key] = v.strip() if isinstance(v, str) else v
+
+            # Map canonical field names if detected
+            for canonical_key, raw_header in mapping.items():
+                clean_raw = raw_header.strip().lower().replace(" ", "_")
+                if clean_raw in cleaned and canonical_key not in cleaned:
+                    cleaned[canonical_key] = cleaned[clean_raw]
+
             records.append(cleaned)
         return records
 

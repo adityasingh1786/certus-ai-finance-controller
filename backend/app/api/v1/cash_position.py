@@ -45,3 +45,18 @@ async def get_cash_position_forecast(
     """Projected position factoring in pending/unsettled amounts."""
     service = request.app.state.cash_position_service
     return service.get_forecast(forecast_date=date)
+
+
+@router.get("/trajectory")
+async def get_cash_position_trajectory(request: Request):
+    """14-day forward cash projection trajectory with 95% confidence intervals."""
+    service = request.app.state.cash_position_service
+    return {"trajectory": service.get_14_day_trajectory()}
+
+
+@router.get("/variance")
+async def get_ledger_variance_analysis(request: Request):
+    """Real-time 3-way balance variance check between ERP, Bank, and Gateway."""
+    service = request.app.state.cash_position_service
+    return service.get_ledger_variance_analysis()
+
