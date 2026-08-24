@@ -222,7 +222,7 @@ Required Response Structure:
 
             return {
                 "data": data,
-                "confidence": resp.get("confidence", 0.88),
+                "confidence": resp.get("confidence"),
             }
         except Exception as e:
             logger.warning(f"Structured extraction error: {e}")
