@@ -7,7 +7,7 @@ const KERNEL_MESSAGES = [
   { text: "Calibrating Double-Lock Invariant Gates...", sub: "55 Programmatic Invariants locked" },
   { text: "Generating ZK-STARK Solvency Proof Verifier...", sub: "Zero-knowledge polynomial commitment ready" },
   { text: "Binding Multi-Rail Adapters (Razorpay, Bank, ERP)...", sub: "20 Sovereign Datasets mapped (DS-01..DS-20)" },
-  { text: "Authenticating Core Architect Node [Aditya Singh]...", sub: "Sharda Univ B.Tech CSE (AI/ML) · SIH 2025" },
+  { text: "Authenticating Core Architect Node [Aditya Singh]...", sub: "Sharda Univ B.Tech CSE (AI/ML) · Core Architect" },
   { text: "Singularity Financial OS Ready. Entering...", sub: "Deterministic reconciliation certainty achieved" },
 ];
 

@@ -8,13 +8,15 @@ import {
   Layers,
   Code2,
   ExternalLink,
-  Flame,
-  Dumbbell,
   Compass,
   CheckCircle2,
   Lock,
   Binary,
   Radio,
+  Globe,
+  Brain,
+  Bot,
+  Calendar,
 } from 'lucide-react';
 import { soundManager } from '../lib/soundFx';
 
@@ -62,7 +64,7 @@ export default function AboutDeveloperSection() {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-50 border border-rose-200 shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-[#E8384F]" />
             <span className="text-[11px] font-mono font-bold text-[#E8384F] tracking-wide uppercase">
-              Lead Architect & Sovereign Engineer
+              Lead Architect & Systems Engineer
             </span>
           </div>
           <h2 className="text-3xl lg:text-4xl font-display font-bold text-slate-900 tracking-tight">
@@ -84,7 +86,7 @@ export default function AboutDeveloperSection() {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Executive Dossier & Bio
+              Executive Dossier & Milestones
             </button>
             <button
               onClick={() => handleModeChange('radar')}
@@ -115,7 +117,7 @@ export default function AboutDeveloperSection() {
           {/* Subtle Top Specular Sheen */}
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#E8384F]/40 to-transparent" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[600px]">
             
             {/* =========================================================================
                 LEFT COLUMN: Slanted Photo Hero Shield (5 cols)
@@ -134,7 +136,7 @@ export default function AboutDeveloperSection() {
                   <div className="absolute -inset-2 bg-gradient-to-tr from-[#E8384F] via-indigo-500 to-rose-400 rounded-3xl blur-md opacity-60 group-hover:opacity-90 transition duration-500 animate-pulse" />
                   
                   {/* Photo Container Frame */}
-                  <div className="relative w-52 h-72 sm:w-60 sm:h-80 rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-slate-800">
+                  <div className="relative w-52 h-72 sm:w-60 sm:h-84 rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-slate-800">
                     <img
                       src="/aditya-singh.png"
                       alt="Aditya Singh - Lead Architect"
@@ -149,21 +151,21 @@ export default function AboutDeveloperSection() {
                         Aditya Singh
                       </p>
                       <p className="text-[10px] font-mono text-rose-300">
-                        Lead AI Architect (19 Yrs)
+                        Sole Lead AI Architect (19 Yrs)
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Floating Grounding Badges */}
+                {/* Status Badges */}
                 <div className="flex flex-wrap items-center justify-center gap-2 max-w-xs">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-white/10 border border-white/15 text-slate-200 backdrop-blur-md">
-                    <Flame className="w-3 h-3 text-amber-400" />
-                    Guerrilla 450
+                    <Code2 className="w-3 h-3 text-[#E8384F]" />
+                    Full-Stack AI Engineer
                   </span>
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-white/10 border border-white/15 text-slate-200 backdrop-blur-md">
-                    <Dumbbell className="w-3 h-3 text-rose-400" />
-                    Heavy Strength Training
+                    <Cpu className="w-3 h-3 text-indigo-400" />
+                    12-Layer OS Creator
                   </span>
                 </div>
               </div>
@@ -212,18 +214,18 @@ export default function AboutDeveloperSection() {
                     </div>
 
                     <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 shadow-xs space-y-1 col-span-2 sm:col-span-1">
-                      <span className="text-[10px] font-mono text-slate-400 font-bold uppercase">Hackathons & Research</span>
+                      <span className="text-[10px] font-mono text-slate-400 font-bold uppercase">Core Domain</span>
                       <p className="text-xs font-display font-bold text-slate-900">
-                        SIH 2025 Innovator
+                        AI & Systems Architecture
                       </p>
                       <p className="text-[10px] text-indigo-600 font-mono font-semibold">
-                        Multimodal AI Models
+                        High-Dim Tensors & ZK
                       </p>
                     </div>
                   </div>
 
                   {/* Vision Narrative */}
-                  <div className="space-y-3 text-left">
+                  <div className="space-y-2.5 text-left">
                     <h3 className="text-sm font-display font-bold text-slate-900 flex items-center gap-2">
                       <Compass className="w-4 h-4 text-[#E8384F]" />
                       The Vision & Engineering Feat
@@ -236,24 +238,60 @@ export default function AboutDeveloperSection() {
                     </p>
                   </div>
 
-                  {/* Grounding & Recent Milestones Pills */}
-                  <div className="space-y-2 text-left">
-                    <span className="text-[10px] font-mono text-slate-400 font-bold uppercase">
-                      Recent Milestones & Architectures
+                  {/* 🚀 Engineered Milestone Projects */}
+                  <div className="space-y-3 text-left">
+                    <span className="text-[10px] font-mono text-slate-400 font-bold uppercase block">
+                      Engineered Milestones & Production Architectures
                     </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      <span className="px-2.5 py-1 rounded-lg text-[11px] bg-slate-100 text-slate-700 font-sans border border-slate-200">
-                        Multimodal Alzheimer's Detection
-                      </span>
-                      <span className="px-2.5 py-1 rounded-lg text-[11px] bg-slate-100 text-slate-700 font-sans border border-slate-200">
-                        Smart India Hackathon (SIH) 2025
-                      </span>
-                      <span className="px-2.5 py-1 rounded-lg text-[11px] bg-slate-100 text-slate-700 font-sans border border-slate-200">
-                        Enterprise EV Infrastructure RAG
-                      </span>
-                      <span className="px-2.5 py-1 rounded-lg text-[11px] bg-slate-100 text-slate-700 font-sans border border-slate-200">
-                        NASA Software Defect Detection
-                      </span>
+                    
+                    <div className="space-y-2.5">
+                      {/* Project 1 */}
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1 hover:border-slate-300 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-display font-bold text-slate-900 flex items-center gap-1.5">
+                            <Globe className="w-3.5 h-3.5 text-blue-600" />
+                            Interactive Digital Web App
+                          </span>
+                          <span className="text-[10px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                            November 2025
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 font-sans leading-relaxed">
+                          Engineered a customized, fully mobile-responsive digital birthday web application.
+                        </p>
+                      </div>
+
+                      {/* Project 2 */}
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1 hover:border-slate-300 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-display font-bold text-slate-900 flex items-center gap-1.5">
+                            <Brain className="w-3.5 h-3.5 text-purple-600" />
+                            Multimodal Alzheimer's Detection Framework
+                          </span>
+                          <span className="text-[10px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                            January – April 2026
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 font-sans leading-relaxed">
+                          Designed an early-detection machine learning pipeline. The architecture utilizes deep learning backbones to analyze and correlate neuroimaging (MRI/PET) and speech data.
+                        </p>
+                      </div>
+
+                      {/* Project 3 */}
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1 hover:border-slate-300 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-display font-bold text-slate-900 flex items-center gap-1.5">
+                            <Bot className="w-3.5 h-3.5 text-emerald-600" />
+                            Sterling AI Interview Portal & Enterprise Automation
+                          </span>
+                          <span className="text-[10px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                            May 2026
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 font-sans leading-relaxed">
+                          Built automation and digitalization infrastructure at Sterling E-Mobility. This included engineering a full-stack recruitment platform featuring a 3D avatar, real-time voice interaction, and advanced Retrieval-Augmented Generation (RAG) pipelines.
+                        </p>
+                      </div>
                     </div>
                   </div>
 
