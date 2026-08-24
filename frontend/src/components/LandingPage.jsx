@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import ParticleCanvasBackground from './ParticleCanvasBackground';
 import CertusLogo from './CertusLogo';
+import AboutDeveloperSection from './AboutDeveloperSection';
 import { soundManager } from '../lib/soundFx';
 
 export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwagger }) {
@@ -168,6 +169,13 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
             className="hover:text-slate-900 transition-colors"
           >
             Double-Lock Engine
+          </button>
+          <button
+            onClick={() => scrollToSection('about-developer')}
+            className="hover:text-[#E8384F] transition-colors font-bold text-slate-800 flex items-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#E8384F]" />
+            <span>Lead Architect</span>
           </button>
           <button
             onClick={handleSwaggerClick}
@@ -456,7 +464,12 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
       </section>
 
       {/* =========================================================================
-          SECTION 6 — Footer with Aditya Singh attribution & GitHub link
+          SECTION 6 — Bespoke Slanted-Frame Executive Developer Showcase
+         ========================================================================= */}
+      <AboutDeveloperSection />
+
+      {/* =========================================================================
+          SECTION 7 — Footer with Aditya Singh attribution & GitHub link
          ========================================================================= */}
       <footer className="py-12 border-t border-slate-200/60 bg-white/70 backdrop-blur-xl text-xs text-slate-500 px-6 lg:px-12 z-10 relative">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">

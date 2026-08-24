@@ -12,6 +12,7 @@ import RecordAuditDrawer from './components/RecordAuditDrawer';
 import PipelineTelemetryModal from './components/PipelineTelemetryModal';
 import CommandPaletteModal from './components/CommandPaletteModal';
 import ErrorToast from './components/ErrorToast';
+import SingularityBootScreen from './components/SingularityBootScreen';
 import {
   fetchCashPosition,
   fetchCashForecast,
@@ -50,15 +51,7 @@ export default function App() {
   const [isReconciling, setIsReconciling] = useState(false);
   const [apiError, setApiError] = useState(null);
 
-  // 1. Initial 2.4s Booting Screen Transition
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentScreen('landing');
-    }, 2400);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // 2. Load Initial Live Backend Data & Scenario Catalog
+  // 1. Load Initial Live Backend Data & Scenario Catalog
   const loadInitialData = useCallback(async () => {
     try {
       const [cashRes, forecastRes, qRes, reconRes, scRes] = await Promise.allSettled([
@@ -181,32 +174,12 @@ export default function App() {
   return (
     <>
       {/* =========================================================================
-          STEP 1: 3D Holographic Booting Screen (2.4s)
+          STEP 1: 3D Holographic Singularity Booting Screen
          ========================================================================= */}
       {currentScreen === 'boot' && (
-        <div className="min-h-screen bg-[#FAFAF9] flex flex-col items-center justify-center relative overflow-hidden select-none aurora-canvas">
-          <div className="relative flex flex-col items-center z-10 space-y-6">
-            <div className="relative">
-              <div className="w-16 h-16 rounded-3xl bg-[#E8384F] flex items-center justify-center text-white text-2xl font-bold font-display shadow-2xl shadow-rose-500/40 animate-pulse">
-                C
-              </div>
-              <div className="absolute inset-0 rounded-3xl border-2 border-[#E8384F]/40 animate-ping" />
-            </div>
-
-            <div className="text-center space-y-2">
-              <h2 className="text-xl font-bold text-slate-900 font-display tracking-tight">
-                CERTUS AUTONOMOUS OS
-              </h2>
-              <p className="text-xs font-mono text-slate-500">
-                Initializing Double-Lock Invariant Core v2.4...
-              </p>
-            </div>
-
-            <div className="w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-              <div className="h-full bg-[#E8384F] rounded-full animate-[ekgFlow_2s_ease-in-out_infinite]" style={{ width: '70%' }} />
-            </div>
-          </div>
-        </div>
+        <SingularityBootScreen
+          onBootComplete={() => setCurrentScreen('landing')}
+        />
       )}
 
       {/* =========================================================================
