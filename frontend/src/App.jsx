@@ -106,19 +106,19 @@ export default function App() {
       if (targetTag === 'input' || targetTag === 'textarea' || targetTag === 'select') return;
 
       if (e.key === '1') {
-        soundManager.playClick();
+        try { soundManager.playClick(); } catch (_) {}
         setActiveTab('recon');
       } else if (e.key === '2') {
-        soundManager.playClick();
+        try { soundManager.playClick(); } catch (_) {}
         setActiveTab('quarantine');
       } else if (e.key === '3') {
-        soundManager.playClick();
+        try { soundManager.playClick(); } catch (_) {}
         setActiveTab('treasury');
       } else if (e.key === '4') {
-        soundManager.playClick();
+        try { soundManager.playClick(); } catch (_) {}
         setActiveTab('copilot');
       } else if (e.key === '5') {
-        soundManager.playClick();
+        try { soundManager.playClick(); } catch (_) {}
         setActiveTab('governance');
       }
     };
@@ -129,7 +129,7 @@ export default function App() {
 
   // 4. Handle 1-Click Demo Execution — Launches Cinematic Telemetry HUD
   const handleRunDemo = async (scenarioId = null) => {
-    soundManager.playClick();
+    try { soundManager.playClick(); } catch (_) {}
     setIsReconciling(true);
     setApiError(null);
     setShowTelemetryModal(true);
@@ -138,7 +138,7 @@ export default function App() {
       const res = await reconcileDemoDataset(scenarioId);
       setPendingDemoData(res);
       setReconciliationData(res);
-      soundManager.playMatchChime();
+      try { soundManager.playMatchChime(); } catch (_) {}
     } catch (err) {
       console.error('Demo execution error:', err);
     } finally {
@@ -156,7 +156,7 @@ export default function App() {
 
   // Quarantine exception resolution handler
   const handleRecordResolved = (recordId, action) => {
-    soundManager.playMatchChime();
+    try { soundManager.playMatchChime(); } catch (_) {}
     setQuarantineRecords((prev) =>
       prev.map((r) =>
         r.record_id === recordId ? { ...r, is_resolved: true, resolution_action: action } : r
@@ -166,164 +166,174 @@ export default function App() {
 
   const unresCount = quarantineRecords.filter((r) => !r.is_resolved).length || 4;
 
-  // =========================================================================
-  // STEP 1: 3D Holographic Booting Screen (2.4s)
-  // =========================================================================
-  if (currentScreen === 'boot') {
-    return (
-      <div className="min-h-screen bg-[#FAFAF9] flex flex-col items-center justify-center relative overflow-hidden select-none aurora-canvas">
-        <div className="relative flex flex-col items-center z-10 space-y-6">
-          <div className="relative">
-            <div className="w-16 h-16 rounded-3xl bg-[#E8384F] flex items-center justify-center text-white text-2xl font-bold font-display shadow-2xl shadow-rose-500/40 animate-pulse">
-              C
+  return (
+    <>
+      {/* =========================================================================
+          STEP 1: 3D Holographic Booting Screen (2.4s)
+         ========================================================================= */}
+      {currentScreen === 'boot' && (
+        <div className="min-h-screen bg-[#FAFAF9] flex flex-col items-center justify-center relative overflow-hidden select-none aurora-canvas">
+          <div className="relative flex flex-col items-center z-10 space-y-6">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-3xl bg-[#E8384F] flex items-center justify-center text-white text-2xl font-bold font-display shadow-2xl shadow-rose-500/40 animate-pulse">
+                C
+              </div>
+              <div className="absolute inset-0 rounded-3xl border-2 border-[#E8384F]/40 animate-ping" />
             </div>
-            <div className="absolute inset-0 rounded-3xl border-2 border-[#E8384F]/40 animate-ping" />
-          </div>
 
-          <div className="text-center space-y-2">
-            <h2 className="text-xl font-bold text-slate-900 font-display tracking-tight">
-              CERTUS AUTONOMOUS OS
-            </h2>
-            <p className="text-xs font-mono text-slate-500">
-              Initializing Double-Lock Invariant Core v2.4...
-            </p>
-          </div>
+            <div className="text-center space-y-2">
+              <h2 className="text-xl font-bold text-slate-900 font-display tracking-tight">
+                CERTUS AUTONOMOUS OS
+              </h2>
+              <p className="text-xs font-mono text-slate-500">
+                Initializing Double-Lock Invariant Core v2.4...
+              </p>
+            </div>
 
-          <div className="w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-            <div className="h-full bg-[#E8384F] rounded-full animate-[ekgFlow_2s_ease-in-out_infinite]" style={{ width: '70%' }} />
+            <div className="w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+              <div className="h-full bg-[#E8384F] rounded-full animate-[ekgFlow_2s_ease-in-out_infinite]" style={{ width: '70%' }} />
+            </div>
           </div>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  // =========================================================================
-  // STEP 2: Interactive Particle Landing Page
-  // =========================================================================
-  if (currentScreen === 'landing') {
-    return (
-      <LandingPage
-        onOpenAuth={() => setCurrentScreen('auth')}
-        onOpenArchitecture={() => setShowArchModal(true)}
-        onOpenSwagger={() => setShowSwaggerModal(true)}
-      />
-    );
-  }
-
-  // =========================================================================
-  // STEP 3: Enterprise Auth Screen
-  // =========================================================================
-  if (currentScreen === 'auth' || !isAuthenticated) {
-    return (
-      <AuthScreen
-        onLoginSuccess={() => {
-          setIsAuthenticated(true);
-          setCurrentScreen('dashboard');
-        }}
-        onBackToLanding={() => setCurrentScreen('landing')}
-      />
-    );
-  }
-
-  // =========================================================================
-  // STEP 4: Fixed Sovereign Financial Controller Operating System Workspace
-  // =========================================================================
-  return (
-    <div className="h-screen w-screen overflow-hidden bg-[#FAFAF9] text-slate-900 flex flex-col antialiased select-none aurora-canvas">
-      
-      {/* 1. Fixed Sovereign TopBar (64px) */}
-      <TopBar
-        activeTab={activeTab}
-        onOpenArchitecture={() => setShowArchModal(true)}
-        onOpenSwagger={() => setShowSwaggerModal(true)}
-        onLoadDemo={() => handleRunDemo(null)}
-        isReconciling={isReconciling}
-        onOpenLanding={() => setCurrentScreen('landing')}
-        onLogout={() => {
-          setIsAuthenticated(false);
-          setCurrentScreen('landing');
-        }}
-        onOpenCommandPalette={() => setShowCommandPalette(true)}
-      />
-
-      {/* 2. Fixed Sovereign Viewport Body Split */}
-      <div className="flex-1 flex w-full relative">
-        {/* Fixed Acrylic Sidebar (260px) */}
-        <Sidebar
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          exceptionCount={unresCount}
+      {/* =========================================================================
+          STEP 2: Interactive Particle Landing Page
+         ========================================================================= */}
+      {currentScreen === 'landing' && (
+        <LandingPage
+          onOpenAuth={() => setCurrentScreen('auth')}
+          onOpenArchitecture={() => setShowArchModal(true)}
+          onOpenSwagger={() => setShowSwaggerModal(true)}
         />
+      )}
 
-        {/* Fluid Momentum Central Workspace (ml-64 mt-16 h-[calc(100vh-64px)]) */}
-        <main className="ml-64 mt-16 h-[calc(100vh-64px)] flex-1 p-8 overflow-y-auto overflow-x-hidden space-y-6">
+      {/* =========================================================================
+          STEP 3: Enterprise Auth Screen
+         ========================================================================= */}
+      {currentScreen === 'auth' && (
+        <AuthScreen
+          onLoginSuccess={() => {
+            setIsAuthenticated(true);
+            setCurrentScreen('dashboard');
+          }}
+          onBackToLanding={() => setCurrentScreen('landing')}
+        />
+      )}
+
+      {/* =========================================================================
+          STEP 4: Fixed Sovereign Financial Controller Operating System Workspace
+         ========================================================================= */}
+      {currentScreen === 'dashboard' && isAuthenticated && (
+        <div className="h-screen w-screen overflow-hidden bg-[#FAFAF9] text-slate-900 flex flex-col antialiased select-none aurora-canvas">
           
-          {/* Hub 1: 3-Way Match Matrix Hub */}
-          {activeTab === 'recon' && (
-            <ReconciliationHub
-              reconciliationData={reconciliationData}
-              onSelectAuditRecord={setSelectedAuditRecord}
-              onRunDemo={handleRunDemo}
-              isReconciling={isReconciling}
-              onReconcileSuccess={(data) => {
-                setReconciliationData(data);
-                loadInitialData();
-              }}
-              setIsProcessing={setIsReconciling}
+          {/* Fixed Sovereign TopBar (64px) */}
+          <TopBar
+            activeTab={activeTab}
+            onOpenArchitecture={() => setShowArchModal(true)}
+            onOpenSwagger={() => setShowSwaggerModal(true)}
+            onLoadDemo={() => handleRunDemo(null)}
+            isReconciling={isReconciling}
+            onOpenLanding={() => setCurrentScreen('landing')}
+            onLogout={() => {
+              setIsAuthenticated(false);
+              setCurrentScreen('landing');
+            }}
+            onOpenCommandPalette={() => setShowCommandPalette(true)}
+          />
+
+          {/* Fixed Sovereign Viewport Body Split */}
+          <div className="flex-1 flex w-full relative">
+            {/* Fixed Acrylic Sidebar (260px) */}
+            <Sidebar
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              exceptionCount={unresCount}
             />
-          )}
 
-          {/* Hub 2: Quarantine & Exceptions Hub */}
-          {activeTab === 'quarantine' && (
-            <QuarantineHub
-              records={quarantineRecords}
-              onRecordResolved={handleRecordResolved}
-              onRefresh={loadInitialData}
-              onInspectRecord={setSelectedAuditRecord}
-            />
-          )}
+            {/* Fluid Momentum Central Workspace */}
+            <main className="ml-64 mt-16 h-[calc(100vh-64px)] flex-1 p-8 overflow-y-auto overflow-x-hidden space-y-6">
+              
+              {/* Hub 1: 3-Way Match Matrix Hub */}
+              {activeTab === 'recon' && (
+                <ReconciliationHub
+                  reconciliationData={reconciliationData}
+                  onSelectAuditRecord={setSelectedAuditRecord}
+                  onRunDemo={handleRunDemo}
+                  isReconciling={isReconciling}
+                  onReconcileSuccess={(data) => {
+                    setReconciliationData(data);
+                    loadInitialData();
+                  }}
+                  setIsProcessing={setIsReconciling}
+                />
+              )}
 
-          {/* Hub 3: Treasury & Liquidity Hub */}
-          {activeTab === 'treasury' && (
-            <TreasuryHub
-              forecastData={forecastData}
-              cashPosition={cashPosition}
-              onRefresh={loadInitialData}
-            />
-          )}
+              {/* Hub 2: Quarantine & Exceptions Hub */}
+              {activeTab === 'quarantine' && (
+                <QuarantineHub
+                  records={quarantineRecords}
+                  onRecordResolved={handleRecordResolved}
+                  onRefresh={loadInitialData}
+                  onInspectRecord={setSelectedAuditRecord}
+                />
+              )}
 
-          {/* Hub 4: Autonomous Copilot Hub */}
-          {activeTab === 'copilot' && (
-            <CopilotHub />
-          )}
+              {/* Hub 3: Treasury & Liquidity Hub */}
+              {activeTab === 'treasury' && (
+                <TreasuryHub
+                  forecastData={forecastData}
+                  cashPosition={cashPosition}
+                  onRefresh={loadInitialData}
+                />
+              )}
 
-          {/* Hub 5: System Governance Hub */}
-          {activeTab === 'governance' && (
-            <GovernanceHub
-              onOpenArchitecture={() => setShowArchModal(true)}
-              onOpenSwagger={() => setShowSwaggerModal(true)}
-            />
-          )}
-        </main>
-      </div>
+              {/* Hub 4: Autonomous Copilot Hub */}
+              {activeTab === 'copilot' && (
+                <CopilotHub />
+              )}
 
-      {/* 3. Double-Lock Audit Slide-Over Drawer */}
+              {/* Hub 5: System Governance Hub */}
+              {activeTab === 'governance' && (
+                <GovernanceHub
+                  onOpenArchitecture={() => setShowArchModal(true)}
+                  onOpenSwagger={() => setShowSwaggerModal(true)}
+                />
+              )}
+            </main>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          GLOBAL MODALS ACCESSIBLE FROM ANY SCREEN (Landing, Auth, or Dashboard)
+         ========================================================================= */}
+
+      {/* 1. Double-Lock Audit Slide-Over Drawer */}
       <RecordAuditDrawer
         record={selectedAuditRecord}
         isOpen={Boolean(selectedAuditRecord)}
         onClose={() => setSelectedAuditRecord(null)}
       />
 
-      {/* 4. Global Spotlight Command Palette Modal (Cmd/Ctrl + K) */}
+      {/* 2. Global Spotlight Command Palette Modal (Cmd/Ctrl + K) */}
       <CommandPaletteModal
         isOpen={showCommandPalette}
         onClose={() => setShowCommandPalette(false)}
-        onSelectTab={setActiveTab}
-        onRunScenario={handleRunDemo}
+        onSelectTab={(tab) => {
+          setIsAuthenticated(true);
+          setCurrentScreen('dashboard');
+          setActiveTab(tab);
+        }}
+        onRunScenario={(scId) => {
+          setIsAuthenticated(true);
+          setCurrentScreen('dashboard');
+          handleRunDemo(scId);
+        }}
         scenarios={scenarioCatalog}
       />
 
-      {/* 5. Architecture Blueprint Modal */}
+      {/* 3. Architecture Blueprint Modal */}
       <Suspense fallback={null}>
         {showArchModal && (
           <ArchitectureModal
@@ -333,7 +343,7 @@ export default function App() {
         )}
       </Suspense>
 
-      {/* 6. Interactive Swagger Modal */}
+      {/* 4. Interactive Swagger REST API Modal */}
       <Suspense fallback={null}>
         {showSwaggerModal && (
           <SwaggerModal
@@ -343,7 +353,7 @@ export default function App() {
         )}
       </Suspense>
 
-      {/* 7. Autonomous Execution Telemetry Flowchart HUD Modal */}
+      {/* 5. Autonomous Execution Telemetry Flowchart HUD Modal */}
       <PipelineTelemetryModal
         isOpen={showTelemetryModal}
         onClose={() => setShowTelemetryModal(false)}
@@ -351,7 +361,7 @@ export default function App() {
         runData={pendingDemoData}
       />
 
-      {/* 8. Dismissible Error Toast */}
+      {/* 6. Dismissible Error Toast */}
       {apiError && (
         <ErrorToast
           title={apiError.title}
@@ -360,7 +370,6 @@ export default function App() {
           onDismiss={() => setApiError(null)}
         />
       )}
-
-    </div>
+    </>
   );
 }

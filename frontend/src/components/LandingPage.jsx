@@ -16,6 +16,8 @@ import {
   ExternalLink,
   Zap,
   Activity,
+  Code,
+  Terminal,
 } from 'lucide-react';
 import ParticleCanvasBackground from './ParticleCanvasBackground';
 import CertusLogo from './CertusLogo';
@@ -23,6 +25,7 @@ import { soundManager } from '../lib/soundFx';
 
 export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwagger }) {
   const [activeTab, setActiveTab] = useState('Matched');
+  const [selectedSector, setSelectedSector] = useState('ALL');
   const [hasScrolled, setHasScrolled] = useState(false);
 
   useEffect(() => {
@@ -34,17 +37,55 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
   }, []);
 
   const scrollToSection = (id) => {
-    soundManager.playClick();
+    try { soundManager.playClick(); } catch (_) {}
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  const handleAuthClick = () => {
-    soundManager.playClick();
+  const handleLaunchClick = () => {
+    try { soundManager.playClick(); } catch (_) {}
     if (onOpenAuth) onOpenAuth();
   };
+
+  const handleArchClick = () => {
+    try { soundManager.playClick(); } catch (_) {}
+    if (onOpenArchitecture) onOpenArchitecture();
+  };
+
+  const handleSwaggerClick = () => {
+    try { soundManager.playClick(); } catch (_) {}
+    if (onOpenSwagger) onOpenSwagger();
+  };
+
+  // Section 4: 20 Enterprise Scenarios Catalog
+  const ALL_SCENARIOS = [
+    { id: 1, name: 'D2C Fashion Flash Sale', sector: 'E-Commerce', bank: 'HDFC CMS', erp: 'Tally Prime' },
+    { id: 2, name: 'B2B SaaS Milestone Invoicing', sector: 'SaaS', bank: 'ICICI Bank', erp: 'NetSuite' },
+    { id: 3, name: 'Quick Commerce 10-Min Delivery', sector: 'E-Commerce', bank: 'Axis Bank', erp: 'SAP S/4HANA' },
+    { id: 4, name: 'NBFC Loan EMI Disbursals', sector: 'FinTech', bank: 'SBI Corporate', erp: 'Oracle GL' },
+    { id: 5, name: 'Hospital TPA Insurance Co-Pay', sector: 'Healthcare', bank: 'Kotak Bank', erp: 'SAP ERP' },
+    { id: 6, name: 'EdTech Subscription Platform', sector: 'SaaS', bank: 'HDFC Bank', erp: 'Zoho Books' },
+    { id: 7, name: 'FoodTech Marketplace Split', sector: 'E-Commerce', bank: 'ICICI CMS', erp: 'Tally Prime' },
+    { id: 8, name: 'Ride-Hailing Fleet Cashouts', sector: 'FinTech', bank: 'Axis Bank', erp: 'Custom GL' },
+    { id: 9, name: 'Cross-Border IT Services Wire', sector: 'SaaS', bank: 'Citibank N.A.', erp: 'Oracle Fusion' },
+    { id: 10, name: 'Luxury Hotel Pre-Auth Capture', sector: 'Hospitality', bank: 'HDFC CMS', erp: 'Opera Cloud' },
+    { id: 11, name: 'Automotive EV Dealership Advance', sector: 'Industrial', bank: 'SBI Bank', erp: 'SAP S/4HANA' },
+    { id: 12, name: 'Freight Logistics COD Batches', sector: 'Logistics', bank: 'ICICI Bank', erp: 'Tally Prime' },
+    { id: 13, name: 'Solar Renewable IPP Tariffs', sector: 'Industrial', bank: 'PFC Bank', erp: 'SAP ERP' },
+    { id: 14, name: 'Gaming In-App Currency Tokens', sector: 'FinTech', bank: 'Yes Bank', erp: 'Postgres' },
+    { id: 15, name: 'Real Estate Escrow Pool RERA', sector: 'FinTech', bank: 'HDFC Escrow', erp: 'NetSuite' },
+    { id: 16, name: 'Pharma Wholesale E-Way Bills', sector: 'Healthcare', bank: 'Kotak Bank', erp: 'SAP S/4HANA' },
+    { id: 17, name: 'Telecom Postpaid Auto-Mandate', sector: 'SaaS', bank: 'SBI CMS', erp: 'Oracle BRM' },
+    { id: 18, name: 'Omnichannel POS Terminal Swipes', sector: 'E-Commerce', bank: 'Axis Bank', erp: 'Tally Prime' },
+    { id: 19, name: 'OTT Media Recurring Subscriptions', sector: 'SaaS', bank: 'HDFC Bank', erp: 'Chargebee' },
+    { id: 20, name: 'Supply Chain Invoice Factoring', sector: 'FinTech', bank: 'ICICI TReDS', erp: 'SAP S/4HANA' },
+  ];
+
+  const filteredScenarios = selectedSector === 'ALL'
+    ? ALL_SCENARIOS
+    : ALL_SCENARIOS.filter(s => s.sector === selectedSector);
 
   // Section 5 Live Verdict Examples Data
   const VERDICT_EXAMPLES = {
@@ -129,20 +170,18 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
             Double-Lock Engine
           </button>
           <button
-            onClick={() => {
-              soundManager.playClick();
-              if (onOpenSwagger) onOpenSwagger();
-            }}
-            className="hover:text-slate-900 transition-colors font-mono"
+            onClick={handleSwaggerClick}
+            className="hover:text-slate-900 transition-colors font-mono flex items-center gap-1 text-slate-700"
           >
-            REST API
+            <span>REST API</span>
+            <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-50 text-[#E8384F] border border-rose-200 font-bold">v1</span>
           </button>
         </nav>
 
         {/* Right CTA: Strictly Enterprise Login */}
         <div className="flex items-center gap-3">
           <button
-            onClick={handleAuthClick}
+            onClick={handleLaunchClick}
             className="shimmer-btn flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <span>Enterprise Login</span>
@@ -157,7 +196,7 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
       <section className="relative pt-32 pb-20 px-6 lg:px-12 max-w-6xl mx-auto text-center z-10">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-slate-200/80 shadow-xs text-xs font-semibold text-slate-700 mb-6 backdrop-blur-md">
           <span className="w-2 h-2 rounded-full bg-[#E8384F] breathing-dot" />
-          <span>Architected by Aditya Singh</span>
+          <span>Lead Architect: <strong>Aditya Singh</strong></span>
           <span className="text-slate-300">•</span>
           <span className="font-mono text-[11px] text-emerald-700 font-bold">55 / 55 Invariants Passing</span>
         </div>
@@ -173,7 +212,7 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
         {/* Hero Actions */}
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5">
           <button
-            onClick={handleAuthClick}
+            onClick={handleLaunchClick}
             className="shimmer-btn flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-[#E8384F] hover:bg-[#d42d43] text-white text-sm font-bold shadow-md shadow-rose-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
           >
             <span>Launch Financial OS</span>
@@ -181,10 +220,7 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
           </button>
 
           <button
-            onClick={() => {
-              soundManager.playClick();
-              if (onOpenArchitecture) onOpenArchitecture();
-            }}
+            onClick={handleArchClick}
             className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white/80 hover:bg-white text-slate-700 border border-slate-200/80 text-sm font-bold shadow-xs backdrop-blur-md transition-all hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
           >
             <Layers className="w-4 h-4 text-[#E8384F]" />
@@ -287,7 +323,73 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
       </section>
 
       {/* =========================================================================
-          SECTION 4 — Interactive Live Verdict Explorer
+          SECTION 4 — 20 Enterprise Scenarios Showcase (With Target ID)
+         ========================================================================= */}
+      <section id="scenarios" className="py-20 px-6 lg:px-12 max-w-6xl mx-auto z-10 relative">
+        <div className="glass-3d-elevated p-8 rounded-3xl specular-top shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-display">
+                20 Enterprise Financial Scenarios
+              </h2>
+              <p className="text-xs text-slate-500 font-sans mt-0.5">
+                Pre-configured dense 4-channel datasets covering high-volume e-commerce, milestone SaaS, credit, and trade.
+              </p>
+            </div>
+
+            {/* Sector Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+              {['ALL', 'E-Commerce', 'SaaS', 'FinTech', 'Healthcare', 'Industrial'].map((sec) => (
+                <button
+                  key={sec}
+                  onClick={() => {
+                    try { soundManager.playClick(); } catch (_) {}
+                    setSelectedSector(sec);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                    selectedSector === sec
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  {sec}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Scenario Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {filteredScenarios.map((sc) => (
+              <div
+                key={sc.id}
+                onClick={handleLaunchClick}
+                className="glass-3d hover-lift-3d p-4 rounded-2xl cursor-pointer border border-slate-200/80 bg-white/70 hover:bg-white text-left space-y-2 group"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono font-bold text-[#E8384F]">#{String(sc.id).padStart(2, '0')}</span>
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-500 uppercase">{sc.sector}</span>
+                </div>
+                <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#E8384F] transition-colors line-clamp-1">{sc.name}</h4>
+                <p className="text-[10px] font-mono text-slate-400">{sc.bank} ↔ {sc.erp}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-2 text-center">
+            <button
+              onClick={handleLaunchClick}
+              className="shimmer-btn inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all"
+            >
+              <span>Test All 20 Scenarios in Dashboard</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#E8384F]" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SECTION 5 — Interactive Live Verdict Explorer
          ========================================================================= */}
       <section id="verdicts" className="py-20 px-6 lg:px-12 max-w-5xl mx-auto z-10 relative">
         <div className="glass-3d-elevated p-8 rounded-3xl specular-top shadow-xl space-y-6">
@@ -306,7 +408,7 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
                 <button
                   key={tab}
                   onClick={() => {
-                    soundManager.playClick();
+                    try { soundManager.playClick(); } catch (_) {}
                     setActiveTab(tab);
                   }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
@@ -354,7 +456,7 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
       </section>
 
       {/* =========================================================================
-          SECTION 5 — Footer with Aditya Singh attribution & GitHub link
+          SECTION 6 — Footer with Aditya Singh attribution & GitHub link
          ========================================================================= */}
       <footer className="py-12 border-t border-slate-200/60 bg-white/70 backdrop-blur-xl text-xs text-slate-500 px-6 lg:px-12 z-10 relative">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
