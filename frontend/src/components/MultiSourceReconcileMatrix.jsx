@@ -341,9 +341,10 @@ export default function MultiSourceReconcileMatrix({
                           e.stopPropagation();
                           if (onSelectRecord) onSelectRecord(row);
                         }}
-                        className="p-1.5 rounded-lg text-slate-400 group-hover:text-[#E8384F] group-hover:bg-rose-50 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 hover:text-[#E8384F] bg-slate-100/80 hover:bg-rose-50 border border-slate-200/80 hover:border-rose-200 transition-all shadow-xs group-hover:bg-white"
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Audit</span>
+                        <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#E8384F]" />
                       </button>
                     </td>
                   </tr>
