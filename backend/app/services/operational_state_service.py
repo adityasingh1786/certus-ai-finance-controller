@@ -12,7 +12,7 @@ Guarantees 100% real-time, zero-delay, zero-error state synchronization across:
 import hashlib
 import json
 import logging
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 from decimal import Decimal
 from typing import Dict, List, Any, Optional
 
@@ -302,7 +302,6 @@ class OperationalStateManager:
             outflows = daily_inflow_base * 0.7 * (1.0 + 0.1 * (i % 2))
             rolling = rolling + (inflows - outflows)
 
-            days.push_back = None
             days.append({
                 "date": d.isoformat(),
                 "projected_balance": round(rolling, 2),

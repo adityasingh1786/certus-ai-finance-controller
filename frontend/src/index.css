@@ -75,8 +75,8 @@
 /* 🪞 3D Glassmorphic Surface System */
 .glass-3d {
   background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.85);
   box-shadow: 
     0 10px 30px -10px rgba(15, 23, 42, 0.04),
@@ -87,8 +87,8 @@
 
 .glass-3d-elevated {
   background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
+  backdrop-filter: blur(28px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow: 
     0 20px 45px -12px rgba(15, 23, 42, 0.07),
