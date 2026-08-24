@@ -31,7 +31,7 @@ export default function AuthScreen({ onLoginSuccess, onBackToLanding }) {
       onLoginSuccess();
     } else {
       setErrorMsg(
-        'For Hackathon review, please use the pre-configured Demo Account (controller@certus.ai) or click "1-Click Demo Login".'
+        'Please use the pre-configured Demo Account (controller@certus.ai) or click "1-Click Demo Login".'
       );
     }
   };
@@ -171,7 +171,7 @@ export default function AuthScreen({ onLoginSuccess, onBackToLanding }) {
 
       {/* Governance Footer Note */}
       <p className="text-[11px] font-mono text-ink-muted mt-6 text-center">
-        Razorpay AI Buildathon 2026 • Dual-Lock Gate • Read-Only MCP Tools
+        Certus Autonomous Financial Controller • Dual-Lock Gate • Read-Only MCP Tools
       </p>
     </div>
   );

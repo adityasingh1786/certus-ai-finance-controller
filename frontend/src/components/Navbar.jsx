@@ -18,7 +18,7 @@ export default function Navbar({ onOpenArchitecture, onOpenSwagger, isLiveMode =
               <span className="font-bold text-lg tracking-tight text-white flex items-center gap-1.5">
                 AI Finance Controller
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary-500/20 text-primary-400 border border-primary-500/30">
-                  Track 04
+                  Enterprise Edition
                 </span>
               </span>
             </div>

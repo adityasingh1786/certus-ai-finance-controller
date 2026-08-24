@@ -97,7 +97,7 @@ export default function LandingPage({ onOpenDashboard, onOpenArchitecture, onOpe
           <CertusLogo className="w-7 h-7" textClassName="text-lg font-bold" />
           <span className="text-border-strong text-xs">|</span>
           <span className="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-page border border-border-subtle text-ink-secondary font-semibold">
-            Track 04
+            Enterprise Edition
           </span>
         </div>
 
@@ -148,7 +148,7 @@ export default function LandingPage({ onOpenDashboard, onOpenArchitecture, onOpe
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sterling-light/60 border border-sterling-border text-sterling text-xs font-semibold tracking-wider uppercase font-mono">
               <span className="h-2 w-2 rounded-full bg-sterling animate-pulse" />
-              <span>AI FINANCE CONTROLLER — RAZORPAY BUILDATHON 2026</span>
+              <span>AUTONOMOUS FINANCIAL CONTROLLER — ENTERPRISE EDITION</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display tracking-tight text-ink-primary leading-[1.08]">
@@ -592,7 +592,7 @@ export default function LandingPage({ onOpenDashboard, onOpenArchitecture, onOpe
             </div>
 
             <div className="text-[11px] font-mono text-ink-muted">
-              Built for Razorpay AI Buildathon 2026 — Track 04
+              Certus Autonomous Financial Operating System • Enterprise v2.4
             </div>
           </div>
         </footer>

@@ -1,12 +1,13 @@
 import React from 'react';
 import {
-  LayoutDashboard,
   Layers,
   ShieldAlert,
   TrendingUp,
   Bot,
-  Terminal,
-  FileCheck,
+  Sliders,
+  Cpu,
+  Lock,
+  Database,
 } from 'lucide-react';
 
 export default function Sidebar({
@@ -17,11 +18,11 @@ export default function Sidebar({
   onOpenSwagger,
 }) {
   const navItems = [
-    { id: 'dashboard', label: 'Drop & Reconcile', icon: LayoutDashboard },
-    { id: 'reconcile', label: 'Match Matrix', icon: Layers },
-    { id: 'exceptions', label: 'Quarantine Queue', icon: ShieldAlert, badge: exceptionCount },
-    { id: 'cash-forecast', label: 'Cash & Forecast', icon: TrendingUp },
-    { id: 'copilot', label: 'Financial Copilot', icon: Bot },
+    { id: 'recon', label: 'Reconciliation Hub', icon: Layers },
+    { id: 'exceptions', label: 'Quarantine & Traps', icon: ShieldAlert, badge: exceptionCount },
+    { id: 'treasury', label: 'Treasury & Liquidity', icon: TrendingUp },
+    { id: 'copilot', label: 'Autonomous Copilot', icon: Bot },
+    { id: 'governance', label: 'System Governance', icon: Sliders },
   ];
 
   return (
@@ -29,7 +30,7 @@ export default function Sidebar({
       {/* Navigation Links */}
       <div className="p-3 space-y-1">
         <div className="px-3 py-2 text-[11px] font-semibold text-ink-muted uppercase tracking-wider font-display">
-          Core Operations
+          Operating Modules
         </div>
 
         {navItems.map((item) => {
@@ -39,9 +40,9 @@ export default function Sidebar({
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-medium transition-fast ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-fast font-display ${
                 isActive
-                  ? 'bg-page text-sterling border border-border-strong font-semibold'
+                  ? 'bg-page text-sterling border border-border-strong shadow-subtle'
                   : 'text-ink-secondary hover:text-ink-primary hover:bg-page/60'
               }`}
             >
@@ -52,10 +53,10 @@ export default function Sidebar({
 
               {item.badge !== undefined && item.badge > 0 && (
                 <span
-                  className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                     isActive
                       ? 'bg-sterling text-white'
-                      : 'bg-status-mismatched-bg text-sterling border border-sterling-border'
+                      : 'bg-sterling-light/60 text-sterling border border-sterling-border'
                   }`}
                 >
                   {item.badge}
@@ -69,16 +70,16 @@ export default function Sidebar({
       {/* Footer System Specs */}
       <div className="p-4 border-t border-border-subtle bg-page/40 space-y-2.5">
         <div className="flex items-center justify-between text-[11px] font-mono text-ink-muted">
+          <span>Edition:</span>
+          <span className="text-ink-primary font-semibold">Enterprise v2.4</span>
+        </div>
+        <div className="flex items-center justify-between text-[11px] font-mono text-ink-muted">
           <span>Engine:</span>
-          <span className="text-ink-primary font-semibold">Dual-Lock v1.0</span>
+          <span className="text-emerald-600 font-semibold">Double-Lock (0.75)</span>
         </div>
         <div className="flex items-center justify-between text-[11px] font-mono text-ink-muted">
-          <span>Database:</span>
-          <span className="text-emerald-700 font-semibold">SQLite Synced</span>
-        </div>
-        <div className="flex items-center justify-between text-[11px] font-mono text-ink-muted">
-          <span>Gate Threshold:</span>
-          <span className="text-ink-primary font-semibold">0.75</span>
+          <span>Audit Status:</span>
+          <span className="text-ink-primary font-semibold">ACID Live Synced</span>
         </div>
       </div>
     </aside>

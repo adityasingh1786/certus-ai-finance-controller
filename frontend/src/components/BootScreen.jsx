@@ -68,7 +68,7 @@ export default function BootScreen({ onBootComplete }) {
               Certus
             </span>
             <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#E8384F]/20 text-[#E8384F] border border-[#E8384F]/40 font-semibold tracking-wider">
-              Track 04
+              Enterprise v2.4
             </span>
           </div>
         </div>

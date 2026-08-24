@@ -4,11 +4,14 @@ import LandingPage from './components/LandingPage';
 import AuthScreen from './components/AuthScreen';
 import TopBar from './components/TopBar';
 import Sidebar from './components/Sidebar';
-import UploadReconcileWidget from './components/UploadReconcileWidget';
-import MultiSourceReconcileMatrix from './components/MultiSourceReconcileMatrix';
-import QuarantineQueue from './components/QuarantineQueue';
-import CashForecastChart from './components/CashForecastChart';
-import AgentChatPanel from './components/AgentChatPanel';
+
+// 5 Primary Operational Hubs
+import ReconciliationHub from './components/ReconciliationHub';
+import QuarantineHub from './components/QuarantineHub';
+import TreasuryHub from './components/TreasuryHub';
+import CopilotHub from './components/CopilotHub';
+import GovernanceHub from './components/GovernanceHub';
+
 import RecordAuditDrawer from './components/RecordAuditDrawer';
 import ErrorToast from './components/ErrorToast';
 
@@ -24,10 +27,10 @@ import {
 } from './lib/api';
 
 export default function App() {
-  // Navigation Flow State: 'boot' -> 'landing' -> 'auth' -> 'dashboard'
+  // Application Lifecycle: 'boot' -> 'landing' -> 'auth' -> 'dashboard'
   const [currentScreen, setCurrentScreen] = useState('boot');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('recon'); // 'recon', 'exceptions', 'treasury', 'copilot', 'governance'
   const [isReconciling, setIsReconciling] = useState(false);
 
   // Core Data State
@@ -77,7 +80,7 @@ export default function App() {
       const res = await reconcileDemoDataset();
       setReconciliationData(res);
       await loadInitialData();
-      setActiveTab('reconcile');
+      setActiveTab('recon');
     } catch (err) {
       console.error('Demo execution error:', err);
       setApiError({
@@ -169,11 +172,16 @@ export default function App() {
     <div className="min-h-screen bg-page text-ink-primary flex flex-col antialiased">
       {/* 1. Global Top Bar */}
       <TopBar
+        activeTab={activeTab}
         onOpenArchitecture={() => setShowArchModal(true)}
         onOpenSwagger={() => setShowSwaggerModal(true)}
         onLoadDemo={handleRunDemo}
         isReconciling={isReconciling}
         onOpenLanding={() => setCurrentScreen('landing')}
+        onLogout={() => {
+          setIsAuthenticated(false);
+          setCurrentScreen('landing');
+        }}
       />
 
       {/* 2. Main App Shell with Navigation Sidebar */}
@@ -186,81 +194,53 @@ export default function App() {
           onOpenSwagger={() => setShowSwaggerModal(true)}
         />
 
-        {/* Main Content Workspace */}
+        {/* Main Content Workspace with Nested Sub-Tabs */}
         <main className="flex-1 p-6 lg:p-8 space-y-6 min-w-0 overflow-y-auto">
-          {/* View 1: Drop & Reconcile (Dashboard) */}
-          {activeTab === 'dashboard' && (
-            <div className="space-y-6">
-              <UploadReconcileWidget
-                onReconcileSuccess={(data) => {
-                  setReconciliationData(data);
-                  loadInitialData();
-                  setActiveTab('reconcile');
-                }}
-                isProcessing={isReconciling}
-                setIsProcessing={setIsReconciling}
-              />
-
-              {reconciliationData && (
-                <div className="mt-8 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-display font-bold text-base text-ink-primary">
-                      Reconciliation Results
-                    </h3>
-                    <button
-                      onClick={() => setActiveTab('reconcile')}
-                      className="text-xs font-semibold text-sterling hover:underline"
-                    >
-                      View in Match Matrix →
-                    </button>
-                  </div>
-                  <MultiSourceReconcileMatrix
-                    reconciliationData={reconciliationData}
-                    onSelectAuditRecord={setSelectedAuditRecord}
-                  />
-                </div>
-              )}
-            </div>
+          {/* Hub 1: Reconciliation Hub */}
+          {activeTab === 'recon' && (
+            <ReconciliationHub
+              reconciliationData={reconciliationData}
+              onSelectAuditRecord={setSelectedAuditRecord}
+              onRunDemo={handleRunDemo}
+              isReconciling={isReconciling}
+              onReconcileSuccess={(data) => {
+                setReconciliationData(data);
+                loadInitialData();
+              }}
+              setIsProcessing={setIsReconciling}
+            />
           )}
 
-          {/* View 2: Match Matrix */}
-          {activeTab === 'reconcile' && (
-            <div className="space-y-6">
-              <MultiSourceReconcileMatrix
-                reconciliationData={reconciliationData}
-                onSelectAuditRecord={setSelectedAuditRecord}
-              />
-            </div>
-          )}
-
-          {/* View 3: Quarantine Queue */}
+          {/* Hub 2: Quarantine & Exceptions Hub */}
           {activeTab === 'exceptions' && (
-            <div className="space-y-6">
-              <QuarantineQueue
-                records={quarantineRecords}
-                onRecordResolved={handleRecordResolved}
-                onRefresh={loadInitialData}
-                onInspectRecord={setSelectedAuditRecord}
-              />
-            </div>
+            <QuarantineHub
+              records={quarantineRecords}
+              onRecordResolved={handleRecordResolved}
+              onRefresh={loadInitialData}
+              onInspectRecord={setSelectedAuditRecord}
+            />
           )}
 
-          {/* View 4: Cash & Forecast */}
-          {activeTab === 'cash-forecast' && (
-            <div className="space-y-6">
-              <CashForecastChart
-                forecastData={forecastData}
-                cashPosition={cashPosition}
-                onRefresh={loadInitialData}
-              />
-            </div>
+          {/* Hub 3: Treasury & Liquidity Hub */}
+          {activeTab === 'treasury' && (
+            <TreasuryHub
+              forecastData={forecastData}
+              cashPosition={cashPosition}
+              onRefresh={loadInitialData}
+            />
           )}
 
-          {/* View 5: Financial Copilot */}
+          {/* Hub 4: Autonomous Copilot Hub */}
           {activeTab === 'copilot' && (
-            <div className="space-y-6">
-              <AgentChatPanel />
-            </div>
+            <CopilotHub />
+          )}
+
+          {/* Hub 5: System Governance Hub */}
+          {activeTab === 'governance' && (
+            <GovernanceHub
+              onOpenArchitecture={() => setShowArchModal(true)}
+              onOpenSwagger={() => setShowSwaggerModal(true)}
+            />
           )}
         </main>
       </div>
