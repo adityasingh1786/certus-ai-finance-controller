@@ -50,19 +50,23 @@ export default function App() {
   // Network Error Toast State
   const [apiError, setApiError] = useState(null);
 
-  // Load Initial Live Backend Data
+  // Load Initial Live Backend Data (Pre-loads Scenario #1 so the matrix is alive on load)
   const loadInitialData = useCallback(async () => {
     try {
-      const [cashRes, forecastRes, qRes] = await Promise.allSettled([
+      const [cashRes, forecastRes, qRes, reconRes] = await Promise.allSettled([
         fetchCashPosition(),
         fetchCashForecast(),
         fetchQuarantineRecords(),
+        reconcileDemoDataset(1),
       ]);
 
       if (cashRes.status === 'fulfilled') setCashPosition(cashRes.value);
       if (forecastRes.status === 'fulfilled') setForecastData(forecastRes.value);
       if (qRes.status === 'fulfilled' && qRes.value?.records) {
         setQuarantineRecords(qRes.value.records);
+      }
+      if (reconRes.status === 'fulfilled' && reconRes.value) {
+        setReconciliationData(reconRes.value);
       }
     } catch (err) {
       console.warn('Initial data load warning:', err);
@@ -85,33 +89,9 @@ export default function App() {
       // Execute backend reconciliation concurrently while HUD animates
       const res = await reconcileDemoDataset(scenarioId);
       setPendingDemoData(res);
+      setReconciliationData(res);
     } catch (err) {
       console.error('Demo execution error:', err);
-      // Even on API error, keep HUD running with fallback data for resilient evaluation
-      setPendingDemoData({
-        scenario_id: scenarioId || 1,
-        scenario_name: 'D2C Fashion & Apparel — Festive Flash Sale',
-        sector: 'E-Commerce & Retail',
-        primary_bank: 'HDFC Bank CMS',
-        erp_system: 'Tally Prime 4.0',
-        description: 'High-volume UPI & credit card sales spike with standard 2.0% MDR + 18% GST deductions.',
-        channel_counts: {
-          channel_1_gateway: 60,
-          channel_2_bank: 60,
-          channel_3_erp: 60,
-          channel_4_quarantine: 4,
-          total_records: 60,
-        },
-        summary: {
-          total_records: 60,
-          matched: 54,
-          mismatched: 2,
-          quarantined: 4,
-          match_rate: 0.90,
-          avg_confidence: 0.982,
-          throughput_records_per_second: 4666.0,
-        },
-      });
     } finally {
       setIsReconciling(false);
     }
@@ -121,7 +101,6 @@ export default function App() {
     if (pendingDemoData) {
       setReconciliationData(pendingDemoData);
     }
-    await loadInitialData();
     setActiveTab('recon');
     setShowTelemetryModal(false);
   };
