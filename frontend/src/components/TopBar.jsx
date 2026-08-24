@@ -1,6 +1,19 @@
-import React from 'react';
-import { Layers, Terminal, Sparkles, Globe, LogOut, ShieldCheck, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Layers,
+  Terminal,
+  Sparkles,
+  Globe,
+  LogOut,
+  ShieldCheck,
+  Search,
+  Volume2,
+  VolumeX,
+  Activity,
+  Zap,
+} from 'lucide-react';
 import CertusLogo from './CertusLogo';
+import { soundManager } from '../lib/soundFx';
 
 export default function TopBar({
   activeTab,
@@ -10,83 +23,161 @@ export default function TopBar({
   isReconciling,
   onOpenLanding,
   onLogout,
+  onOpenCommandPalette,
 }) {
+  const [isMuted, setIsMuted] = useState(soundManager.getIsMuted());
+
+  useEffect(() => {
+    setIsMuted(soundManager.getIsMuted());
+  }, []);
+
+  const handleToggleSound = () => {
+    const nextMuted = soundManager.toggleMute();
+    setIsMuted(nextMuted);
+    if (!nextMuted) {
+      soundManager.playClick();
+    }
+  };
+
   const HUB_NAMES = {
-    recon: 'Reconciliation Hub',
-    exceptions: 'Quarantine & Traps',
+    recon: '3-Way Match Matrix',
+    quarantine: 'Quarantine & Exceptions',
     treasury: 'Treasury & Liquidity',
     copilot: 'Autonomous Copilot',
     governance: 'System Governance',
   };
 
   return (
-    <header className="h-14 border-b border-border-subtle bg-surface px-6 flex items-center justify-between sticky top-0 z-20 shadow-subtle">
-      {/* Brand & Breadcrumbs */}
-      <div className="flex items-center gap-3">
+    <header className="fixed top-0 left-0 right-0 h-16 z-40 bg-white/80 backdrop-blur-2xl border-b border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] px-6 flex items-center justify-between">
+      
+      {/* Left: Brand & Breadcrumb + EKG Heartbeat */}
+      <div className="flex items-center gap-3.5">
         <CertusLogo className="w-7 h-7" textClassName="text-base font-bold" />
-        <span className="text-border-strong text-xs">/</span>
-        <span className="text-xs font-display font-semibold text-ink-primary">
+        <span className="text-slate-300 text-xs">/</span>
+        <span className="text-xs font-display font-bold text-slate-900">
           {HUB_NAMES[activeTab] || 'Workspace'}
         </span>
-        <span className="hidden sm:inline text-border-strong text-xs">|</span>
-        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-[11px] font-medium font-mono">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          Double-Lock Engine Active
+
+        {/* Living Financial Vitals EKG Waveform */}
+        <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-slate-200">
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] font-mono text-emerald-800 font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 breathing-dot" />
+            <span>4,666 rec/s</span>
+          </div>
+
+          <svg className="w-16 h-4 text-emerald-500 overflow-visible" viewBox="0 0 60 16">
+            <path
+              d="M0,8 L15,8 L18,2 L22,14 L26,4 L30,10 L34,8 L60,8"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="ekg-line"
+            />
+          </svg>
         </div>
       </div>
 
-      {/* Action Tools */}
-      <div className="flex items-center gap-2">
+      {/* Center: Spotlight Command Trigger */}
+      <div className="hidden md:flex items-center">
         <button
-          onClick={onLoadDemo}
+          onClick={() => {
+            soundManager.playClick();
+            if (onOpenCommandPalette) onOpenCommandPalette();
+          }}
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-100/70 hover:bg-slate-100 border border-slate-200/80 text-xs text-slate-500 hover:text-slate-800 transition-all shadow-xs group"
+        >
+          <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#E8384F]" />
+          <span>Spotlight Search...</span>
+          <kbd className="px-1.5 py-0.5 rounded bg-white border border-slate-200 text-[10px] font-mono text-slate-600 font-bold shadow-xs">
+            ⌘K
+          </kbd>
+        </button>
+      </div>
+
+      {/* Right: Action Tools & Profile */}
+      <div className="flex items-center gap-2">
+        {/* Web Audio Mute/Unmute Toggle */}
+        <button
+          onClick={handleToggleSound}
+          title={isMuted ? 'Unmute Sound FX' : 'Mute Sound FX'}
+          className="p-2 rounded-xl bg-white border border-slate-200/80 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors shadow-xs"
+        >
+          {isMuted ? <VolumeX className="w-4 h-4 text-slate-400" /> : <Volume2 className="w-4 h-4 text-[#E8384F]" />}
+        </button>
+
+        {/* 1-Click Demo Trigger */}
+        <button
+          onClick={() => {
+            soundManager.playClick();
+            if (onLoadDemo) onLoadDemo();
+          }}
           disabled={isReconciling}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sterling hover:bg-sterling-hover text-white text-xs font-semibold shadow-subtle transition-fast disabled:opacity-50"
+          className="shimmer-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E8384F] hover:bg-[#d42d43] text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
         >
           <Sparkles className="w-3.5 h-3.5" />
           <span>{isReconciling ? 'Reconciling...' : '1-Click Demo'}</span>
         </button>
 
+        {/* Architecture Blueprint Modal Trigger */}
+        <button
+          onClick={() => {
+            soundManager.playClick();
+            if (onOpenArchitecture) onOpenArchitecture();
+          }}
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/80 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition-colors"
+        >
+          <Layers className="w-3.5 h-3.5 text-[#E8384F]" />
+          <span className="hidden md:inline">Blueprint</span>
+        </button>
+
+        {/* Swagger Modal Trigger */}
+        <button
+          onClick={() => {
+            soundManager.playClick();
+            if (onOpenSwagger) onOpenSwagger();
+          }}
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/80 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition-colors font-mono"
+        >
+          <Terminal className="w-3.5 h-3.5 text-slate-500" />
+          <span className="hidden md:inline">API</span>
+        </button>
+
+        {/* Landing Page Trigger */}
         {onOpenLanding && (
           <button
-            onClick={onOpenLanding}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle hover:border-border-strong text-ink-secondary hover:text-ink-primary text-xs font-medium transition-fast bg-surface"
+            onClick={() => {
+              soundManager.playClick();
+              onOpenLanding();
+            }}
+            title="Landing Overview"
+            className="p-2 rounded-xl bg-white border border-slate-200/80 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors shadow-xs"
           >
-            <Globe className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Landing Overview</span>
+            <Globe className="w-4 h-4" />
           </button>
         )}
 
-        <button
-          onClick={onOpenArchitecture}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle hover:border-border-strong text-ink-secondary hover:text-ink-primary text-xs font-medium transition-fast bg-surface"
-        >
-          <Layers className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Architecture</span>
-        </button>
+        {/* Divider */}
+        <div className="h-4 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
 
-        <button
-          onClick={onOpenSwagger}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-subtle hover:border-border-strong text-ink-secondary hover:text-ink-primary text-xs font-medium transition-fast bg-surface"
-        >
-          <Terminal className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">API Docs</span>
-        </button>
-
-        {/* Controller Profile & Logout */}
-        <div className="h-4 w-[1px] bg-border-subtle mx-1 hidden sm:block" />
-
-        <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-page border border-border-subtle text-xs font-mono">
-          <div className="w-5 h-5 rounded-full bg-sterling-light/60 border border-sterling-border flex items-center justify-center text-sterling text-[10px] font-bold">
+        {/* Controller Profile Badge: Aditya Singh */}
+        <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white border border-slate-200/80 shadow-xs text-xs font-mono">
+          <div className="w-5 h-5 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-[#E8384F] text-[10px] font-bold">
             AS
           </div>
-          <span className="text-ink-primary font-semibold">Aditya Singh</span>
+          <span className="text-slate-800 font-bold">Aditya Singh</span>
         </div>
 
+        {/* Sign Out Trigger */}
         {onLogout && (
           <button
-            onClick={onLogout}
-            title="Sign Out to Overview"
-            className="p-1.5 rounded-lg border border-border-subtle hover:border-sterling hover:text-sterling text-ink-muted transition-fast bg-surface"
+            onClick={() => {
+              soundManager.playClick();
+              onLogout();
+            }}
+            title="Sign Out"
+            className="p-2 rounded-xl bg-white border border-slate-200/80 hover:border-rose-300 hover:text-[#E8384F] text-slate-400 transition-colors shadow-xs"
           >
             <LogOut className="w-4 h-4" />
           </button>

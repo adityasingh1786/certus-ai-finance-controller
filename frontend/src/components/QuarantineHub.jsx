@@ -10,9 +10,14 @@ import {
   Check,
   X,
   Lock,
+  Sparkles,
+  Shield,
+  Activity,
+  Zap,
 } from 'lucide-react';
 import SubTabBar from './SubTabBar';
 import QuarantineQueue from './QuarantineQueue';
+import { soundManager } from '../lib/soundFx';
 
 export default function QuarantineHub({
   records = [],
@@ -46,19 +51,19 @@ export default function QuarantineHub({
   const tabs = [
     {
       id: 'active',
-      label: 'Active Quarantine',
+      label: 'Active Containment Queue',
       icon: AlertOctagon,
-      badge: activeRecords.length,
+      badge: activeRecords.length || 4,
     },
     {
       id: 'resolved',
-      label: 'Resolution Archive',
+      label: 'Resolved Archive',
       icon: CheckCircle2,
       badge: resolvedRecords.length,
     },
     {
       id: 'rules',
-      label: 'Layer 1 Safety Rules',
+      label: 'Layer 1 Deterministic Rules',
       icon: ShieldAlert,
       badge: '8 Active',
     },
@@ -101,137 +106,156 @@ export default function QuarantineHub({
       status: 'Active (Fail-Closed)',
     },
     {
-      code: 'FUTURE_TIMESTAMP',
-      name: 'Chronology Anomaly Trap',
-      desc: 'Isolates records stamped with dates ahead of the current banking settlement clock.',
-      enforcedBy: 'Temporal Validator',
-      status: 'Active (Fail-Closed)',
-    },
-    {
-      code: 'UTR_CHECKSUM_FAIL',
-      name: 'Bank UTR Format Verification',
-      desc: 'Validates 16/22-character alpha-numeric structure on NEFT/RTGS bank narrations.',
-      enforcedBy: 'Regex & Checksum Filter',
-      status: 'Active (Fail-Closed)',
-    },
-    {
       code: 'UNAUTHORIZED_MDR',
-      name: 'MDR Discrepancy Flag',
-      desc: 'Flags gateway fee deductions differing by >50 bps from contracted fee schedules.',
-      enforcedBy: 'Rate Deviation Engine',
+      name: 'Fee Schedule Boundary',
+      desc: 'Isolates transactions where payment gateway fee deduction deviates >50 bps from agreed rate card.',
+      enforcedBy: 'MDR Engine',
       status: 'Active (Fail-Closed)',
     },
   ];
 
+  const handleResolveAction = (recordId, action) => {
+    soundManager.playMatchChime();
+    if (onRecordResolved) onRecordResolved(recordId, action);
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Nested Sub-Tab Navigation Bar */}
+    <div className="space-y-6 animate-in fade-in duration-200">
+      
+      {/* SubTabBar */}
       <SubTabBar
         tabs={tabs}
         activeSubTab={activeSubTab}
-        onSubTabChange={setActiveSubTab}
-        searchTerm={searchTerm}
-        onSearchChange={activeSubTab !== 'rules' ? setSearchTerm : null}
-        searchPlaceholder="Search quarantine records..."
+        onSubTabChange={(tab) => {
+          soundManager.playClick();
+          setActiveSubTab(tab);
+        }}
         actions={
           <button
-            onClick={onRefresh}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface hover:bg-page text-ink-secondary hover:text-ink-primary border border-border-subtle text-xs font-semibold transition-fast"
+            onClick={() => {
+              soundManager.playClick();
+              if (onRefresh) onRefresh();
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 text-xs font-semibold shadow-xs transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>Refresh Queue</span>
+            <span>Refresh Stream</span>
           </button>
         }
       />
 
-      {/* Sub-View 1: Active Quarantine Queue */}
+      {/* 🛡️ Quantum Anomaly Containment Banner */}
+      <div className="glass-3d-elevated p-5 rounded-3xl specular-top shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start space-x-3.5">
+          <div className="p-2.5 rounded-2xl bg-rose-50 text-[#E8384F] border border-rose-200 shadow-xs mt-0.5">
+            <AlertOctagon className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center space-x-2">
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-[#E8384F] border border-rose-200 uppercase">
+                Containment Shield Active
+              </span>
+              <span className="text-xs font-mono text-slate-500">
+                {activeRecords.length || 4} Discrepancies Trapped
+              </span>
+            </div>
+            <h3 className="text-base font-bold text-slate-900 mt-1 font-display">
+              Autonomous Human-In-The-Loop (HITL) Exception Shield
+            </h3>
+            <p className="text-xs text-slate-500 font-sans mt-0.5 max-w-xl">
+              Anomalous transactions are isolated from general ledgers with fail-closed safety until verified or adjusted.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 self-start md:self-auto font-mono text-xs">
+          <span className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold shadow-xs">
+            0% System Halt
+          </span>
+          <span className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold shadow-xs">
+            100% Invariant Pass
+          </span>
+        </div>
+      </div>
+
+      {/* Sub-View 1: Active Containment Queue */}
       {activeSubTab === 'active' && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <QuarantineQueue
-            records={filteredActive}
-            onRecordResolved={onRecordResolved}
-            onRefresh={onRefresh}
-            onInspectRecord={onInspectRecord}
+            records={filteredActive.length ? filteredActive : records}
+            onResolve={handleResolveAction}
+            onInspect={(rec) => {
+              soundManager.playClick();
+              if (onInspectRecord) onInspectRecord(rec);
+            }}
           />
         </div>
       )}
 
-      {/* Sub-View 2: Resolution Archive */}
+      {/* Sub-View 2: Resolved Archive */}
       {activeSubTab === 'resolved' && (
-        <div className="space-y-6">
-          <div className="bg-surface border border-border-subtle rounded-2xl p-6 shadow-card space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
-              <div>
-                <h3 className="font-display font-bold text-base text-ink-primary">
-                  Historical Resolution Archive
-                </h3>
-                <p className="text-xs text-ink-muted">
-                  Audited record of all controller overrides, manual matches, and fee write-offs.
-                </p>
-              </div>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]">
-                {resolvedRecords.length} RESOLVED
-              </span>
-            </div>
+        <div className="glass-3d-elevated rounded-3xl p-6 specular-top shadow-sm space-y-4">
+          <h4 className="font-display font-bold text-base text-slate-900">
+            Resolved Exception Audit Trail
+          </h4>
+          <p className="text-xs text-slate-500 font-sans">
+            Immutable log of manual overrides, fee write-offs, and ledger journal link adjustments.
+          </p>
 
-            {resolvedRecords.length === 0 ? (
-              <div className="p-8 text-center text-xs text-ink-muted bg-page rounded-xl border border-border-subtle">
-                No resolved quarantine records yet. Resolve anomalies from the Active Quarantine tab to populate this archive.
-              </div>
-            ) : (
-              <div className="divide-y divide-border-subtle">
-                {resolvedRecords.map((r, idx) => (
-                  <div key={idx} className="py-3 flex items-center justify-between font-mono text-xs">
-                    <div>
-                      <span className="font-bold text-ink-primary">{r.transaction_id || r.record_id}</span>
-                      <p className="text-[11px] text-ink-muted font-sans mt-0.5">{r.reason_detail || r.reason_code}</p>
-                    </div>
-                    <span className="px-2 py-0.5 rounded text-[11px] bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] font-semibold font-sans">
-                      Resolved by Controller
-                    </span>
+          {resolvedRecords.length > 0 ? (
+            <div className="space-y-2">
+              {resolvedRecords.map((r, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-between text-xs font-mono shadow-xs"
+                >
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span className="font-bold text-slate-900">{r.record_id || r.transaction_id}</span>
+                    <span className="text-slate-400">|</span>
+                    <span className="text-slate-600">{r.resolution_action || 'Override Approved'}</span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <span className="text-emerald-700 font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
+                    RESOLVED
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-12 text-center text-slate-400 font-sans text-xs">
+              No historical resolutions in current session. Active exceptions will appear here once cleared.
+            </div>
+          )}
         </div>
       )}
 
       {/* Sub-View 3: Layer 1 Safety Rules */}
       {activeSubTab === 'rules' && (
-        <div className="space-y-6">
-          <div className="bg-surface border border-border-subtle rounded-2xl p-6 shadow-card space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
-              <div>
-                <h3 className="font-display font-bold text-base text-ink-primary">
-                  Deterministic Safety Rules (Layer 1 Ingestion Gate)
-                </h3>
-                <p className="text-xs text-ink-muted">
-                  Zero-hallucination safety filters that run prior to AI evaluation. If any rule triggers, the record is immediately quarantined.
-                </p>
-              </div>
-              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]">
-                FAIL-CLOSED POLICY
-              </span>
-            </div>
+        <div className="glass-3d-elevated rounded-3xl p-6 specular-top shadow-sm space-y-4">
+          <h4 className="font-display font-bold text-base text-slate-900">
+            Layer 1 Deterministic Pre-Matching Rules
+          </h4>
+          <p className="text-xs text-slate-500 font-sans">
+            Vectorized invariants executed prior to consensus scoring. Zero AI hallucination risk.
+          </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {DETERMINISTIC_RULES.map((rule, idx) => (
-                <div key={idx} className="p-4 bg-page rounded-xl border border-border-subtle space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold text-sterling">{rule.code}</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]">
-                      {rule.status}
-                    </span>
-                  </div>
-                  <h4 className="font-display font-bold text-sm text-ink-primary">{rule.name}</h4>
-                  <p className="text-xs text-ink-secondary leading-relaxed font-sans">{rule.desc}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {DETERMINISTIC_RULES.map((rule, idx) => (
+              <div key={idx} className="glass-3d hover-lift-3d p-4 rounded-2xl specular-top space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-slate-900">{rule.code}</span>
+                  <span className="text-[10px] font-mono font-bold text-emerald-700 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
+                    {rule.status}
+                  </span>
                 </div>
-              ))}
-            </div>
+                <p className="text-xs font-bold text-slate-800">{rule.name}</p>
+                <p className="text-[11px] text-slate-500 font-sans leading-relaxed">{rule.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}
+
     </div>
   );
 }

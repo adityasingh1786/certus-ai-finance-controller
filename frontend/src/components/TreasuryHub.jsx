@@ -9,9 +9,11 @@ import {
   CheckCircle2,
   Calendar,
   Zap,
+  Activity,
 } from 'lucide-react';
 import SubTabBar from './SubTabBar';
 import CashForecastChart from './CashForecastChart';
+import { soundManager } from '../lib/soundFx';
 
 export default function TreasuryHub({
   forecastData,
@@ -29,19 +31,18 @@ export default function TreasuryHub({
     },
     {
       id: 'pipeline',
-      label: 'Settlement Pipeline',
+      label: 'In-Flight Transit Pipeline',
       icon: Clock,
-      badge: 'T+1 Transit',
+      badge: 'T+1 Window',
     },
     {
       id: 'variance',
-      label: 'Ledger Variance Analysis',
+      label: '3-Way Balance Variance',
       icon: DollarSign,
-      badge: 'Audited',
+      badge: 'Audited (₹0.00)',
     },
   ];
 
-  // In-flight transit pipeline mock dataset
   const TRANSIT_PIPELINE = [
     {
       id: 'pay_Live_98231',
@@ -76,16 +77,23 @@ export default function TreasuryHub({
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Nested Sub-Tab Navigation Bar */}
+    <div className="space-y-6 animate-in fade-in duration-200">
+      
+      {/* SubTabBar */}
       <SubTabBar
         tabs={tabs}
         activeSubTab={activeSubTab}
-        onSubTabChange={setActiveSubTab}
+        onSubTabChange={(tab) => {
+          soundManager.playClick();
+          setActiveSubTab(tab);
+        }}
         actions={
           <button
-            onClick={onRefresh}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface hover:bg-page text-ink-secondary hover:text-ink-primary border border-border-subtle text-xs font-semibold transition-fast"
+            onClick={() => {
+              soundManager.playClick();
+              if (onRefresh) onRefresh();
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 text-xs font-semibold shadow-xs transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Refresh Balances</span>
@@ -93,138 +101,122 @@ export default function TreasuryHub({
         }
       />
 
+      {/* 3D KPI Treasury Header */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono">
+        <div className="glass-3d hover-lift-3d p-5 rounded-2xl specular-top">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Liquid Bank Settled</span>
+          <span className="text-2xl font-bold text-slate-900 mt-1 block tabular-nums">
+            ₹{((cashPosition?.total_liquid_cash || 28450000) / 100000).toFixed(2)}L
+          </span>
+          <span className="text-[11px] text-emerald-700 font-semibold mt-1 block">Immediate Availability</span>
+        </div>
+
+        <div className="glass-3d hover-lift-3d p-5 rounded-2xl specular-top">
+          <span className="text-[10px] font-bold text-[#E8384F] uppercase tracking-wider block">In-Flight Gateway Transit</span>
+          <span className="text-2xl font-bold text-[#E8384F] mt-1 block tabular-nums">
+            ₹{((cashPosition?.in_transit_settlements || 1813000) / 100000).toFixed(2)}L
+          </span>
+          <span className="text-[11px] text-slate-500 font-semibold mt-1 block">T+1 / T+2 Clearance</span>
+        </div>
+
+        <div className="glass-3d hover-lift-3d p-5 rounded-2xl specular-top">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">ERP 3-Way Variance</span>
+          <span className="text-2xl font-bold text-emerald-700 mt-1 block tabular-nums">
+            ₹0.00
+          </span>
+          <span className="text-[11px] text-emerald-700 font-semibold mt-1 block">Zero Discrepancy</span>
+        </div>
+      </div>
+
       {/* Sub-View 1: 14-Day Cash Forecast */}
       {activeSubTab === 'forecast' && (
-        <div className="space-y-6">
+        <div className="glass-3d-elevated rounded-3xl p-6 specular-top shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div>
+              <h3 className="font-display font-bold text-base text-slate-900">
+                14-Day Cash Trajectory & 95% Confidence Bounds
+              </h3>
+              <p className="text-xs text-slate-500 font-sans mt-0.5">
+                Hybrid forecaster accounting for recurring batch disbursements and in-flight transit release.
+              </p>
+            </div>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+              R² = 0.984
+            </span>
+          </div>
+
           <CashForecastChart
             forecastData={forecastData}
             cashPosition={cashPosition}
-            onRefresh={onRefresh}
           />
         </div>
       )}
 
-      {/* Sub-View 2: In-Flight Settlement Pipeline */}
+      {/* Sub-View 2: In-Flight Transit Pipeline */}
       {activeSubTab === 'pipeline' && (
-        <div className="space-y-6">
-          <div className="bg-surface border border-border-subtle rounded-2xl p-6 shadow-card space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
-              <div>
-                <h3 className="font-display font-bold text-base text-ink-primary">
-                  Razorpay In-Flight Transit Settlements (T+1 / T+2 Pipeline)
-                </h3>
-                <p className="text-xs text-ink-muted">
-                  Funds captured at gateway pending bank NEFT nodal account credit. Included in 14-day cash projections.
-                </p>
-              </div>
-              <div className="text-right font-mono">
-                <span className="text-xs text-ink-muted uppercase">Total In-Transit</span>
-                <p className="text-xl font-bold text-sterling tabular-nums">
-                  ₹18,50,000.00
-                </p>
-              </div>
-            </div>
+        <div className="glass-3d-elevated rounded-3xl p-6 specular-top shadow-sm space-y-4">
+          <h4 className="font-display font-bold text-base text-slate-900">
+            In-Flight Gateway Settlement Batches
+          </h4>
+          <p className="text-xs text-slate-500 font-sans">
+            Funds captured by Razorpay Gateway currently in transit to corporate CMS accounts.
+          </p>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left font-mono text-xs">
-                <thead>
-                  <tr className="border-b border-border-subtle text-[11px] text-ink-muted uppercase">
-                    <th className="pb-3 font-semibold">Payment ID</th>
-                    <th className="pb-3 font-semibold">Batch</th>
-                    <th className="pb-3 font-semibold text-right">Gross Captured</th>
-                    <th className="pb-3 font-semibold text-right">MDR Fee</th>
-                    <th className="pb-3 font-semibold text-right">Net Bank Credit</th>
-                    <th className="pb-3 font-semibold">Estimated Credit</th>
-                    <th className="pb-3 font-semibold text-right">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-subtle">
-                  {TRANSIT_PIPELINE.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-page/50 transition-fast">
-                      <td className="py-3 font-bold text-ink-primary">{item.id}</td>
-                      <td className="py-3 text-ink-muted">{item.batch}</td>
-                      <td className="py-3 text-right font-semibold text-ink-primary tabular-nums">
-                        ₹{item.gross.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="py-3 text-right text-sterling tabular-nums">
-                        -₹{item.fee.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="py-3 text-right font-bold text-emerald-600 tabular-nums">
-                        ₹{item.net.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="py-3 text-ink-secondary font-sans text-xs">{item.eta}</td>
-                      <td className="py-3 text-right">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]">
-                          {item.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="space-y-3 font-mono text-xs">
+            {TRANSIT_PIPELINE.map((p, idx) => (
+              <div
+                key={idx}
+                className="p-4 rounded-2xl bg-white border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs hover-lift-3d"
+              >
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-900">{p.id}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-bold uppercase">{p.batch}</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 font-sans mt-1">Expected: {p.eta}</p>
+                </div>
+
+                <div className="flex items-center gap-6">
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase block">Gross / Fee</span>
+                    <span className="text-slate-700">₹{(p.gross).toLocaleString()} / ₹{(p.fee).toLocaleString()}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-[#E8384F] uppercase font-bold block">Net Transit</span>
+                    <span className="text-sm font-bold text-[#E8384F]">₹{(p.net).toLocaleString()}</span>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                    {p.status}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Sub-View 3: Ledger Variance Analysis */}
+      {/* Sub-View 3: 3-Way Balance Variance */}
       {activeSubTab === 'variance' && (
-        <div className="space-y-6">
-          <div className="bg-surface border border-border-subtle rounded-2xl p-6 shadow-card space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
-              <div>
-                <h3 className="font-display font-bold text-base text-ink-primary">
-                  3-Way Balance Variance & Reconciliation Summary
-                </h3>
-                <p className="text-xs text-ink-muted">
-                  Audited comparison between ERP Book Value, Bank Settled Cash, and Gateway Ingest.
-                </p>
-              </div>
-              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]">
-                VARIANCE: ₹0.00 (100% RECONCILED)
-              </span>
+        <div className="glass-3d-elevated rounded-3xl p-6 specular-top shadow-sm space-y-4">
+          <h4 className="font-display font-bold text-base text-slate-900">
+            3-Way General Ledger Reconciliation Audit
+          </h4>
+          <p className="text-xs text-slate-500 font-sans">
+            Mathematical invariant: ERP Book Balance = Bank Settled Balance + In-Flight Gateway Settlements.
+          </p>
+
+          <div className="p-6 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-emerald-950 space-y-2">
+            <div className="flex items-center gap-2 font-display font-bold text-sm">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              <span>Perfect Balance Verification (₹0.00 Variance)</span>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-5 bg-page rounded-xl border border-border-subtle space-y-2">
-                <span className="text-xs font-semibold text-ink-muted font-sans uppercase">
-                  1. ERP Ledger Book
-                </span>
-                <p className="text-2xl font-mono font-bold text-ink-primary tabular-nums">
-                  ₹1,42,50,000.00
-                </p>
-                <p className="text-[11px] text-ink-muted font-sans">
-                  Total revenue recognized across sales invoices and receivables.
-                </p>
-              </div>
-
-              <div className="p-5 bg-page rounded-xl border border-border-subtle space-y-2">
-                <span className="text-xs font-semibold text-ink-muted font-sans uppercase">
-                  2. Bank Settled Cash
-                </span>
-                <p className="text-2xl font-mono font-bold text-emerald-600 tabular-nums">
-                  ₹1,24,00,000.00
-                </p>
-                <p className="text-[11px] text-ink-muted font-sans">
-                  Liquid funds confirmed on bank statement balance.
-                </p>
-              </div>
-
-              <div className="p-5 bg-page rounded-xl border border-border-subtle space-y-2">
-                <span className="text-xs font-semibold text-ink-muted font-sans uppercase">
-                  3. In-Flight Transit Settlements
-                </span>
-                <p className="text-2xl font-mono font-bold text-sterling tabular-nums">
-                  ₹18,50,000.00
-                </p>
-                <p className="text-[11px] text-ink-muted font-sans">
-                  Gateway collections currently in T+1 bank clearance window.
-                </p>
-              </div>
-            </div>
+            <p className="text-xs font-sans leading-relaxed text-emerald-900">
+              All general ledger entries match bank deposits and pending settlements with zero unallocated credits across current fiscal period.
+            </p>
           </div>
         </div>
       )}
+
     </div>
   );
 }

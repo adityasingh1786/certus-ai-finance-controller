@@ -1,63 +1,72 @@
-import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
-import BootScreen from './components/BootScreen';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import LandingPage from './components/LandingPage';
 import AuthScreen from './components/AuthScreen';
 import TopBar from './components/TopBar';
 import Sidebar from './components/Sidebar';
-
-// 5 Primary Operational Hubs
 import ReconciliationHub from './components/ReconciliationHub';
 import QuarantineHub from './components/QuarantineHub';
 import TreasuryHub from './components/TreasuryHub';
 import CopilotHub from './components/CopilotHub';
 import GovernanceHub from './components/GovernanceHub';
-
 import RecordAuditDrawer from './components/RecordAuditDrawer';
-import ErrorToast from './components/ErrorToast';
 import PipelineTelemetryModal from './components/PipelineTelemetryModal';
-
-// Lazy-loaded heavy modal views
-const ArchitectureModal = lazy(() => import('./components/ArchitectureModal'));
-const SwaggerModal = lazy(() => import('./components/SwaggerModal'));
-
+import CommandPaletteModal from './components/CommandPaletteModal';
+import ErrorToast from './components/ErrorToast';
 import {
   fetchCashPosition,
   fetchCashForecast,
   fetchQuarantineRecords,
   reconcileDemoDataset,
+  fetchScenarioCatalog,
 } from './lib/api';
+import { soundManager } from './lib/soundFx';
+
+// Lazy-loaded secondary modals to preserve fast bundle load
+const ArchitectureModal = lazy(() => import('./components/ArchitectureModal'));
+const SwaggerModal = lazy(() => import('./components/SwaggerModal'));
 
 export default function App() {
-  // Application Lifecycle: 'boot' -> 'landing' -> 'auth' -> 'dashboard'
-  const [currentScreen, setCurrentScreen] = useState('boot');
+  // Navigation & Screen State
+  const [currentScreen, setCurrentScreen] = useState('boot'); // 'boot' | 'landing' | 'auth' | 'dashboard'
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState('recon'); // 'recon', 'exceptions', 'treasury', 'copilot', 'governance'
-  const [isReconciling, setIsReconciling] = useState(false);
+  const [activeTab, setActiveTab] = useState('recon'); // 'recon' | 'quarantine' | 'treasury' | 'copilot' | 'governance'
 
-  // Core Data State
-  const [cashPosition, setCashPosition] = useState(null);
-  const [forecastData, setForecastData] = useState(null);
-  const [quarantineRecords, setQuarantineRecords] = useState([]);
-  const [reconciliationData, setReconciliationData] = useState(null);
-  const [selectedAuditRecord, setSelectedAuditRecord] = useState(null);
-
-  // Modals & Real-Time Telemetry HUD
+  // Modal Visibility States
   const [showArchModal, setShowArchModal] = useState(false);
   const [showSwaggerModal, setShowSwaggerModal] = useState(false);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [selectedAuditRecord, setSelectedAuditRecord] = useState(null);
+
+  // Live Operational Financial Data States
+  const [reconciliationData, setReconciliationData] = useState(null);
+  const [quarantineRecords, setQuarantineRecords] = useState([]);
+  const [cashPosition, setCashPosition] = useState(null);
+  const [forecastData, setForecastData] = useState(null);
+  const [scenarioCatalog, setScenarioCatalog] = useState([]);
   const [pendingDemoData, setPendingDemoData] = useState(null);
 
-  // Network Error Toast State
+  // Loading & Processing States
+  const [isReconciling, setIsReconciling] = useState(false);
   const [apiError, setApiError] = useState(null);
 
-  // Load Initial Live Backend Data (Pre-loads Scenario #1 so the matrix is alive on load)
+  // 1. Initial 2.4s Booting Screen Transition
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentScreen('landing');
+    }, 2400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 2. Load Initial Live Backend Data & Scenario Catalog
   const loadInitialData = useCallback(async () => {
     try {
-      const [cashRes, forecastRes, qRes, reconRes] = await Promise.allSettled([
+      const [cashRes, forecastRes, qRes, reconRes, scRes] = await Promise.allSettled([
         fetchCashPosition(),
         fetchCashForecast(),
         fetchQuarantineRecords(),
         reconcileDemoDataset(1),
+        fetchScenarioCatalog(),
       ]);
 
       if (cashRes.status === 'fulfilled') setCashPosition(cashRes.value);
@@ -67,6 +76,9 @@ export default function App() {
       }
       if (reconRes.status === 'fulfilled' && reconRes.value) {
         setReconciliationData(reconRes.value);
+      }
+      if (scRes.status === 'fulfilled' && scRes.value?.scenarios) {
+        setScenarioCatalog(scRes.value.scenarios);
       }
     } catch (err) {
       console.warn('Initial data load warning:', err);
@@ -79,17 +91,54 @@ export default function App() {
     }
   }, [isAuthenticated, loadInitialData]);
 
-  // Handle 1-Click Demo Execution — Launches Cinematic Telemetry HUD
+  // 3. Global Keyboard Shortcuts Listener (Cmd/Ctrl + K, Hotkeys 1-5)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Cmd/Ctrl + K -> Toggle Command Palette
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setShowCommandPalette((prev) => !prev);
+        return;
+      }
+
+      // Hotkeys 1-5 for hub switching (only if not typing in inputs)
+      const targetTag = document.activeElement?.tagName?.toLowerCase();
+      if (targetTag === 'input' || targetTag === 'textarea' || targetTag === 'select') return;
+
+      if (e.key === '1') {
+        soundManager.playClick();
+        setActiveTab('recon');
+      } else if (e.key === '2') {
+        soundManager.playClick();
+        setActiveTab('quarantine');
+      } else if (e.key === '3') {
+        soundManager.playClick();
+        setActiveTab('treasury');
+      } else if (e.key === '4') {
+        soundManager.playClick();
+        setActiveTab('copilot');
+      } else if (e.key === '5') {
+        soundManager.playClick();
+        setActiveTab('governance');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // 4. Handle 1-Click Demo Execution — Launches Cinematic Telemetry HUD
   const handleRunDemo = async (scenarioId = null) => {
+    soundManager.playClick();
     setIsReconciling(true);
     setApiError(null);
     setShowTelemetryModal(true);
 
     try {
-      // Execute backend reconciliation concurrently while HUD animates
       const res = await reconcileDemoDataset(scenarioId);
       setPendingDemoData(res);
       setReconciliationData(res);
+      soundManager.playMatchChime();
     } catch (err) {
       console.error('Demo execution error:', err);
     } finally {
@@ -105,67 +154,66 @@ export default function App() {
     setShowTelemetryModal(false);
   };
 
-  const handleRecordResolved = (recordId) => {
+  // Quarantine exception resolution handler
+  const handleRecordResolved = (recordId, action) => {
+    soundManager.playMatchChime();
     setQuarantineRecords((prev) =>
       prev.map((r) =>
-        r.record_id === recordId || r.transaction_id === recordId
-          ? { ...r, is_resolved: true, resolved: true }
-          : r
+        r.record_id === recordId ? { ...r, is_resolved: true, resolution_action: action } : r
       )
     );
   };
 
-  const unresCount = quarantineRecords.filter((r) => !r.is_resolved && !r.resolved).length;
+  const unresCount = quarantineRecords.filter((r) => !r.is_resolved).length || 4;
 
   // =========================================================================
-  // STEP 1: Booting Screen (2.4s sequence -> transitions to Landing Page)
+  // STEP 1: 3D Holographic Booting Screen (2.4s)
   // =========================================================================
   if (currentScreen === 'boot') {
-    return <BootScreen onBootComplete={() => setCurrentScreen('landing')} />;
-  }
-
-  // =========================================================================
-  // STEP 2: Full 8-Section Long Scrolling Landing Page
-  // =========================================================================
-  if (currentScreen === 'landing') {
     return (
-      <>
-        <LandingPage
-          onOpenDashboard={() => {
-            if (isAuthenticated) {
-              setCurrentScreen('dashboard');
-            } else {
-              setCurrentScreen('auth');
-            }
-          }}
-          onOpenArchitecture={() => setShowArchModal(true)}
-          onOpenSwagger={() => setShowSwaggerModal(true)}
-        />
-        {/* Modals */}
-        <Suspense fallback={null}>
-          {showArchModal && (
-            <ArchitectureModal
-              isOpen={showArchModal}
-              onClose={() => setShowArchModal(false)}
-            />
-          )}
-        </Suspense>
-        <Suspense fallback={null}>
-          {showSwaggerModal && (
-            <SwaggerModal
-              isOpen={showSwaggerModal}
-              onClose={() => setShowSwaggerModal(false)}
-            />
-          )}
-        </Suspense>
-      </>
+      <div className="min-h-screen bg-[#FAFAF9] flex flex-col items-center justify-center relative overflow-hidden select-none aurora-canvas">
+        <div className="relative flex flex-col items-center z-10 space-y-6">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-3xl bg-[#E8384F] flex items-center justify-center text-white text-2xl font-bold font-display shadow-2xl shadow-rose-500/40 animate-pulse">
+              C
+            </div>
+            <div className="absolute inset-0 rounded-3xl border-2 border-[#E8384F]/40 animate-ping" />
+          </div>
+
+          <div className="text-center space-y-2">
+            <h2 className="text-xl font-bold text-slate-900 font-display tracking-tight">
+              CERTUS AUTONOMOUS OS
+            </h2>
+            <p className="text-xs font-mono text-slate-500">
+              Initializing Double-Lock Invariant Core v2.4...
+            </p>
+          </div>
+
+          <div className="w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+            <div className="h-full bg-[#E8384F] rounded-full animate-[ekgFlow_2s_ease-in-out_infinite]" style={{ width: '70%' }} />
+          </div>
+        </div>
+      </div>
     );
   }
 
   // =========================================================================
-  // STEP 3: Enterprise Auth Screen (1-Click Demo Login + Email Form)
+  // STEP 2: Interactive Particle Landing Page
   // =========================================================================
-  if (currentScreen === 'auth') {
+  if (currentScreen === 'landing') {
+    return (
+      <LandingPage
+        onOpenAuth={() => setCurrentScreen('auth')}
+        onOpenArchitecture={() => setShowArchModal(true)}
+        onOpenSwagger={() => setShowSwaggerModal(true)}
+      />
+    );
+  }
+
+  // =========================================================================
+  // STEP 3: Enterprise Auth Screen
+  // =========================================================================
+  if (currentScreen === 'auth' || !isAuthenticated) {
     return (
       <AuthScreen
         onLoginSuccess={() => {
@@ -178,37 +226,39 @@ export default function App() {
   }
 
   // =========================================================================
-  // STEP 4: Live Enterprise Financial Controller Dashboard Workspace
+  // STEP 4: Fixed Sovereign Financial Controller Operating System Workspace
   // =========================================================================
   return (
-    <div className="min-h-screen bg-page text-ink-primary flex flex-col antialiased">
-      {/* 1. Global Top Bar */}
+    <div className="h-screen w-screen overflow-hidden bg-[#FAFAF9] text-slate-900 flex flex-col antialiased select-none aurora-canvas">
+      
+      {/* 1. Fixed Sovereign TopBar (64px) */}
       <TopBar
         activeTab={activeTab}
         onOpenArchitecture={() => setShowArchModal(true)}
         onOpenSwagger={() => setShowSwaggerModal(true)}
-        onLoadDemo={handleRunDemo}
+        onLoadDemo={() => handleRunDemo(null)}
         isReconciling={isReconciling}
         onOpenLanding={() => setCurrentScreen('landing')}
         onLogout={() => {
           setIsAuthenticated(false);
           setCurrentScreen('landing');
         }}
+        onOpenCommandPalette={() => setShowCommandPalette(true)}
       />
 
-      {/* 2. Main App Shell with Navigation Sidebar */}
-      <div className="flex-1 flex max-w-7xl w-full mx-auto">
+      {/* 2. Fixed Sovereign Viewport Body Split */}
+      <div className="flex-1 flex w-full relative">
+        {/* Fixed Acrylic Sidebar (260px) */}
         <Sidebar
           activeTab={activeTab}
           onTabChange={setActiveTab}
           exceptionCount={unresCount}
-          onOpenArchitecture={() => setShowArchModal(true)}
-          onOpenSwagger={() => setShowSwaggerModal(true)}
         />
 
-        {/* Main Content Workspace with Nested Sub-Tabs */}
-        <main className="flex-1 p-6 lg:p-8 space-y-6 min-w-0 overflow-y-auto">
-          {/* Hub 1: Reconciliation Hub */}
+        {/* Fluid Momentum Central Workspace (ml-64 mt-16 h-[calc(100vh-64px)]) */}
+        <main className="ml-64 mt-16 h-[calc(100vh-64px)] flex-1 p-8 overflow-y-auto overflow-x-hidden space-y-6">
+          
+          {/* Hub 1: 3-Way Match Matrix Hub */}
           {activeTab === 'recon' && (
             <ReconciliationHub
               reconciliationData={reconciliationData}
@@ -224,7 +274,7 @@ export default function App() {
           )}
 
           {/* Hub 2: Quarantine & Exceptions Hub */}
-          {activeTab === 'exceptions' && (
+          {activeTab === 'quarantine' && (
             <QuarantineHub
               records={quarantineRecords}
               onRecordResolved={handleRecordResolved}
@@ -264,7 +314,16 @@ export default function App() {
         onClose={() => setSelectedAuditRecord(null)}
       />
 
-      {/* 4. Architecture Blueprint Modal */}
+      {/* 4. Global Spotlight Command Palette Modal (Cmd/Ctrl + K) */}
+      <CommandPaletteModal
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        onSelectTab={setActiveTab}
+        onRunScenario={handleRunDemo}
+        scenarios={scenarioCatalog}
+      />
+
+      {/* 5. Architecture Blueprint Modal */}
       <Suspense fallback={null}>
         {showArchModal && (
           <ArchitectureModal
@@ -274,7 +333,7 @@ export default function App() {
         )}
       </Suspense>
 
-      {/* 5. Interactive Swagger Modal */}
+      {/* 6. Interactive Swagger Modal */}
       <Suspense fallback={null}>
         {showSwaggerModal && (
           <SwaggerModal
@@ -284,7 +343,7 @@ export default function App() {
         )}
       </Suspense>
 
-      {/* 6. Autonomous Execution Telemetry Flowchart HUD Modal */}
+      {/* 7. Autonomous Execution Telemetry Flowchart HUD Modal */}
       <PipelineTelemetryModal
         isOpen={showTelemetryModal}
         onClose={() => setShowTelemetryModal(false)}
@@ -292,7 +351,7 @@ export default function App() {
         runData={pendingDemoData}
       />
 
-      {/* 7. Dismissible Error Toast */}
+      {/* 8. Dismissible Error Toast */}
       {apiError && (
         <ErrorToast
           title={apiError.title}
@@ -301,6 +360,7 @@ export default function App() {
           onDismiss={() => setApiError(null)}
         />
       )}
+
     </div>
   );
 }

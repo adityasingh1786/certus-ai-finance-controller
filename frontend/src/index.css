@@ -4,20 +4,19 @@
 
 @layer base {
   :root {
-    /* Centralize the token system here instead of scattering hex values */
     --bg-page: #FAFAF9;
     --bg-surface: #FFFFFF;
     --bg-subtle: #F4F4F5;
-    --text-primary: #111827;
-    --text-secondary: #4B5563;
-    --text-muted: #9CA3AF;
-    --border-subtle: #E5E7EB;
-    --border-strong: #D1D5DB;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+    --border-subtle: #E2E8F0;
+    --border-strong: #CBD5E1;
     --sterling-red: #E8384F;
     --sterling-hover: #D02B41;
     --match-green: #10B981;
     --missing-amber: #F59E0B;
-    --duplicate-slate: #6366F1;
+    --duplicate-slate: #8B5CF6;
   }
 
   * {
@@ -30,6 +29,7 @@
     font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -43,8 +43,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Keyboard accessibility — missing before. Never remove focus states
-     entirely; a finance tool with no visible focus ring is a real miss. */
   :focus-visible {
     outline: 2px solid var(--sterling-red);
     outline-offset: 2px;
@@ -55,7 +53,6 @@
     color: #FFFFFF;
   }
 
-  /* Respect users who've asked for less motion — cheap to add, real signal */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -65,37 +62,153 @@
   }
 }
 
-/* Fast, non-expensive transitions — transform/opacity are compositor-only
-   (essentially free); background-color/border-color are cheap enough for
-   single-element hover states. Never add box-shadow, filter, or width/height
-   to this list. */
-.transition-fast {
-  transition: transform 150ms ease, opacity 150ms ease, background-color 150ms ease, border-color 150ms ease;
+/* 🌌 Living Aurora Ambient Lighting Background */
+.aurora-canvas {
+  position: relative;
+  background-color: #FAFAF9;
+  background-image: 
+    radial-gradient(at 90% 10%, rgba(232, 56, 79, 0.05) 0px, transparent 50%),
+    radial-gradient(at 10% 90%, rgba(99, 102, 241, 0.04) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(255, 255, 255, 0.9) 0px, transparent 100%);
 }
 
-/* Crisp Clean Scrollbars — Chromium/WebKit */
+/* 🪞 3D Glassmorphic Surface System */
+.glass-3d {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    0 10px 30px -10px rgba(15, 23, 42, 0.04),
+    0 0 0 1px rgba(226, 232, 240, 0.6),
+    0 1px 0 0 rgba(255, 255, 255, 0.9) inset;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-3d-elevated {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 20px 45px -12px rgba(15, 23, 42, 0.07),
+    0 0 0 1px rgba(226, 232, 240, 0.7),
+    0 1px 0 0 rgba(255, 255, 255, 1) inset;
+}
+
+/* 3D Hover Tilt & Micro-Lift */
+.hover-lift-3d {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease;
+}
+
+.hover-lift-3d:hover {
+  transform: translateY(-3px) scale(1.005);
+  box-shadow: 
+    0 25px 50px -12px rgba(232, 56, 79, 0.10),
+    0 0 0 1px rgba(232, 56, 79, 0.35),
+    0 1px 0 0 rgba(255, 255, 255, 1) inset;
+}
+
+.hover-lift-3d:active {
+  transform: scale(0.985);
+}
+
+/* Specular Top Bevel Edge */
+.specular-top {
+  border-top: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.9) inset;
+}
+
+/* Ambient Sterling Red Under-Glow */
+.ambient-glow-red {
+  box-shadow: 0 15px 35px -10px rgba(232, 56, 79, 0.14), 0 0 15px -3px rgba(232, 56, 79, 0.08);
+}
+
+/* ✨ Diagonal Specular Shimmer Light-Sweep */
+.shimmer-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 220%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 70%
+  );
+  transform: rotate(30deg);
+  transition: all 0.75s ease;
+}
+
+.shimmer-btn:hover::after {
+  left: 110%;
+  top: 110%;
+}
+
+/* 🟢 Living Breathing Status Halo */
+@keyframes breathingPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.4;
+  }
+}
+
+.breathing-dot {
+  position: relative;
+}
+
+.breathing-dot::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 9999px;
+  background: inherit;
+  opacity: 0.6;
+  animation: breathingPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  z-index: 0;
+}
+
+/* 🌊 Animated EKG Waveform Stroke */
+@keyframes ekgFlow {
+  0% {
+    stroke-dashoffset: 200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.ekg-line {
+  stroke-dasharray: 200;
+  animation: ekgFlow 3s linear infinite;
+}
+
+/* Custom Slim Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-subtle);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 3px;
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
-}
-
-/* Standards-compliant scrollbar styling for modern browsers (Firefox, Chrome 121+, Edge 121+) */
-@supports (scrollbar-width: thin) {
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-strong) var(--bg-subtle);
-  }
+  background: rgba(148, 163, 184, 0.65);
 }
