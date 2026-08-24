@@ -581,7 +581,7 @@ export default function LandingPage({ onOpenDashboard, onOpenArchitecture, onOpe
                 Swagger API
               </button>
               <a
-                href="https://github.com"
+                href="https://github.com/adityasingh1786/certus-ai-finance-controller"
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-ink-primary transition-fast flex items-center gap-1"
@@ -592,7 +592,7 @@ export default function LandingPage({ onOpenDashboard, onOpenArchitecture, onOpe
             </div>
 
             <div className="text-[11px] font-mono text-ink-muted">
-              Certus Autonomous Financial Operating System • Enterprise v2.4
+              Certus Autonomous Financial Operating System • Designed & Built by Aditya Singh
             </div>
           </div>
         </footer>

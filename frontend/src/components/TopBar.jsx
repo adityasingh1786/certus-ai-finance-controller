@@ -77,9 +77,9 @@ export default function TopBar({
 
         <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-page border border-border-subtle text-xs font-mono">
           <div className="w-5 h-5 rounded-full bg-sterling-light/60 border border-sterling-border flex items-center justify-center text-sterling text-[10px] font-bold">
-            NS
+            AS
           </div>
-          <span className="text-ink-primary font-semibold">Niraj Singh</span>
+          <span className="text-ink-primary font-semibold">Aditya Singh</span>
         </div>
 
         {onLogout && (

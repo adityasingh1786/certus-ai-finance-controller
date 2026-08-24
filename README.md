@@ -2,7 +2,8 @@
 
 > **An autonomous financial operations agent that ingests messy, multi-source settlement data, reconciles it against expected cash flows, delivers real-time audited cash forecasts, and — critically — never silently trusts a bad number.**
 
-[![CI Pipeline](https://github.com/nirajsingh/ai-finance-controller/actions/workflows/ci.yml/badge.svg)](https://github.com/nirajsingh/ai-finance-controller/actions)
+[![CI Pipeline](https://github.com/adityasingh1786/certus-ai-finance-controller/actions/workflows/ci.yml/badge.svg)](https://github.com/adityasingh1786/certus-ai-finance-controller/actions)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-adityasingh1786%2Fcertus--ai--finance--controller-blue?logo=github)](https://github.com/adityasingh1786/certus-ai-finance-controller)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)](https://fastapi.tiangolo.com)
 [![React 18](https://img.shields.io/badge/React-18.3-61dafb.svg)](https://reactjs.org/)
@@ -125,5 +126,12 @@ Open `http://localhost:3000` to view the dashboard.
 
 ---
 
+## 👤 Author & Architecture Lead
+- **Aditya Singh** — Lead Architect & Developer  
+- **GitHub**: [@adityasingh1786](https://github.com/adityasingh1786)  
+- **Repository**: [certus-ai-finance-controller](https://github.com/adityasingh1786/certus-ai-finance-controller)
+
+---
+
 ## 📜 License
-MIT License. Built for Razorpay AI Buildathon 2026.
+MIT License. Copyright (c) 2026 Aditya Singh. Built for Razorpay AI Buildathon 2026.
