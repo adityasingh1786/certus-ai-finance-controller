@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ai-finance-controller-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r backend/requirements.txt"
+    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.5
+      - key: APP_ENV
+        value: production
+      - key: CORS_ORIGINS
+        value: "*"

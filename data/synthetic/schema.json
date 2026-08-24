@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SettlementRecord",
+  "description": "Normalized settlement transaction schema for multi-source reconciliation.",
+  "type": "object",
+  "properties": {
+    "transaction_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Unique transaction identifier"
+    },
+    "merchant_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "settlement_date": {
+      "type": "string",
+      "format": "date",
+      "description": "YYYY-MM-DD settlement date"
+    },
+    "gross_amount": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Gross transaction amount"
+    },
+    "fee": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Platform or processing fee"
+    },
+    "tax": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Tax on fee (GST/VAT)"
+    },
+    "net_amount": {
+      "type": "number",
+      "description": "Net settlement amount (gross - fee - tax)"
+    },
+    "currency": {
+      "type": "string",
+      "enum": ["INR", "USD", "EUR", "GBP"]
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": ["UPI", "CARD", "NETBANKING", "WALLET", "BANK_TRANSFER", "OTHER"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "settled", "failed", "refunded", "partially_refunded"]
+    },
+    "narration": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "utr_number": {
+      "type": ["string", "null"]
+    },
+    "payment_id": {
+      "type": ["string", "null"]
+    },
+    "order_id": {
+      "type": ["string", "null"]
+    },
+    "invoice_number": {
+      "type": ["string", "null"]
+    }
+  },
+  "required": [
+    "transaction_id",
+    "merchant_id",
+    "settlement_date",
+    "gross_amount",
+    "fee",
+    "tax",
+    "net_amount",
+    "currency",
+    "payment_method",
+    "status"
+  ]
+}

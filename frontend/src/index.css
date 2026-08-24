@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Centralize the token system here instead of scattering hex values */
+    --bg-page: #FAFAF9;
+    --bg-surface: #FFFFFF;
+    --bg-subtle: #F4F4F5;
+    --text-primary: #111827;
+    --text-secondary: #4B5563;
+    --text-muted: #9CA3AF;
+    --border-subtle: #E5E7EB;
+    --border-strong: #D1D5DB;
+    --sterling-red: #E8384F;
+    --sterling-hover: #D02B41;
+    --match-green: #10B981;
+    --missing-amber: #F59E0B;
+    --duplicate-slate: #6366F1;
+  }
+
+  * {
+    border-color: var(--border-subtle);
+  }
+
+  body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  .font-mono,
+  .tabular-nums {
+    font-family: 'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Keyboard accessibility — missing before. Never remove focus states
+     entirely; a finance tool with no visible focus ring is a real miss. */
+  :focus-visible {
+    outline: 2px solid var(--sterling-red);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--sterling-red);
+    color: #FFFFFF;
+  }
+
+  /* Respect users who've asked for less motion — cheap to add, real signal */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Fast, non-expensive transitions — transform/opacity are compositor-only
+   (essentially free); background-color/border-color are cheap enough for
+   single-element hover states. Never add box-shadow, filter, or width/height
+   to this list. */
+.transition-fast {
+  transition: transform 150ms ease, opacity 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+/* Crisp Clean Scrollbars — Chromium/WebKit */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-subtle);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Standards-compliant scrollbar styling for modern browsers (Firefox, Chrome 121+, Edge 121+) */
+@supports (scrollbar-width: thin) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) var(--bg-subtle);
+  }
+}
