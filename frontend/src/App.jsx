@@ -309,6 +309,7 @@ export default function App() {
                 <CopilotHub
                   reconciliationData={reconciliationData}
                   quarantineRecords={quarantineRecords}
+                  onInspectRecord={setSelectedAuditRecord}
                 />
               )}
 

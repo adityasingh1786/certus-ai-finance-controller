@@ -1,33 +1,49 @@
 """
 AI Finance Controller — Agent Query API Routes
 
-POST /api/v1/agent/query — natural-language query with mandatory citations
+POST /api/v1/agent/query — natural-language query with mandatory citations & live scenario context
 GET  /api/v1/agent/tools — list available tools (read-only introspection)
 GET  /api/v1/agent/conversations/{id} — full audit transcript
 """
 
 from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Dict, Any, List
 from uuid import uuid4
 from datetime import datetime, timezone
 
 router = APIRouter()
-conversations: dict[str, list[dict]] = {}
+conversations: Dict[str, List[Dict[str, Any]]] = {}
 
 
 class QueryRequest(BaseModel):
-    question: str = Field(..., min_length=1, max_length=1000)
+    question: Optional[str] = None
+    query: Optional[str] = None
     conversation_id: Optional[str] = None
+    chat_history: Optional[List[Dict[str, Any]]] = None
+    context: Optional[Dict[str, Any]] = None  # Live screen state (active scenario, records, exceptions)
 
 
 @router.post("/query")
 async def agent_query(request: Request, body: QueryRequest):
     """
-    Natural-language entry point.
-    Returns answer + cited record IDs + confidence + tool calls trace.
+    Natural-language entry point for Autonomous Financial Controller Copilot.
+    Receives live scenario context and returns expert forensic diagnosis,
+    step-by-step fix recommendations, cited record IDs, and tool execution traces.
     """
-    agent_orchestrator = request.app.state.agent_orchestrator
+    user_query = body.question or body.query or ""
+    if not user_query.strip():
+        raise HTTPException(status_code=400, detail="Query or question text is required.")
+
+    agent_orchestrator = getattr(request.app.state, "agent_orchestrator", None)
+    if not agent_orchestrator:
+        from app.agent.orchestrator import AgentOrchestrator
+        agent_orchestrator = AgentOrchestrator(
+            ingestion_service=getattr(request.app.state, "ingestion_service", None),
+            cash_service=getattr(request.app.state, "cash_service", None),
+        )
+        request.app.state.agent_orchestrator = agent_orchestrator
+
     conversation_id = body.conversation_id or str(uuid4())
 
     if conversation_id not in conversations:
@@ -35,22 +51,23 @@ async def agent_query(request: Request, body: QueryRequest):
 
     conversations[conversation_id].append({
         "role": "user",
-        "content": body.question,
+        "content": user_query,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
 
-    # Call orchestrator
+    # Call orchestrator with live context
     response = await agent_orchestrator.answer_query(
-        question=body.question,
+        question=user_query,
         conversation_id=conversation_id,
+        client_context=body.context,
     )
 
     conversations[conversation_id].append({
         "role": "assistant",
-        "content": response["answer"],
-        "confidence": response["confidence"],
-        "cited_record_ids": response["cited_record_ids"],
-        "tool_calls": response["tool_calls"],
+        "content": response.get("answer", ""),
+        "confidence": response.get("confidence"),
+        "cited_record_ids": response.get("cited_record_ids", []),
+        "tool_calls": response.get("tool_calls", []),
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
 
@@ -89,8 +106,16 @@ async def list_agent_tools():
                 },
                 "is_read_only": True,
             },
+            {
+                "name": "audit_exceptions_and_remediations",
+                "description": "Analyzes quarantined exceptions and produces deterministic forensic remediation steps.",
+                "parameters": {
+                    "scenario_id": {"type": "integer", "description": "Active scenario identifier", "required": False},
+                },
+                "is_read_only": True,
+            },
         ],
-        "governing_principle": "Every tool is READ-ONLY with respect to financial state. The agent can query, reconcile, and forecast — no tool can execute a transfer, post a journal entry, or alter a trusted record.",
+        "governing_principle": "Every tool is READ-ONLY with respect to financial state. The agent can query, reconcile, analyze and suggest fixes — no tool can execute a transfer or alter a ledger.",
     }
 
 
@@ -98,9 +123,4 @@ async def list_agent_tools():
 async def get_conversation(conversation_id: str):
     if conversation_id not in conversations:
         raise HTTPException(status_code=404, detail=f"Conversation {conversation_id} not found")
-
-    return {
-        "conversation_id": conversation_id,
-        "messages": conversations[conversation_id],
-        "message_count": len(conversations[conversation_id]),
-    }
+    return {"conversation_id": conversation_id, "messages": conversations[conversation_id]}

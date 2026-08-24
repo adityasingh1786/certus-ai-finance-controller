@@ -17,6 +17,7 @@ import { soundManager } from '../lib/soundFx';
 export default function CopilotHub({
   reconciliationData,
   quarantineRecords = [],
+  onInspectRecord,
 }) {
   const [activeSubTab, setActiveSubTab] = useState('chat');
   const [injectedPrompt, setInjectedPrompt] = useState(null);
@@ -39,7 +40,7 @@ export default function CopilotHub({
       id: 'chat',
       label: 'Controller Copilot',
       icon: Bot,
-      badge: 'Strict Read-Only',
+      badge: 'Live Reasoning LLM',
     },
     {
       id: 'prompts',
@@ -57,18 +58,18 @@ export default function CopilotHub({
 
   const PRESET_PROMPTS = [
     {
+      title: `Remediation Playbook for ${scenarioName}`,
+      query: `Analyze all quarantined records and tell me step-by-step how to fix the discrepancies in ${scenarioName}.`,
+      desc: `Produces concrete fix actions for MDR deviations, missing UTRs, and unposted vouchers.`,
+    },
+    {
       title: `Audited Position for ${scenarioName}`,
       query: `What is the audited cash balance and 7-day settlement forecast for Scenario #${scenarioNum} (${scenarioName})?`,
       desc: `Queries ledger balance in ${erpSystem} and in-flight transit lines with ${primaryBank}.`,
     },
     {
-      title: 'Quarantine Anomaly Audit',
-      query: `Audit all unresolved quarantine records for ${scenarioName} and explain their root causes.`,
-      desc: 'Retrieves active Layer 1 safety traps and summarizes deterministic failure codes.',
-    },
-    {
-      title: 'MDR Fee Discrepancy Check',
-      query: `Check for MDR fee deviations between Razorpay gateway and ${primaryBank} statement.`,
+      title: 'MDR Fee Discrepancy Forensic Breakdown',
+      query: `Check for MDR fee deviations between Razorpay gateway and ${primaryBank} statement and explain the math.`,
       desc: 'Compares contracted rate cards against actual deducted settlement amounts.',
     },
     {
@@ -156,7 +157,7 @@ export default function CopilotHub({
               Autonomous Financial Copilot — {scenarioName}
             </h3>
             <p className="text-xs text-slate-500 font-sans mt-0.5">
-              Read-only LLM reasoning engine with mandatory citation requirements against <strong>{primaryBank}</strong> & <strong>{erpSystem}</strong>.
+              Multi-model reasoning agent analyzing live settlement discrepancies across <strong>{primaryBank}</strong> & <strong>{erpSystem}</strong>.
             </p>
           </div>
         </div>
@@ -166,7 +167,7 @@ export default function CopilotHub({
             Model: Groq LLaMA 3.3 70B
           </span>
           <span className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold shadow-xs">
-            Read-Only Safe
+            Live AI Agent
           </span>
         </div>
       </div>
@@ -174,7 +175,12 @@ export default function CopilotHub({
       {/* Sub-View 1: Copilot Chat */}
       {activeSubTab === 'chat' && (
         <div className="glass-3d-elevated rounded-3xl p-6 specular-top shadow-sm">
-          <AgentChatPanel initialPrompt={injectedPrompt} />
+          <AgentChatPanel
+            reconciliationData={reconciliationData}
+            quarantineRecords={quarantineRecords}
+            initialPrompt={injectedPrompt}
+            onInspectRecord={onInspectRecord}
+          />
         </div>
       )}
 
