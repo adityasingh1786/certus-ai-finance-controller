@@ -139,38 +139,71 @@ async def reconcile_three_files(
     return response_payload
 
 
+from app.services.dataset_registry import (
+    SCENARIO_CATALOG,
+    generate_vast_4_channel_dataset,
+    get_scenario_manifest,
+)
+from fastapi import Query
+
+
+@router.get("/reconcile/scenarios")
+async def get_scenario_catalog():
+    """Returns the catalog of 20 hyper-realistic enterprise financial scenarios."""
+    return {"total_scenarios": len(SCENARIO_CATALOG), "scenarios": SCENARIO_CATALOG}
+
+
 @router.post("/reconcile/demo")
-async def reconcile_demo_dataset():
+async def reconcile_demo_dataset(
+    request: Request,
+    scenario_id: Optional[int] = Query(None, description="Optional Scenario ID (1..20). If omitted, randomly picks a scenario."),
+):
     """
     1-Click Demo Endpoint:
-    Loads pre-bundled synthetic datasets from /data/synthetic/ and executes
-    the full reconciliation and double-lock evaluation pipeline.
+    Dynamically generates and reconciles one of the 20 vast enterprise scenarios across 4 channels.
     """
-    try:
-        raw_gateway = _load_demo_file("gateway_records.csv")
-        raw_bank = _load_demo_file("bank_statement.csv")
-        raw_erp = _load_demo_file("erp_ledger.csv")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to load synthetic datasets: {str(e)}")
+    # 1. Generate or load 4-channel dataset
+    dataset = generate_vast_4_channel_dataset(scenario_id=scenario_id)
+    raw_gateway = dataset["gateway_records"]
+    raw_bank = dataset["bank_records"]
+    raw_erp = dataset["erp_records"]
 
-    # Normalize through identical dynamic column pipeline
+    # 2. Normalize through dynamic column pipeline
     normalized_gateway = column_detector.normalize_records(raw_gateway, source_label="gateway")
     normalized_bank = column_detector.normalize_records(raw_bank, source_label="bank_statement")
     normalized_erp = column_detector.normalize_records(raw_erp, source_label="erp_ledger")
 
-    run_id = f"demo_run_{uuid4().hex[:8]}"
+    # 3. Execute 3-way reconciliation engine
+    run_id = f"demo_run_{dataset['scenario_id']:02d}_{uuid4().hex[:8]}"
     recon_output = reconciliation_engine.reconcile_sources(
         gateway_records=normalized_gateway,
         bank_records=normalized_bank,
         erp_records=normalized_erp,
     )
 
+    # 4. Sync records into ingestion & quarantine services if available in state
+    try:
+        if hasattr(request.app.state, "ingestion_service") and request.app.state.ingestion_service:
+            ing_svc = request.app.state.ingestion_service
+            ing_svc.records[run_id] = normalized_gateway
+            ing_svc.quarantine_records = dataset["quarantine_records"]
+    except Exception:
+        pass
+
     response_payload = {
         "run_id": run_id,
         "is_demo": True,
+        "scenario_id": dataset["scenario_id"],
+        "scenario_name": dataset["scenario_name"],
+        "sector": dataset["sector"],
+        "primary_bank": dataset["primary_bank"],
+        "erp_system": dataset["erp_system"],
+        "description": dataset["description"],
+        "channel_counts": dataset["record_counts"],
         "summary": recon_output["summary"],
         "results": recon_output["results"],
-        "exceptions": recon_output["exceptions"],
+        "matches": recon_output.get("matches", []),
+        "exceptions": recon_output["exceptions"] + dataset.get("quarantine_records", []),
         "column_mappings": {
             "gateway": column_detector.detect_mapping(raw_gateway),
             "bank": column_detector.detect_mapping(raw_bank),

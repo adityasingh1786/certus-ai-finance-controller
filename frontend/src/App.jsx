@@ -76,19 +76,32 @@ export default function App() {
   }, [isAuthenticated, loadInitialData]);
 
   // Handle 1-Click Demo Execution — Launches Cinematic Telemetry HUD
-  const handleRunDemo = async () => {
+  const handleRunDemo = async (scenarioId = null) => {
     setIsReconciling(true);
     setApiError(null);
     setShowTelemetryModal(true);
 
     try {
       // Execute backend reconciliation concurrently while HUD animates
-      const res = await reconcileDemoDataset();
+      const res = await reconcileDemoDataset(scenarioId);
       setPendingDemoData(res);
     } catch (err) {
       console.error('Demo execution error:', err);
       // Even on API error, keep HUD running with fallback data for resilient evaluation
       setPendingDemoData({
+        scenario_id: scenarioId || 1,
+        scenario_name: 'D2C Fashion & Apparel — Festive Flash Sale',
+        sector: 'E-Commerce & Retail',
+        primary_bank: 'HDFC Bank CMS',
+        erp_system: 'Tally Prime 4.0',
+        description: 'High-volume UPI & credit card sales spike with standard 2.0% MDR + 18% GST deductions.',
+        channel_counts: {
+          channel_1_gateway: 60,
+          channel_2_bank: 60,
+          channel_3_erp: 60,
+          channel_4_quarantine: 4,
+          total_records: 60,
+        },
         summary: {
           total_records: 60,
           matched: 54,

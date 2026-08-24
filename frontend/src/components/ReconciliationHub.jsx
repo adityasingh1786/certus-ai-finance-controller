@@ -121,6 +121,41 @@ export default function ReconciliationHub({
       {/* Sub-View 1: 3-Way Match Matrix */}
       {activeSubTab === 'matrix' && (
         <div className="space-y-6">
+          {/* Active Enterprise Scenario Banner */}
+          {reconciliationData?.scenario_name && (
+            <div className="p-4 rounded-2xl border border-border-subtle bg-gradient-to-r from-surface to-page shadow-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-xl bg-sterling/10 text-sterling border border-sterling/20">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                      {reconciliationData.sector || 'E-Commerce'}
+                    </span>
+                    <span className="text-xs font-mono font-bold text-sterling">
+                      SCENARIO #{String(reconciliationData.scenario_id || 1).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-bold text-ink-primary mt-0.5 font-display">
+                    {reconciliationData.scenario_name}
+                  </h4>
+                  <p className="text-xs text-ink-muted line-clamp-1">{reconciliationData.description}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 self-end sm:self-auto font-mono text-xs">
+                <span className="px-2.5 py-1 rounded-lg bg-surface border border-border-subtle text-ink-secondary">
+                  {reconciliationData.primary_bank || 'HDFC Bank CMS'}
+                </span>
+                <span className="text-border-subtle">↔</span>
+                <span className="px-2.5 py-1 rounded-lg bg-surface border border-border-subtle text-ink-secondary">
+                  {reconciliationData.erp_system || 'Tally Prime'}
+                </span>
+              </div>
+            </div>
+          )}
+
           <MultiSourceReconcileMatrix
             reconciliationData={reconciliationData}
             onSelectAuditRecord={onSelectAuditRecord}
@@ -132,6 +167,54 @@ export default function ReconciliationHub({
       {/* Sub-View 2: Drop & Ingest */}
       {activeSubTab === 'ingest' && (
         <div className="space-y-6">
+          {/* 20-Scenario Enterprise Preset Selector */}
+          <div className="bg-surface border border-border-subtle rounded-2xl p-5 shadow-card space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-display font-bold text-sm text-ink-primary">
+                  Select from 20 Enterprise Financial Scenarios
+                </h4>
+                <p className="text-xs text-ink-muted">
+                  Test Certus with 4-channel real-world data profiles across D2C, B2B SaaS, Quick Commerce, NBFC, and more.
+                </p>
+              </div>
+              <button
+                onClick={() => onRunDemo && onRunDemo(null)}
+                disabled={isReconciling}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sterling hover:bg-sterling-hover text-white text-xs font-semibold shadow-subtle transition-fast disabled:opacity-50"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>🎲 Random Scenario</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
+              {[
+                { id: 1, name: 'D2C Fashion Flash Sale', sector: 'Retail' },
+                { id: 2, name: 'B2B SaaS Milestone Invoicing', sector: 'SaaS' },
+                { id: 3, name: 'Quick Commerce 10-Min Delivery', sector: 'Q-Comm' },
+                { id: 4, name: 'NBFC Loan EMI Disbursals', sector: 'Credit' },
+                { id: 5, name: 'Hospital TPA Insurance Co-Pay', sector: 'Health' },
+                { id: 6, name: 'EdTech Subscription Platform', sector: 'EdTech' },
+                { id: 7, name: 'FoodTech Marketplace Split', sector: 'Food' },
+                { id: 8, name: 'Ride-Hailing Fleet Cashouts', sector: 'Mobility' },
+              ].map((sc) => (
+                <button
+                  key={sc.id}
+                  onClick={() => onRunDemo && onRunDemo(sc.id)}
+                  disabled={isReconciling}
+                  className="p-3 rounded-xl border border-border-subtle bg-page hover:bg-surface hover:border-sterling/40 text-left transition-fast group disabled:opacity-50"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono font-bold text-sterling">#{String(sc.id).padStart(2, '0')}</span>
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-surface border border-border-subtle text-ink-muted uppercase">{sc.sector}</span>
+                  </div>
+                  <p className="text-xs font-semibold text-ink-primary mt-1 group-hover:text-sterling transition-fast line-clamp-1">{sc.name}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <UploadReconcileWidget
             onReconcileSuccess={(data) => {
               if (onReconcileSuccess) onReconcileSuccess(data);

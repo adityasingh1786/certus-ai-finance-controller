@@ -187,23 +187,26 @@ export default function PipelineTelemetryModal({ isOpen, onClose, onComplete, ru
       {/* Modal Card */}
       <div className="relative w-full max-w-4xl bg-white border border-slate-200/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
-        {/* Top Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+        {/* Top Header with Scenario Badge */}
+        <div className="px-6 py-3.5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50/80">
           <div className="flex items-center space-x-3">
             <CertusLogo />
-            <div className="h-4 w-px bg-slate-200" />
+            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
             <div className="flex items-center space-x-2">
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E8384F] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#E8384F]"></span>
               </span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-700">
-                Autonomous Execution HUD • Live Telemetry
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                SCENARIO #{String(runData?.scenario_id || 1).padStart(2, '0')}: {runData?.scenario_name || 'D2C Fashion & Apparel — Festive Flash Sale'}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 self-end sm:self-auto">
+            <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+              {runData?.sector || 'E-Commerce'}
+            </span>
             <button
               onClick={() => setIsPaused(!isPaused)}
               className="px-2.5 py-1 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
@@ -217,6 +220,23 @@ export default function PipelineTelemetryModal({ isOpen, onClose, onComplete, ru
               <span>Skip to Matrix</span>
               <span>➔</span>
             </button>
+          </div>
+        </div>
+
+        {/* 4-Channel Distribution Banner */}
+        <div className="px-6 py-2 bg-slate-900 text-slate-300 text-[11px] font-mono flex flex-wrap items-center justify-between gap-2 border-b border-slate-800">
+          <div className="flex items-center space-x-4">
+            <span className="text-amber-400 font-bold">4-CHANNEL INGEST:</span>
+            <span>CH1: Gateway <strong className="text-white">({runData?.channel_counts?.channel_1_gateway || 60})</strong></span>
+            <span>•</span>
+            <span>CH2: Bank <strong className="text-white">({runData?.channel_counts?.channel_2_bank || 60})</strong></span>
+            <span>•</span>
+            <span>CH3: ERP <strong className="text-white">({runData?.channel_counts?.channel_3_erp || 60})</strong></span>
+            <span>•</span>
+            <span>CH4: Quarantine <strong className="text-rose-400">({runData?.channel_counts?.channel_4_quarantine || 4})</strong></span>
+          </div>
+          <div className="text-[10px] text-slate-400">
+            {runData?.primary_bank || 'HDFC Bank CMS'} ↔ {runData?.erp_system || 'Tally Prime'}
           </div>
         </div>
 
