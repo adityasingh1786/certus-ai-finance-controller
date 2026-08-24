@@ -156,18 +156,6 @@ export default function AboutDeveloperSection() {
                     </div>
                   </div>
                 </div>
-
-                {/* Status Badges */}
-                <div className="flex flex-wrap items-center justify-center gap-2 max-w-xs">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-white/10 border border-white/15 text-slate-200 backdrop-blur-md">
-                    <Code2 className="w-3 h-3 text-[#E8384F]" />
-                    Full-Stack AI Engineer
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-white/10 border border-white/15 text-slate-200 backdrop-blur-md">
-                    <Cpu className="w-3 h-3 text-indigo-400" />
-                    12-Layer OS Creator
-                  </span>
-                </div>
               </div>
 
               {/* Verified Node Status Footer */}
