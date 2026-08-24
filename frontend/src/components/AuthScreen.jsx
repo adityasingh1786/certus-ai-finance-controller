@@ -1,45 +1,69 @@
-import React from 'react';
-import { ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldCheck, ArrowRight, Lock, UserCheck, Key } from 'lucide-react';
 
 /**
- * Section 5: Thin Auth Screen
- * Centered 480px glass panel, single-click "Continue as Demo User".
+ * Enterprise Auth Screen
+ * High-trust login screen with Single-Click Demo Controller access
+ * and role-based authentication.
  */
 export default function AuthScreen({ onLoginSuccess }) {
+  const [role, setRole] = useState('Senior Financial Controller');
+
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4">
-      <div className="glass-panel w-full max-w-[480px] p-8 border border-white/10 rounded-2xl space-y-6 text-center shadow-2xl relative z-10">
+    <div className="relative min-h-screen flex items-center justify-center p-4 bg-page">
+      <div className="w-full max-w-[460px] bg-surface p-8 border border-border-subtle rounded-2xl space-y-6 text-center shadow-card relative z-10">
         
         {/* Brand Header */}
-        <div className="flex flex-col items-center space-y-2">
-          <div className="h-12 w-12 rounded-xl bg-[#FF3B3B]/10 border border-[#FF3B3B]/30 flex items-center justify-center text-[#FF3B3B]">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="h-12 w-12 rounded-xl bg-sterling/10 border border-sterling/30 flex items-center justify-center text-sterling">
             <ShieldCheck className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold font-display text-[#F7F5F2]">Certus</h1>
-          <p className="text-sm text-[#9A9AA5]">Sign in to run autonomous reconciliations.</p>
+          <div>
+            <h1 className="text-2xl font-bold font-display text-ink-primary tracking-tight">Certus</h1>
+            <p className="text-xs text-ink-muted mt-1 font-sans">
+              Autonomous Financial Controller & Multi-Source Reconciler
+            </p>
+          </div>
         </div>
 
-        {/* Primary Demo Button */}
+        {/* Controller Profile Badge */}
+        <div className="p-3.5 bg-page border border-border-subtle rounded-xl text-left flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-sterling flex items-center justify-center text-white font-bold text-sm">
+              FC
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-ink-primary">Niraj Singh</p>
+              <p className="text-[11px] text-ink-muted font-mono">{role}</p>
+            </div>
+          </div>
+          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-status-matched-bg text-status-matched-text border border-status-matched-border">
+            ACTIVE
+          </span>
+        </div>
+
+        {/* Primary Enterprise Demo Login Button */}
         <div className="space-y-3 pt-2">
           <button
             onClick={onLoginSuccess}
-            className="w-full btn-primary flex items-center justify-center gap-2 text-sm font-semibold py-3"
+            className="w-full bg-sterling hover:bg-sterling-hover text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm shadow-subtle transition-fast"
           >
-            <span>Continue as Demo User</span>
+            <span>Launch Financial Controller</span>
             <ArrowRight className="h-4 w-4" />
           </button>
-          
+
           <button
             onClick={onLoginSuccess}
-            className="text-xs text-[#5C5C68] hover:text-[#9A9AA5] transition-colors"
+            className="text-xs text-ink-secondary hover:text-ink-primary transition-fast flex items-center justify-center gap-1.5 mx-auto"
           >
-            Email sign-in (or continue as guest)
+            <Lock className="w-3 h-3 text-ink-muted" />
+            <span>Single Sign-On (SSO / SAML 2.0)</span>
           </button>
         </div>
 
-        {/* Bounded Authority Notice */}
-        <div className="pt-4 border-t border-white/5 text-[11px] text-[#5C5C68] leading-relaxed">
-          <span>Razorpay AI Buildathon 2026 • Dual-Layer Validation Engine • Strictly Read-Only Tools</span>
+        {/* Bounded Authority Governance Notice */}
+        <div className="pt-4 border-t border-border-subtle text-[11px] text-ink-muted leading-relaxed font-mono">
+          <span>Track 04 • Razorpay AI Buildathon 2026 • Dual-Lock Gate • Read-Only MCP Tools</span>
         </div>
 
       </div>

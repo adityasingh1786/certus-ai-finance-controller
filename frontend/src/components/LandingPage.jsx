@@ -36,7 +36,7 @@ export default function LandingPage({ onOpenDashboard, onOpenArchitecture, onOpe
       {/* 6.1 Fixed Nav (72px) */}
       <header className="fixed top-0 inset-x-0 h-[72px] glass-panel border-b border-white/10 z-40 px-6 lg:px-12 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-[#FF3B3B]/10 border border-[#FF3B3B]/40 flex items-center justify-center text-[#FF3B3B]">
+          <div className="h-8 w-8 rounded-lg bg-[#E8384F]/10 border border-[#E8384F]/40 flex items-center justify-center text-[#E8384F]">
             <ShieldCheck className="h-4 w-4" />
           </div>
           <span className="text-xl font-bold font-display tracking-tight text-[#F7F5F2]">
@@ -68,13 +68,13 @@ export default function LandingPage({ onOpenDashboard, onOpenArchitecture, onOpe
       <section className="pt-36 pb-20 px-6 lg:px-12 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         
         <div className="lg:col-span-7 space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-pill bg-[#FF3B3B]/10 border border-[#FF3B3B]/30 text-[#FF3B3B] text-xs font-semibold tracking-wider uppercase">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#FF3B3B] animate-ping" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-pill bg-[#E8384F]/10 border border-[#E8384F]/30 text-[#E8384F] text-xs font-semibold tracking-wider uppercase">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#E8384F] animate-ping" />
             <span>AI Finance Controller — Track 04</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display tracking-tight leading-[1.08] text-[#F7F5F2]">
-            Every record gets a verdict, <span className="text-[#FF3B3B]">not a guess.</span>
+            Every record gets a verdict, <span className="text-[#E8384F]">not a guess.</span>
           </h1>
 
           <p className="text-base sm:text-lg text-[#9A9AA5] max-w-2xl leading-relaxed font-sans">
@@ -135,7 +135,7 @@ export default function LandingPage({ onOpenDashboard, onOpenArchitecture, onOpe
             <span className="text-[11px] font-sans font-semibold uppercase tracking-wider text-[#9A9AA5] block mb-1">
               Anomalies Isolated
             </span>
-            <span className="text-3xl font-mono font-semibold text-[#FF3B3B]">14 / 14</span>
+            <span className="text-3xl font-mono font-semibold text-[#E8384F]">14 / 14</span>
           </div>
         </div>
       </section>
@@ -143,7 +143,7 @@ export default function LandingPage({ onOpenDashboard, onOpenArchitecture, onOpe
       {/* 6.3 How It Works Section */}
       <section id="how-it-works" className="py-20 px-6 lg:px-12 max-w-7xl mx-auto w-full space-y-12">
         <div className="text-center space-y-3">
-          <span className="text-xs font-mono uppercase tracking-widest text-[#FF3B3B]">Deterministic Rules + Bounded AI</span>
+          <span className="text-xs font-mono uppercase tracking-widest text-[#E8384F]">Deterministic Rules + Bounded AI</span>
           <h2 className="text-3xl lg:text-4xl font-bold font-display text-[#F7F5F2]">The 4-Stage Reconciliation Pipeline</h2>
           <p className="text-sm text-[#9A9AA5] max-w-xl mx-auto">
             Zero hallucinated figures. Every decision is attributable to an explicit Layer 1 rule or verified LLM schema extraction.

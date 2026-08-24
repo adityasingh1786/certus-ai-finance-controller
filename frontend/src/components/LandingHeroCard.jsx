@@ -21,9 +21,9 @@ export default function LandingHeroCard() {
     },
     {
       status: 'QUARANTINED',
-      color: '#FF3B3B',
+      color: '#E8384F',
       dim: '#3A1414',
-      glow: 'rgba(255, 59, 59, 0.35)',
+      glow: 'rgba(232, 56, 79, 0.35)',
       badge: 'Layer 1 Anomaly Isolated',
       icon: AlertOctagon,
       txId: 'pay_bad_019283',

@@ -37,7 +37,7 @@ export default function BootScreen({ onBootComplete }) {
 
     // 2500ms: boot complete callback
     const tComplete = setTimeout(() => {
-      onBootComplete();
+      if (onBootComplete) onBootComplete();
     }, 2500);
 
     return () => {
@@ -56,11 +56,10 @@ export default function BootScreen({ onBootComplete }) {
     >
       {/* Brand Box with Sweep Border */}
       <div className="relative flex flex-col items-center space-y-6">
-        
         <div
           className={`relative px-8 py-3.5 rounded-xl border transition-all duration-500 ${
             sweepResolved
-              ? 'border-[#FF3B3B] shadow-[0_0_30px_rgba(255,59,59,0.35)] bg-white/[0.03]'
+              ? 'border-[#E8384F] shadow-[0_0_30px_rgba(232,56,79,0.35)] bg-white/[0.03]'
               : 'border-white/10 bg-transparent'
           }`}
         >
@@ -68,7 +67,7 @@ export default function BootScreen({ onBootComplete }) {
             <span className="text-3xl font-bold font-display text-[#F7F5F2] tracking-tight">
               Certus
             </span>
-            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#FF3B3B]/20 text-[#FF3B3B] border border-[#FF3B3B]/40 font-semibold tracking-wider">
+            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#E8384F]/20 text-[#E8384F] border border-[#E8384F]/40 font-semibold tracking-wider">
               Track 04
             </span>
           </div>
@@ -79,13 +78,12 @@ export default function BootScreen({ onBootComplete }) {
           {logLines.map((line, idx) => (
             <div key={idx} className="flex items-center gap-2">
               <span className="text-[#4FD1FF] text-xs">›</span>
-              <span className={idx === logs.length - 1 ? 'text-[#2FD97F] font-semibold' : ''}>
+              <span className={idx === logs.length - 1 ? 'text-[#10B981] font-semibold' : ''}>
                 {line}
               </span>
             </div>
           ))}
         </div>
-
       </div>
     </div>
   );

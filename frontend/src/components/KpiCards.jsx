@@ -47,9 +47,9 @@ export default function KpiCards({ cashPosition, reconciliationSummary, quaranti
           <span className="text-[11px] font-sans font-semibold uppercase tracking-wider text-[#9A9AA5]">
             Exceptions Open
           </span>
-          <AlertOctagon className="h-4 w-4 text-[#FF3B3B]" />
+          <AlertOctagon className="h-4 w-4 text-[#E8384F]" />
         </div>
-        <div className="text-3xl font-mono font-semibold text-[#FF3B3B] tabular-nums">
+        <div className="text-3xl font-mono font-semibold text-[#E8384F] tabular-nums">
           {quarantineCount || 14}
         </div>
         <div className="text-[11px] text-[#5C5C68] font-mono">
