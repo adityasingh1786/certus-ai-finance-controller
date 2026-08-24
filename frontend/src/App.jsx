@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import BootScreen from './components/BootScreen';
 import AuthScreen from './components/AuthScreen';
+import LandingPage from './components/LandingPage';
 import TopBar from './components/TopBar';
 import Sidebar from './components/Sidebar';
 import UploadReconcileWidget from './components/UploadReconcileWidget';
@@ -25,6 +26,7 @@ import {
 export default function App() {
   const [isBooting, setIsBooting] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [viewMode, setViewMode] = useState('dashboard'); // 'landing' or 'dashboard'
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isReconciling, setIsReconciling] = useState(false);
 
@@ -100,17 +102,54 @@ export default function App() {
 
   const unresCount = quarantineRecords.filter((r) => !r.is_resolved && !r.resolved).length;
 
-  // Step 1: Cinematic Boot Sequence
+  // Step 1: Cinematic Boot Sequence (2.4s)
   if (isBooting) {
     return <BootScreen onBootComplete={() => setIsBooting(false)} />;
   }
 
   // Step 2: Enterprise Authentication Screen
   if (!isAuthenticated) {
-    return <AuthScreen onLoginSuccess={() => setIsAuthenticated(true)} />;
+    return (
+      <AuthScreen
+        onLoginSuccess={() => {
+          setIsAuthenticated(true);
+          setViewMode('dashboard');
+        }}
+      />
+    );
   }
 
-  // Step 3: Enterprise Live Controller Dashboard
+  // Step 3A: Long-Scrolling Landing Page
+  if (viewMode === 'landing') {
+    return (
+      <>
+        <LandingPage
+          onOpenDashboard={() => setViewMode('dashboard')}
+          onOpenArchitecture={() => setShowArchModal(true)}
+          onOpenSwagger={() => setShowSwaggerModal(true)}
+        />
+        {/* Modals */}
+        <Suspense fallback={null}>
+          {showArchModal && (
+            <ArchitectureModal
+              isOpen={showArchModal}
+              onClose={() => setShowArchModal(false)}
+            />
+          )}
+        </Suspense>
+        <Suspense fallback={null}>
+          {showSwaggerModal && (
+            <SwaggerModal
+              isOpen={showSwaggerModal}
+              onClose={() => setShowSwaggerModal(false)}
+            />
+          )}
+        </Suspense>
+      </>
+    );
+  }
+
+  // Step 3B: Enterprise Live Controller Dashboard
   return (
     <div className="min-h-screen bg-page text-ink-primary flex flex-col antialiased">
       {/* 1. Global Top Bar */}
@@ -119,6 +158,7 @@ export default function App() {
         onOpenSwagger={() => setShowSwaggerModal(true)}
         onLoadDemo={handleRunDemo}
         isReconciling={isReconciling}
+        onOpenLanding={() => setViewMode('landing')}
       />
 
       {/* 2. Main App Shell with Navigation Sidebar */}

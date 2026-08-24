@@ -1,7 +1,7 @@
 import React from 'react';
-import { Layers, Terminal, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Layers, Terminal, Sparkles, Globe } from 'lucide-react';
 
-export default function TopBar({ onOpenArchitecture, onOpenSwagger, onLoadDemo, isReconciling }) {
+export default function TopBar({ onOpenArchitecture, onOpenSwagger, onLoadDemo, isReconciling, onOpenLanding }) {
   return (
     <header className="h-14 border-b border-border-subtle bg-surface px-6 flex items-center justify-between sticky top-0 z-20">
       {/* Brand & Engine Status */}
@@ -15,7 +15,7 @@ export default function TopBar({ onOpenArchitecture, onOpenSwagger, onLoadDemo, 
           </span>
         </div>
         <span className="text-border-strong text-xs">|</span>
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium">
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium font-mono">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           Double-Lock Engine Active
         </div>
@@ -31,6 +31,16 @@ export default function TopBar({ onOpenArchitecture, onOpenSwagger, onLoadDemo, 
           <Sparkles className="w-3.5 h-3.5 text-sterling" />
           <span>1-Click Demo</span>
         </button>
+
+        {onOpenLanding && (
+          <button
+            onClick={onOpenLanding}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border-subtle hover:border-border-strong text-ink-secondary hover:text-ink-primary text-xs font-medium transition-fast bg-surface"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>Landing Page</span>
+          </button>
+        )}
 
         <button
           onClick={onOpenArchitecture}
