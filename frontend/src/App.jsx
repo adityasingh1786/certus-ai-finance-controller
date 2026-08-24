@@ -76,6 +76,9 @@ export default function App() {
       }
       if (reconRes.status === 'fulfilled' && reconRes.value) {
         setReconciliationData(reconRes.value);
+        if (reconRes.value.exceptions && reconRes.value.exceptions.length > 0) {
+          setQuarantineRecords(reconRes.value.exceptions);
+        }
       }
       if (scRes.status === 'fulfilled' && scRes.value?.scenarios) {
         setScenarioCatalog(scRes.value.scenarios);
@@ -138,6 +141,9 @@ export default function App() {
       const res = await reconcileDemoDataset(scenarioId);
       setPendingDemoData(res);
       setReconciliationData(res);
+      if (res.exceptions && res.exceptions.length > 0) {
+        setQuarantineRecords(res.exceptions);
+      }
       try { soundManager.playMatchChime(); } catch (_) {}
     } catch (err) {
       console.error('Demo execution error:', err);
@@ -149,6 +155,9 @@ export default function App() {
   const handleTelemetryComplete = async () => {
     if (pendingDemoData) {
       setReconciliationData(pendingDemoData);
+      if (pendingDemoData.exceptions && pendingDemoData.exceptions.length > 0) {
+        setQuarantineRecords(pendingDemoData.exceptions);
+      }
     }
     setActiveTab('recon');
     setShowTelemetryModal(false);
@@ -159,12 +168,15 @@ export default function App() {
     try { soundManager.playMatchChime(); } catch (_) {}
     setQuarantineRecords((prev) =>
       prev.map((r) =>
-        r.record_id === recordId ? { ...r, is_resolved: true, resolution_action: action } : r
+        (r.record_id === recordId || r.transaction_id === recordId)
+          ? { ...r, is_resolved: true, resolved: true, resolution_action: action }
+          : r
       )
     );
   };
 
-  const unresCount = quarantineRecords.filter((r) => !r.is_resolved).length || 4;
+  const activeExceptions = quarantineRecords.filter((r) => !r.is_resolved && !r.resolved);
+  const unresCount = activeExceptions.length > 0 ? activeExceptions.length : (reconciliationData?.exceptions?.length || 4);
 
   return (
     <>
@@ -230,6 +242,7 @@ export default function App() {
           {/* Fixed Sovereign TopBar (64px) */}
           <TopBar
             activeTab={activeTab}
+            reconciliationData={reconciliationData}
             onOpenArchitecture={() => setShowArchModal(true)}
             onOpenSwagger={() => setShowSwaggerModal(true)}
             onLoadDemo={() => handleRunDemo(null)}
@@ -263,6 +276,7 @@ export default function App() {
                   isReconciling={isReconciling}
                   onReconcileSuccess={(data) => {
                     setReconciliationData(data);
+                    if (data.exceptions) setQuarantineRecords(data.exceptions);
                     loadInitialData();
                   }}
                   setIsProcessing={setIsReconciling}
@@ -273,6 +287,7 @@ export default function App() {
               {activeTab === 'quarantine' && (
                 <QuarantineHub
                   records={quarantineRecords}
+                  reconciliationData={reconciliationData}
                   onRecordResolved={handleRecordResolved}
                   onRefresh={loadInitialData}
                   onInspectRecord={setSelectedAuditRecord}
@@ -282,6 +297,7 @@ export default function App() {
               {/* Hub 3: Treasury & Liquidity Hub */}
               {activeTab === 'treasury' && (
                 <TreasuryHub
+                  reconciliationData={reconciliationData}
                   forecastData={forecastData}
                   cashPosition={cashPosition}
                   onRefresh={loadInitialData}
@@ -290,12 +306,16 @@ export default function App() {
 
               {/* Hub 4: Autonomous Copilot Hub */}
               {activeTab === 'copilot' && (
-                <CopilotHub />
+                <CopilotHub
+                  reconciliationData={reconciliationData}
+                  quarantineRecords={quarantineRecords}
+                />
               )}
 
               {/* Hub 5: System Governance Hub */}
               {activeTab === 'governance' && (
                 <GovernanceHub
+                  reconciliationData={reconciliationData}
                   onOpenArchitecture={() => setShowArchModal(true)}
                   onOpenSwagger={() => setShowSwaggerModal(true)}
                 />

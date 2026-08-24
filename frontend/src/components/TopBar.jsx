@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Layers,
   Terminal,
@@ -11,12 +11,14 @@ import {
   VolumeX,
   Activity,
   Zap,
+  ChevronDown,
 } from 'lucide-react';
 import CertusLogo from './CertusLogo';
 import { soundManager } from '../lib/soundFx';
 
 export default function TopBar({
   activeTab,
+  reconciliationData,
   onOpenArchitecture,
   onOpenSwagger,
   onLoadDemo,
@@ -35,9 +37,19 @@ export default function TopBar({
     const nextMuted = soundManager.toggleMute();
     setIsMuted(nextMuted);
     if (!nextMuted) {
-      soundManager.playClick();
+      try { soundManager.playClick(); } catch (_) {}
     }
   };
+
+  const scenarioNum = useMemo(() => {
+    const raw = reconciliationData?.scenario_id;
+    if (typeof raw === 'object' && raw !== null) return raw.id || 1;
+    if (typeof raw === 'number') return raw;
+    if (typeof raw === 'string') return parseInt(raw, 10) || 1;
+    return 1;
+  }, [reconciliationData]);
+
+  const scenarioName = reconciliationData?.scenario_name || 'D2C Fashion & Apparel — Festive Flash Sale';
 
   const HUB_NAMES = {
     recon: '3-Way Match Matrix',
@@ -58,8 +70,22 @@ export default function TopBar({
           {HUB_NAMES[activeTab] || 'Workspace'}
         </span>
 
+        {/* Active Scenario Pill Button */}
+        <button
+          onClick={() => {
+            try { soundManager.playClick(); } catch (_) {}
+            if (onOpenCommandPalette) onOpenCommandPalette();
+          }}
+          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-50/80 hover:bg-rose-100 border border-rose-200/80 text-[11px] font-mono text-[#E8384F] font-bold shadow-2xs transition-all group"
+          title="Click to switch scenario (Cmd/Ctrl + K)"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E8384F] breathing-dot" />
+          <span className="max-w-[140px] truncate">SC #{String(scenarioNum).padStart(2, '0')}: {scenarioName}</span>
+          <ChevronDown className="w-3 h-3 text-[#E8384F] group-hover:translate-y-0.5 transition-transform" />
+        </button>
+
         {/* Living Financial Vitals EKG Waveform */}
-        <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-slate-200">
+        <div className="hidden xl:flex items-center gap-2 pl-3 border-l border-slate-200">
           <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] font-mono text-emerald-800 font-bold">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 breathing-dot" />
             <span>4,666 rec/s</span>
@@ -83,7 +109,7 @@ export default function TopBar({
       <div className="hidden md:flex items-center">
         <button
           onClick={() => {
-            soundManager.playClick();
+            try { soundManager.playClick(); } catch (_) {}
             if (onOpenCommandPalette) onOpenCommandPalette();
           }}
           className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-100/70 hover:bg-slate-100 border border-slate-200/80 text-xs text-slate-500 hover:text-slate-800 transition-all shadow-xs group"
@@ -110,20 +136,20 @@ export default function TopBar({
         {/* 1-Click Demo Trigger */}
         <button
           onClick={() => {
-            soundManager.playClick();
+            try { soundManager.playClick(); } catch (_) {}
             if (onLoadDemo) onLoadDemo();
           }}
           disabled={isReconciling}
           className="shimmer-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E8384F] hover:bg-[#d42d43] text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>{isReconciling ? 'Reconciling...' : '1-Click Demo'}</span>
+          <span>{isReconciling ? 'Reconciling...' : '🎲 Random Scenario'}</span>
         </button>
 
         {/* Architecture Blueprint Modal Trigger */}
         <button
           onClick={() => {
-            soundManager.playClick();
+            try { soundManager.playClick(); } catch (_) {}
             if (onOpenArchitecture) onOpenArchitecture();
           }}
           className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/80 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition-colors"
@@ -135,7 +161,7 @@ export default function TopBar({
         {/* Swagger Modal Trigger */}
         <button
           onClick={() => {
-            soundManager.playClick();
+            try { soundManager.playClick(); } catch (_) {}
             if (onOpenSwagger) onOpenSwagger();
           }}
           className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/80 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition-colors font-mono"
@@ -148,7 +174,7 @@ export default function TopBar({
         {onOpenLanding && (
           <button
             onClick={() => {
-              soundManager.playClick();
+              try { soundManager.playClick(); } catch (_) {}
               onOpenLanding();
             }}
             title="Landing Overview"
@@ -173,7 +199,7 @@ export default function TopBar({
         {onLogout && (
           <button
             onClick={() => {
-              soundManager.playClick();
+              try { soundManager.playClick(); } catch (_) {}
               onLogout();
             }}
             title="Sign Out"
