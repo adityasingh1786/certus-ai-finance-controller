@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import BootScreen from './components/BootScreen';
-import AuthScreen from './components/AuthScreen';
 import LandingPage from './components/LandingPage';
+import AuthScreen from './components/AuthScreen';
 import TopBar from './components/TopBar';
 import Sidebar from './components/Sidebar';
 import UploadReconcileWidget from './components/UploadReconcileWidget';
@@ -24,9 +24,9 @@ import {
 } from './lib/api';
 
 export default function App() {
-  const [isBooting, setIsBooting] = useState(true);
+  // Navigation Flow State: 'boot' -> 'landing' -> 'auth' -> 'dashboard'
+  const [currentScreen, setCurrentScreen] = useState('boot');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [viewMode, setViewMode] = useState('dashboard'); // 'landing' or 'dashboard'
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isReconciling, setIsReconciling] = useState(false);
 
@@ -102,29 +102,27 @@ export default function App() {
 
   const unresCount = quarantineRecords.filter((r) => !r.is_resolved && !r.resolved).length;
 
-  // Step 1: Cinematic Boot Sequence (2.4s)
-  if (isBooting) {
-    return <BootScreen onBootComplete={() => setIsBooting(false)} />;
+  // =========================================================================
+  // STEP 1: Booting Screen (2.4s sequence -> transitions to Landing Page)
+  // =========================================================================
+  if (currentScreen === 'boot') {
+    return <BootScreen onBootComplete={() => setCurrentScreen('landing')} />;
   }
 
-  // Step 2: Enterprise Authentication Screen
-  if (!isAuthenticated) {
-    return (
-      <AuthScreen
-        onLoginSuccess={() => {
-          setIsAuthenticated(true);
-          setViewMode('dashboard');
-        }}
-      />
-    );
-  }
-
-  // Step 3A: Long-Scrolling Landing Page
-  if (viewMode === 'landing') {
+  // =========================================================================
+  // STEP 2: Full 8-Section Long Scrolling Landing Page
+  // =========================================================================
+  if (currentScreen === 'landing') {
     return (
       <>
         <LandingPage
-          onOpenDashboard={() => setViewMode('dashboard')}
+          onOpenDashboard={() => {
+            if (isAuthenticated) {
+              setCurrentScreen('dashboard');
+            } else {
+              setCurrentScreen('auth');
+            }
+          }}
           onOpenArchitecture={() => setShowArchModal(true)}
           onOpenSwagger={() => setShowSwaggerModal(true)}
         />
@@ -149,7 +147,24 @@ export default function App() {
     );
   }
 
-  // Step 3B: Enterprise Live Controller Dashboard
+  // =========================================================================
+  // STEP 3: Enterprise Auth Screen (1-Click Demo Login + Email Form)
+  // =========================================================================
+  if (currentScreen === 'auth') {
+    return (
+      <AuthScreen
+        onLoginSuccess={() => {
+          setIsAuthenticated(true);
+          setCurrentScreen('dashboard');
+        }}
+        onBackToLanding={() => setCurrentScreen('landing')}
+      />
+    );
+  }
+
+  // =========================================================================
+  // STEP 4: Live Enterprise Financial Controller Dashboard Workspace
+  // =========================================================================
   return (
     <div className="min-h-screen bg-page text-ink-primary flex flex-col antialiased">
       {/* 1. Global Top Bar */}
@@ -158,7 +173,7 @@ export default function App() {
         onOpenSwagger={() => setShowSwaggerModal(true)}
         onLoadDemo={handleRunDemo}
         isReconciling={isReconciling}
-        onOpenLanding={() => setViewMode('landing')}
+        onOpenLanding={() => setCurrentScreen('landing')}
       />
 
       {/* 2. Main App Shell with Navigation Sidebar */}
