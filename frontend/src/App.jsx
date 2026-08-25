@@ -130,16 +130,37 @@ export default function App() {
     setApiError(null);
     setShowTelemetryModal(true);
 
+    // Compute random non-repeating scenario ID if null
+    let targetId = scenarioId;
+    if (!targetId) {
+      const currentId = reconciliationData?.scenario_id || 1;
+      const available = Array.from({ length: 20 }, (_, i) => i + 1).filter((id) => id !== currentId);
+      targetId = available[Math.floor(Math.random() * available.length)] || (currentId === 20 ? 1 : currentId + 1);
+    }
+
     try {
-      const res = await reconcileDemoDataset(scenarioId);
+      const res = await reconcileDemoDataset(targetId);
       setPendingDemoData(res);
       setReconciliationData(res);
       if (res.exceptions && res.exceptions.length > 0) {
         setQuarantineRecords(res.exceptions);
       }
+
+      // Synchronously refresh Treasury & Cash Position for new scenario
+      try {
+        const [cashRes, forecastRes] = await Promise.allSettled([
+          fetchCashPosition(),
+          fetchCashForecast(),
+        ]);
+        if (cashRes.status === 'fulfilled') setCashPosition(cashRes.value);
+        if (forecastRes.status === 'fulfilled') setForecastData(forecastRes.value);
+      } catch (_) {}
+
       try { soundManager.playMatchChime(); } catch (_) {}
     } catch (err) {
       console.error('Demo execution error:', err);
+      setApiError(err.message || 'Demo reconciliation failed.');
+      try { soundManager.playErrorBuzzer(); } catch (_) {}
     } finally {
       setIsReconciling(false);
     }
@@ -156,8 +177,8 @@ export default function App() {
     setShowTelemetryModal(false);
   };
 
-  // Quarantine exception resolution handler
-  const handleRecordResolved = (recordId, action) => {
+  // Quarantine exception resolution handler with atomic summary sync
+  const handleRecordResolved = (recordId, action, updatedSummary = null) => {
     try { soundManager.playMatchChime(); } catch (_) {}
     setQuarantineRecords((prev) =>
       prev.map((r) =>
@@ -166,6 +187,10 @@ export default function App() {
           : r
       )
     );
+
+    if (updatedSummary) {
+      setReconciliationData((prev) => (prev ? { ...prev, summary: updatedSummary } : prev));
+    }
   };
 
   const activeExceptions = quarantineRecords.filter((r) => !r.is_resolved && !r.resolved);
@@ -216,6 +241,8 @@ export default function App() {
           <TopBar
             activeTab={activeTab}
             reconciliationData={reconciliationData}
+            scenarioCatalog={scenarioCatalog}
+            onRunScenario={handleRunDemo}
             onOpenArchitecture={() => setShowArchModal(true)}
             onOpenSwagger={() => setShowSwaggerModal(true)}
             onLoadDemo={() => handleRunDemo(null)}
@@ -244,8 +271,10 @@ export default function App() {
               {activeTab === 'recon' && (
                 <ReconciliationHub
                   reconciliationData={reconciliationData}
+                  scenarioCatalog={scenarioCatalog}
                   onSelectAuditRecord={setSelectedAuditRecord}
                   onRunDemo={handleRunDemo}
+                  onRunScenario={handleRunDemo}
                   isReconciling={isReconciling}
                   onReconcileSuccess={(data) => {
                     setReconciliationData(data);

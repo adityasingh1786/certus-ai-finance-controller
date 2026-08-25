@@ -19,6 +19,8 @@ import { soundManager } from '../lib/soundFx';
 export default function TopBar({
   activeTab,
   reconciliationData,
+  scenarioCatalog = [],
+  onRunScenario,
   onOpenArchitecture,
   onOpenSwagger,
   onLoadDemo,
@@ -70,19 +72,38 @@ export default function TopBar({
           {HUB_NAMES[activeTab] || 'Workspace'}
         </span>
 
-        {/* Active Scenario Pill Button */}
-        <button
-          onClick={() => {
-            try { soundManager.playClick(); } catch (_) {}
-            if (onOpenCommandPalette) onOpenCommandPalette();
-          }}
-          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-50/80 hover:bg-rose-100 border border-rose-200/80 text-[11px] font-mono text-[#E8384F] font-bold shadow-2xs transition-all group"
-          title="Click to switch scenario (Cmd/Ctrl + K)"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-[#E8384F] breathing-dot" />
-          <span className="max-w-[140px] truncate">SC #{String(scenarioNum).padStart(2, '0')}: {scenarioName}</span>
-          <ChevronDown className="w-3 h-3 text-[#E8384F] group-hover:translate-y-0.5 transition-transform" />
-        </button>
+        {/* Active Scenario Selector Dropdown */}
+        <div className="hidden sm:flex items-center relative group">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-50/90 hover:bg-rose-100/90 border border-rose-200/80 text-[11px] font-mono text-[#E8384F] font-bold shadow-2xs transition-all">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E8384F] breathing-dot" />
+            <select
+              value={scenarioNum}
+              onChange={(e) => {
+                const targetId = parseInt(e.target.value, 10);
+                if (onRunScenario && targetId) {
+                  soundManager.playClick();
+                  onRunScenario(targetId);
+                }
+              }}
+              className="bg-transparent text-[#E8384F] font-mono font-bold text-[11px] focus:outline-none cursor-pointer pr-4 max-w-[160px] truncate"
+              title="Select Active Enterprise Scenario (1-20)"
+            >
+              {scenarioCatalog && scenarioCatalog.length > 0 ? (
+                scenarioCatalog.map((sc) => (
+                  <option key={sc.id} value={sc.id} className="bg-white text-slate-900 font-sans text-xs py-1">
+                    DS-#{String(sc.id).padStart(2, '0')}: {sc.name.split('—')[0].trim()} ({sc.sector})
+                  </option>
+                ))
+              ) : (
+                Array.from({ length: 20 }, (_, i) => i + 1).map((id) => (
+                  <option key={id} value={id} className="bg-white text-slate-900 font-sans text-xs py-1">
+                    DS-#{String(id).padStart(2, '0')} Scenario
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+        </div>
 
         {/* Living Financial Vitals EKG Waveform */}
         <div className="hidden xl:flex items-center gap-2 pl-3 border-l border-slate-200">

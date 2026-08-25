@@ -73,22 +73,18 @@ class AgentOrchestrator:
             }
 
         # 1. Extract and normalize live context from operational state mesh
-        ctx = client_context or {}
-        scenario_id = ctx.get("scenario_id", 1)
-        scenario_name = ctx.get("scenario_name", "D2C Fashion & Apparel Flash Sale")
-        sector = ctx.get("sector", "E-Commerce & Retail")
-        primary_bank = ctx.get("primary_bank", "HDFC Bank CMS")
-        erp_system = ctx.get("erp_system", "Tally Prime 4.0")
-        
-        reconciliation_summary = ctx.get("summary") or {
-            "total_records": 60,
-            "matched": 54,
-            "mismatched": 2,
-            "missing": 4,
-            "match_rate": "90.0%",
-        }
+        from app.services.operational_state_service import state_manager
+        live_state = state_manager.get_full_reconciliation_payload()
 
-        active_exceptions = ctx.get("quarantine_records") or [
+        ctx = client_context or {}
+        scenario_id = ctx.get("scenario_id") or live_state.get("scenario_id", 1)
+        scenario_name = ctx.get("scenario_name") or live_state.get("scenario_name", "Enterprise Scenario")
+        sector = ctx.get("sector") or live_state.get("sector", "Financial Operations")
+        primary_bank = ctx.get("primary_bank") or live_state.get("primary_bank", "HDFC Bank CMS")
+        erp_system = ctx.get("erp_system") or live_state.get("erp_system", "Tally Prime 4.0")
+
+        reconciliation_summary = ctx.get("summary") or live_state.get("summary", {})
+        active_exceptions = ctx.get("quarantine_records") or live_state.get("exceptions", []) or [
             {
                 "record_id": "QR-001-MDR",
                 "reason_code": "UNAUTHORIZED_MDR",

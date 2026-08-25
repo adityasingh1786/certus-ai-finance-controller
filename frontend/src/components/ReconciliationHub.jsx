@@ -25,8 +25,10 @@ import { soundManager } from '../lib/soundFx';
 
 export default function ReconciliationHub({
   reconciliationData,
+  scenarioCatalog = [],
   onSelectAuditRecord,
   onRunDemo,
+  onRunScenario,
   isReconciling,
   onReconcileSuccess,
   setIsProcessing,
@@ -150,7 +152,37 @@ export default function ReconciliationHub({
           setActiveSubTab(tab);
         }}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Inline 20-Scenario Selector */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/80 text-xs font-semibold shadow-xs">
+              <span className="text-[10px] font-bold text-slate-400 font-mono hidden sm:inline">DATASET:</span>
+              <select
+                value={scenarioNum}
+                onChange={(e) => {
+                  const targetId = parseInt(e.target.value, 10);
+                  if (onRunScenario && targetId) {
+                    soundManager.playClick();
+                    onRunScenario(targetId);
+                  }
+                }}
+                disabled={isReconciling}
+                className="bg-transparent text-slate-900 font-bold text-xs focus:outline-none cursor-pointer max-w-[150px] sm:max-w-[200px] truncate"
+                title="Select Specific Scenario (1-20)"
+              >
+                {scenarioCatalog && scenarioCatalog.length > 0 ? (
+                  scenarioCatalog.map((sc) => (
+                    <option key={sc.id} value={sc.id}>
+                      DS-#{String(sc.id).padStart(2, '0')}: {sc.name.split('—')[0].trim()} ({sc.sector})
+                    </option>
+                  ))
+                ) : (
+                  Array.from({ length: 20 }, (_, i) => i + 1).map((id) => (
+                    <option key={id} value={id}>DS-#{String(id).padStart(2, '0')} Scenario</option>
+                  ))
+                )}
+              </select>
+            </div>
+
             <button
               onClick={() => {
                 soundManager.playClick();
@@ -166,7 +198,7 @@ export default function ReconciliationHub({
             {records.length > 0 && (
               <button
                 onClick={handleExportCsv}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 text-xs font-semibold shadow-xs transition-colors"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 text-xs font-semibold shadow-xs transition-colors"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Export CSV</span>

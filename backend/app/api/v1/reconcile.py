@@ -66,17 +66,26 @@ async def get_scenario_catalog():
     return {"total_scenarios": len(SCENARIO_CATALOG), "scenarios": SCENARIO_CATALOG}
 
 
+import random
+
+
 @router.post("/reconcile/demo")
 async def reconcile_demo_dataset(
     request: Request,
-    scenario_id: Optional[int] = Query(None, description="Standardized Scenario ID (1..20). If omitted, defaults to 1."),
+    scenario_id: Optional[int] = Query(None, description="Standardized Scenario ID (1..20). If omitted, picks a random new scenario."),
 ):
     """
     1-Click Demo Endpoint:
     Atomically switches the central state machine to Dataset {scenario_id} (Code: {01..20})
     and returns the fully synchronized multi-stream state.
     """
-    target_id = scenario_id if (scenario_id and 1 <= scenario_id <= 20) else 1
+    if scenario_id and 1 <= scenario_id <= 20:
+        target_id = scenario_id
+    else:
+        current_active = getattr(state_manager, "_active_scenario_id", 1)
+        available = [i for i in range(1, 21) if i != current_active]
+        target_id = random.choice(available) if available else random.randint(1, 20)
+
     response_payload = state_manager.set_active_scenario(target_id)
     response_payload["is_demo"] = True
 
