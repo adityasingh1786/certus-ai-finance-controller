@@ -36,37 +36,43 @@ class OperationalStateManager:
         return cls._instance
 
     def __init__(self):
-        if self._initialized:
+        if getattr(self, "_initialized", False):
             return
-        self._active_scenario_id = 1
-        self._current_dataset = None
-        self._reconciliation_results = []
-        self._quarantine_records = []
-        self._journal_vouchers = []
-        self._merkle_tree_leaves = []
-        self._merkle_root = ""
-        self._subscribers = []
+        self._active_scenario_id: int = 1
+        self._current_dataset: Dict[str, Any] = generate_vast_4_channel_dataset(1)
+        self._reconciliation_results: List[Dict[str, Any]] = []
+        self._quarantine_records: List[Dict[str, Any]] = []
+        self._journal_vouchers: List[Dict[str, Any]] = []
+        self._merkle_tree_leaves: List[str] = []
+        self._merkle_root: str = ""
+        self._subscribers: List[Any] = []
         self._load_scenario(1)
         self._initialized = True
+
+    def _get_dataset(self) -> Dict[str, Any]:
+        """Guarantees a valid active dataset dictionary is always returned."""
+        if not self._current_dataset:
+            self._current_dataset = generate_vast_4_channel_dataset(self._active_scenario_id)
+        return self._current_dataset
 
     def _load_scenario(self, scenario_id: int):
         """Loads and initializes a standardized dataset into the state machine."""
         self._active_scenario_id = scenario_id
         dataset = generate_vast_4_channel_dataset(scenario_id)
         self._current_dataset = dataset
-        self._quarantine_records = dataset["quarantine_audit_records"]
+        self._quarantine_records = dataset.get("quarantine_audit_records", [])
         self._journal_vouchers = []
 
         # Run 3-Way Reconcile Matrix
-        gw_map = {r["transaction_id"]: r for r in dataset["gateway_records"]}
-        bank_map = {r["transaction_id"]: r for r in dataset["bank_records"]}
-        erp_map = {r["transaction_id"]: r for r in dataset["erp_records"]}
+        gw_map = {r["transaction_id"]: r for r in dataset.get("gateway_records", [])}
+        bank_map = {r["transaction_id"]: r for r in dataset.get("bank_records", [])}
+        erp_map = {r["transaction_id"]: r for r in dataset.get("erp_records", [])}
         quarantine_ids = {q["transaction_id"] for q in self._quarantine_records}
 
         results = []
         leaves = []
 
-        for i, gw in enumerate(dataset["gateway_records"], 1):
+        for i, gw in enumerate(dataset.get("gateway_records", []), 1):
             txn_id = gw["transaction_id"]
             bank_rec = bank_map.get(txn_id)
             erp_rec = erp_map.get(txn_id)
@@ -101,13 +107,13 @@ class OperationalStateManager:
                 "bank_amount": bank_rec["credit_amount"] if bank_rec else 0.0,
                 "erp_amount": erp_rec["gross_revenue"] if erp_rec else 0.0,
                 "status": status,
-                "reason": f"3-Way Double-Lock Invariant verification against {dataset['primary_bank']} and {dataset['erp_system']} with zero variance.",
+                "reason": f"3-Way Double-Lock Invariant verification against {dataset.get('primary_bank', 'HDFC')} and {dataset.get('erp_system', 'Tally')} with zero variance.",
                 "confidence": confidence,
                 "created_at": gw["created_at"],
                 "channel_match": {
                     "gateway": True,
-                    "bank": bank_rec is not None and bank_rec["clearing_status"] == "CLEARED",
-                    "erp": erp_rec is not None and erp_rec["ledger_status"] == "POSTED",
+                    "bank": bank_rec is not None and bank_rec.get("clearing_status") == "CLEARED",
+                    "erp": erp_rec is not None and erp_rec.get("ledger_status") == "POSTED",
                 },
             }
             results.append(rec_item)
@@ -141,7 +147,8 @@ class OperationalStateManager:
     def set_active_scenario(self, scenario_id: int) -> Dict[str, Any]:
         """Atomically switches the active scenario across the entire platform."""
         self._load_scenario(scenario_id)
-        logger.info(f"✅ Active scenario switched to #{scenario_id}: {self._current_dataset['scenario_name']}")
+        ds = self._get_dataset()
+        logger.info(f"✅ Active scenario switched to #{scenario_id}: {ds.get('scenario_name', '')}")
         return self.get_full_reconciliation_payload()
 
     def get_full_reconciliation_payload(self) -> Dict[str, Any]:
@@ -153,17 +160,18 @@ class OperationalStateManager:
         rate_pct = round((matched / total * 100), 2) if total > 0 else 0.0
         rate = f"{rate_pct:.1f}%"
 
-        manifest = self._current_dataset["scenario"]
+        ds = self._get_dataset()
+        manifest = ds.get("scenario", {})
 
         return {
             "run_id": f"RUN-DS{self._active_scenario_id:02d}-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}",
             "scenario": manifest,
             "scenario_id": self._active_scenario_id,
-            "scenario_code": manifest["code"],
-            "scenario_name": manifest["name"],
-            "sector": manifest["sector"],
-            "primary_bank": manifest["primary_bank"],
-            "erp_system": manifest["erp_system"],
+            "scenario_code": manifest.get("code", f"SC-{self._active_scenario_id:02d}"),
+            "scenario_name": manifest.get("name", ds.get("scenario_name", "Enterprise Scenario")),
+            "sector": manifest.get("sector", "Fintech & Retail"),
+            "primary_bank": manifest.get("primary_bank", "HDFC Bank CMS"),
+            "erp_system": manifest.get("erp_system", "Tally Prime 4.0"),
             "summary": {
                 "total_records": total,
                 "matched": matched,
@@ -195,58 +203,40 @@ class OperationalStateManager:
         """
         target_exc = None
         for q in self._quarantine_records:
-            if q["record_id"] == record_id or q["transaction_id"] == record_id:
+            if q.get("record_id") == record_id or q.get("transaction_id") == record_id:
                 target_exc = q
                 break
 
         if not target_exc:
-            target_exc = {
-                "record_id": record_id,
-                "transaction_id": record_id,
-                "reason_code": "MANUAL_OVERRIDE",
-                "gross_amount": 14500.0,
-                "discrepancy_amount": 72.5,
+            return {
+                "success": False,
+                "message": f"Exception record '{record_id}' not found in active quarantine batch.",
             }
 
+        # Mark as resolved
         target_exc["is_resolved"] = True
-        target_exc["resolution_type"] = resolution_type
+        target_exc["resolution_action"] = resolution_type
         target_exc["resolution_notes"] = notes
         target_exc["resolved_at"] = datetime.now(timezone.utc).isoformat()
 
-        # Update reconciliation matrix row to Matched
-        txn_id = target_exc["transaction_id"]
+        # Update reconciliation results
         for r in self._reconciliation_results:
-            if r["transaction_id"] == txn_id:
+            if r["record_id"] == record_id or r["transaction_id"] == record_id:
                 r["status"] = "Matched"
                 r["confidence"] = 1.0
-                r["channel_match"]["bank"] = True
-                r["channel_match"]["erp"] = True
+                r["reason"] = f"Manual HITL Authorized Override: {resolution_type}. Zero ledger variance."
                 break
 
-        # Generate ISO 20022 Balanced Journal Voucher
-        amount = float(target_exc.get("discrepancy_amount", 72.5))
-        voucher_id = f"JV-DS{self._active_scenario_id:02d}-{len(self._journal_vouchers) + 1:04d}"
+        # Generate balancing journal voucher entry
+        voucher_id = f"JV-{self._active_scenario_id:02d}-{len(self._journal_vouchers) + 1:04d}"
         voucher = {
             "voucher_id": voucher_id,
             "record_id": record_id,
+            "debit_account": "Account #5021 (Payment Gateway Processing Expense)" if "MDR" in resolution_type else "Account #1010 (HDFC Operating Settlement A/C)",
+            "credit_account": "Account #1020 (Clearing Suspense Account)",
+            "amount": float(target_exc.get("discrepancy_amount", 0.0) or target_exc.get("gross_amount", 0.0)),
             "resolution_type": resolution_type,
-            "entries": [
-                {
-                    "account_code": "4100-MDR-EXPENSE",
-                    "account_name": "Gateway Processing Fee Expense Ledger",
-                    "debit": amount,
-                    "credit": 0.0,
-                },
-                {
-                    "account_code": "1100-SETTLEMENT-CLEARING",
-                    "account_name": "Bank Settlement Clearing Account",
-                    "debit": 0.0,
-                    "credit": amount,
-                },
-            ],
-            "debit_total": amount,
-            "credit_total": amount,
-            "variance": 0.0,
+            "notes": notes,
             "authorized_by": "Controller (HITL Review Studio)",
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
@@ -262,23 +252,28 @@ class OperationalStateManager:
 
     def get_cash_position_snapshot(self) -> Dict[str, Any]:
         """Calculates live audited cash positions directly from active scenario metrics."""
-        manifest = self._current_dataset["scenario"]
-        base_balance = Decimal(str(manifest["avg_ticket_size"])) * Decimal("54")
-        pending_inflows = Decimal(str(manifest["avg_ticket_size"])) * Decimal("6")
+        ds = self._get_dataset()
+        manifest = ds.get("scenario", {})
+        avg_ticket = manifest.get("avg_ticket_size", 5000)
+        base_balance = Decimal(str(avg_ticket)) * Decimal("54")
+        pending_inflows = Decimal(str(avg_ticket)) * Decimal("6")
+
+        bank_name = manifest.get("primary_bank", "HDFC Bank CMS")
+        bank_prefix = bank_name[:4].upper() if len(bank_name) >= 4 else "BANK"
 
         return {
             "total_liquid_cash": float(base_balance),
             "in_transit_settlements": float(pending_inflows),
             "as_of_timestamp": datetime.now(timezone.utc).isoformat(),
             "currency": "INR",
-            "active_scenario_code": manifest["code"],
-            "primary_bank": manifest["primary_bank"],
-            "erp_system": manifest["erp_system"],
+            "active_scenario_code": manifest.get("code", f"SC-{self._active_scenario_id:02d}"),
+            "primary_bank": bank_name,
+            "erp_system": manifest.get("erp_system", "Tally Prime 4.0"),
             "audited_by": "Double-Lock Invariant Engine v2.4 (SQLite WAL)",
             "accounts": [
                 {
-                    "account_id": f"ACC-{manifest['primary_bank'][:4].upper()}-01",
-                    "bank_name": manifest["primary_bank"],
+                    "account_id": f"ACC-{bank_prefix}-01",
+                    "bank_name": bank_name,
                     "account_type": "Corporate Settlement Current Account",
                     "currency": "INR",
                     "available_balance": float(base_balance),
@@ -292,9 +287,11 @@ class OperationalStateManager:
         """14-Day continuous accrual forecast derived from active scenario baseline."""
         today = date.today()
         days = []
-        manifest = self._current_dataset["scenario"]
-        rolling = float(Decimal(str(manifest["avg_ticket_size"])) * Decimal("54"))
-        daily_inflow_base = float(manifest["avg_ticket_size"]) * 4.0
+        ds = self._get_dataset()
+        manifest = ds.get("scenario", {})
+        avg_ticket = manifest.get("avg_ticket_size", 5000)
+        rolling = float(Decimal(str(avg_ticket)) * Decimal("54"))
+        daily_inflow_base = float(avg_ticket) * 4.0
 
         for i in range(14):
             d = today + timedelta(days=i)
@@ -314,17 +311,18 @@ class OperationalStateManager:
         return {
             "forecast_days": days,
             "r_squared_confidence": 0.988,
-            "scenario_name": manifest["name"],
+            "scenario_name": manifest.get("name", ds.get("scenario_name", "Enterprise Scenario")),
             "model_type": "Hybrid Accrual Forecaster (T+1/T+2)",
         }
 
     def get_quarantine_snapshot(self) -> Dict[str, Any]:
         """Returns the active quarantine exceptions for the active scenario."""
+        ds = self._get_dataset()
         return {
             "records": self._quarantine_records,
             "active_count": sum(1 for q in self._quarantine_records if not q.get("is_resolved", False)),
             "total_discrepancy_amount": sum(float(q.get("discrepancy_amount", 0.0)) for q in self._quarantine_records),
-            "scenario_name": self._current_dataset["scenario_name"],
+            "scenario_name": ds.get("scenario_name", "Enterprise Scenario"),
         }
 
 
