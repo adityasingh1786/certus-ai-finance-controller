@@ -1,26 +1,21 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  backend:
+  certus-controller:
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: Dockerfile
+    container_name: certus-ai-finance-controller
     ports:
       - "8000:8000"
     environment:
       - APP_ENV=production
-      - DATABASE_URL=sqlite:///./ai_finance_controller.db
-      - CORS_ORIGINS=http://localhost:3000
+      - SQLITE_DB_PATH=/app/data/certus.db
+      - CONFIDENCE_THRESHOLD=0.75
     volumes:
-      - ./data:/app/data
+      - certus_data:/app/data
+    restart: unless-stopped
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-    environment:
-      - VITE_API_URL=http://localhost:8000
+volumes:
+  certus_data:
+    driver: local
