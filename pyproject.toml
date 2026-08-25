@@ -33,6 +33,13 @@ dev = [
     "black>=24.3.0"
 ]
 
+[tool.setuptools.packages.find]
+where = ["backend"]
+
+[tool.pyright]
+include = ["backend"]
+extraPaths = ["backend"]
+
 [tool.pytest.ini_options]
 minversion = "8.0"
 addopts = "-q"
@@ -41,6 +48,7 @@ pythonpath = ["backend"]
 asyncio_mode = "auto"
 
 [tool.ruff]
+src = ["backend"]
 line-length = 100
 target-version = "py312"
 
