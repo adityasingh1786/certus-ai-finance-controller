@@ -22,6 +22,7 @@ class QueryRequest(BaseModel):
     conversation_id: Optional[str] = None
     chat_history: Optional[List[Dict[str, Any]]] = None
     context: Optional[Dict[str, Any]] = None  # Live screen state (active scenario, records, exceptions)
+    model_mode: Optional[str] = "auto"  # 'auto' | 'fast' | 'deep' | 'airgap'
 
 
 @router.post("/query")
@@ -60,6 +61,7 @@ async def agent_query(request: Request, body: QueryRequest):
         question=user_query,
         conversation_id=conversation_id,
         client_context=body.context,
+        model_mode=body.model_mode or "auto",
     )
 
     conversations[conversation_id].append({
