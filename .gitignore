@@ -78,3 +78,16 @@ yarn-error.log*
 .system_generated/
 .scratch/
 scratch/
+
+# Internal Audit Reports, Plans & Review Documents
+*AUDIT*
+*audit*
+AUDIT_REPORT.md
+audit_report.md
+audit_and_overhaul_plan.md
+implementation_plan.md
+walkthrough.md
+*PLAN*
+*plan*
+.gemini/
+
