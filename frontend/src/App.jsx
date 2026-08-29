@@ -25,6 +25,7 @@ import { soundManager } from './lib/soundFx';
 // Lazy-loaded secondary modals to preserve fast bundle load
 const ArchitectureModal = lazy(() => import('./components/ArchitectureModal'));
 const SwaggerModal = lazy(() => import('./components/SwaggerModal'));
+const KeyboardShortcutsModal = lazy(() => import('./components/KeyboardShortcutsModal'));
 
 export default function App() {
   // Navigation & Screen State
@@ -35,6 +36,7 @@ export default function App() {
   // Modal Visibility States
   const [showArchModal, setShowArchModal] = useState(false);
   const [showSwaggerModal, setShowSwaggerModal] = useState(false);
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [selectedAuditRecord, setSelectedAuditRecord] = useState(null);
@@ -101,7 +103,14 @@ export default function App() {
       const targetTag = document.activeElement?.tagName?.toLowerCase();
       if (targetTag === 'input' || targetTag === 'textarea' || targetTag === 'select') return;
 
-      if (e.key === '1') {
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault();
+        try { soundManager.playClick(); } catch (_) {}
+        setShowShortcutsModal((prev) => !prev);
+      } else if (e.key.toLowerCase() === 'e' && !e.metaKey && !e.ctrlKey) {
+        try { soundManager.playClick(); } catch (_) {}
+        setShowSwaggerModal((prev) => !prev);
+      } else if (e.key === '1') {
         try { soundManager.playClick(); } catch (_) {}
         setActiveTab('recon');
       } else if (e.key === '2') {
@@ -372,6 +381,16 @@ export default function App() {
           <SwaggerModal
             isOpen={showSwaggerModal}
             onClose={() => setShowSwaggerModal(false)}
+          />
+        )}
+      </Suspense>
+
+      {/* 5. Keyboard Navigation Cheatsheet HUD Modal */}
+      <Suspense fallback={null}>
+        {showShortcutsModal && (
+          <KeyboardShortcutsModal
+            isOpen={showShortcutsModal}
+            onClose={() => setShowShortcutsModal(false)}
           />
         )}
       </Suspense>
