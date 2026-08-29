@@ -282,3 +282,24 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(232, 56, 79, 0.5);
 }
+
+/* 🚀 High-Velocity Telemetry Marquee Animation */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 28s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
