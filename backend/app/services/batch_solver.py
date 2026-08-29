@@ -13,6 +13,25 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def _extract_paisa(record: Dict[str, Any], key_paisa: str, key_fallback: str) -> int:
+    """Safely extracts integer paisa from record with fallback float conversion."""
+    val_paisa = record.get(key_paisa)
+    if val_paisa is not None:
+        try:
+            return int(val_paisa)
+        except (ValueError, TypeError):
+            pass
+
+    val_fallback = record.get(key_fallback)
+    if val_fallback is not None:
+        try:
+            return int(round(float(val_fallback) * 100))
+        except (ValueError, TypeError):
+            pass
+
+    return 0
+
+
 def solve_many_to_one_settlements(
     unmatched_gateway_records: List[Dict[str, Any]],
     unmatched_bank_credits: List[Dict[str, Any]],
@@ -41,22 +60,21 @@ def solve_many_to_one_settlements(
 
     for bank_record in unmatched_bank_credits:
         bank_id = bank_record.get("statement_id") or bank_record.get("utr") or bank_record.get("id")
-        target_paisa = int(
-            bank_record.get("credit_amount_paisa")
-            or bank_record.get("amount_paisa")
-            or round(float(bank_record.get("amount", 0)) * 100)
-        )
+        target_paisa = _extract_paisa(bank_record, "credit_amount_paisa", "amount")
 
         if target_paisa <= 0:
             continue
 
         # Filter candidate gateway records (not yet consumed, positive net amount)
-        candidates = [
-            g for g in unmatched_gateway_records
-            if (g.get("payment_id") or g.get("id")) not in consumed_gateway_ids
-            and int(g.get("net_amount_paisa") or round(float(g.get("net_amount", g.get("amount", 0))) * 100)) > 0
-            and int(g.get("net_amount_paisa") or round(float(g.get("net_amount", g.get("amount", 0))) * 100)) <= target_paisa
-        ]
+        candidates = []
+        for g in unmatched_gateway_records:
+            g_id = g.get("payment_id") or g.get("id")
+            if g_id in consumed_gateway_ids:
+                continue
+
+            net_paisa = _extract_paisa(g, "net_amount_paisa", "net_amount") or _extract_paisa(g, "amount_paisa", "amount")
+            if 0 < net_paisa <= target_paisa:
+                candidates.append(g)
 
         if not candidates:
             continue
@@ -67,7 +85,7 @@ def solve_many_to_one_settlements(
         if matched_subset and len(matched_subset) > 1:
             subset_ids = [g.get("payment_id") or g.get("id") for g in matched_subset]
             total_matched_paisa = sum(
-                int(g.get("net_amount_paisa") or round(float(g.get("net_amount", g.get("amount", 0))) * 100))
+                _extract_paisa(g, "net_amount_paisa", "net_amount") or _extract_paisa(g, "amount_paisa", "amount")
                 for g in matched_subset
             )
 
@@ -114,7 +132,7 @@ def _find_subset_sum(
     # Sort candidates descending for fast pruning
     sorted_candidates = sorted(
         candidates,
-        key=lambda x: int(x.get("net_amount_paisa") or round(float(x.get("net_amount", x.get("amount", 0))) * 100)),
+        key=lambda x: _extract_paisa(x, "net_amount_paisa", "net_amount") or _extract_paisa(x, "amount_paisa", "amount"),
         reverse=True,
     )
 
@@ -127,7 +145,7 @@ def _find_subset_sum(
 
         for i in range(start_idx, len(sorted_candidates)):
             cand = sorted_candidates[i]
-            cand_paisa = int(cand.get("net_amount_paisa") or round(float(cand.get("net_amount", cand.get("amount", 0))) * 100))
+            cand_paisa = _extract_paisa(cand, "net_amount_paisa", "net_amount") or _extract_paisa(cand, "amount_paisa", "amount")
 
             if current_sum + cand_paisa > target_paisa + tolerance_paisa:
                 continue  # Prune branch

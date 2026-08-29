@@ -61,16 +61,16 @@ class MDRRateCardClassifier:
         gst_percent = schedule["gst_percent"]
 
         # Expected Base Fee in paisa
-        expected_base_fee_paisa = int(round((gross_amount_paisa * base_bps) / 10000))
+        expected_base_fee_paisa = round((gross_amount_paisa * base_bps) / 10000)
         # Expected GST on Fee in paisa
-        expected_gst_paisa = int(round((expected_base_fee_paisa * gst_percent) / 100))
+        expected_gst_paisa = round((expected_base_fee_paisa * gst_percent) / 100)
         total_expected_fee_paisa = expected_base_fee_paisa + expected_gst_paisa
 
         # Variance
         fee_variance_paisa = actual_fee_deducted_paisa - total_expected_fee_paisa
         variance_bps = 0
         if gross_amount_paisa > 0:
-            variance_bps = int(round((abs(fee_variance_paisa) / gross_amount_paisa) * 10000))
+            variance_bps = round((abs(fee_variance_paisa) / gross_amount_paisa) * 10000)
 
         # Check for zero-MDR violations (e.g. charging fee on UPI)
         if base_bps == 0 and actual_fee_deducted_paisa > 0:
