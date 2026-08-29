@@ -25,7 +25,7 @@ def _extract_paisa(record: Dict[str, Any], key_paisa: str, key_fallback: str) ->
     val_fallback = record.get(key_fallback)
     if val_fallback is not None:
         try:
-            return int(round(float(val_fallback) * 100))
+            return round(float(val_fallback) * 100)
         except (ValueError, TypeError):
             pass
 
