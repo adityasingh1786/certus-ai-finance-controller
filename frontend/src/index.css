@@ -6,7 +6,7 @@
   :root {
     --bg-page: #FAFAF9;
     --bg-surface: #FFFFFF;
-    --bg-subtle: #F4F4F5;
+    --bg-subtle: #F8FAFC;
     --text-primary: #0F172A;
     --text-secondary: #475569;
     --text-muted: #94A3B8;
@@ -14,6 +14,7 @@
     --border-strong: #CBD5E1;
     --sterling-red: #E8384F;
     --sterling-hover: #D02B41;
+    --neon-ruby: #FF2E4D;
     --match-green: #10B981;
     --missing-amber: #F59E0B;
     --duplicate-slate: #8B5CF6;
@@ -21,6 +22,27 @@
 
   * {
     border-color: var(--border-subtle);
+  }
+
+  /* Lenis smooth scrolling base rules */
+  html.lenis, html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  .lenis.lenis-scrolling iframe {
+    pointer-events: none;
   }
 
   body {
@@ -34,7 +56,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', sans-serif;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
   }
 
   .font-mono,
@@ -49,7 +71,7 @@
   }
 
   ::selection {
-    background-color: var(--sterling-red);
+    background-color: #E8384F;
     color: #FFFFFF;
   }
 
@@ -67,17 +89,17 @@
   position: relative;
   background-color: #FAFAF9;
   background-image: 
-    radial-gradient(at 90% 10%, rgba(232, 56, 79, 0.05) 0px, transparent 50%),
+    radial-gradient(at 90% 10%, rgba(232, 56, 79, 0.06) 0px, transparent 50%),
     radial-gradient(at 10% 90%, rgba(99, 102, 241, 0.04) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(255, 255, 255, 0.9) 0px, transparent 100%);
+    radial-gradient(at 50% 50%, rgba(255, 255, 255, 0.95) 0px, transparent 100%);
 }
 
-/* 🪞 3D Glassmorphic Surface System */
+/* 🪞 3D Glassmorphic Surface System - Red & White Luxury */
 .glass-3d {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.88);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(226, 232, 240, 0.85);
   box-shadow: 
     0 10px 30px -10px rgba(15, 23, 42, 0.04),
     0 0 0 1px rgba(226, 232, 240, 0.6),
@@ -86,14 +108,37 @@
 }
 
 .glass-3d-elevated {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
   backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.95);
   box-shadow: 
     0 20px 45px -12px rgba(15, 23, 42, 0.07),
     0 0 0 1px rgba(226, 232, 240, 0.7),
     0 1px 0 0 rgba(255, 255, 255, 1) inset;
+}
+
+/* Luxury Obsidian & Crimson Multi-Depth Shadow Card */
+.luxury-glass-card {
+  background: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 
+    0 4px 6px -1px rgba(15, 23, 42, 0.03),
+    0 12px 32px -4px rgba(232, 56, 79, 0.05),
+    0 24px 60px -12px rgba(15, 23, 42, 0.07),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.luxury-glass-card:hover {
+  border-color: rgba(232, 56, 79, 0.35);
+  box-shadow: 
+    0 8px 20px -2px rgba(15, 23, 42, 0.04),
+    0 20px 45px -4px rgba(232, 56, 79, 0.12),
+    0 35px 80px -10px rgba(15, 23, 42, 0.09),
+    0 0 0 1px rgba(232, 56, 79, 0.15) inset;
 }
 
 /* 3D Hover Tilt & Micro-Lift */
@@ -121,7 +166,7 @@
 
 /* Ambient Sterling Red Under-Glow */
 .ambient-glow-red {
-  box-shadow: 0 15px 35px -10px rgba(232, 56, 79, 0.14), 0 0 15px -3px rgba(232, 56, 79, 0.08);
+  box-shadow: 0 15px 35px -10px rgba(232, 56, 79, 0.16), 0 0 20px -3px rgba(232, 56, 79, 0.10);
 }
 
 /* ✨ Diagonal Specular Shimmer Light-Sweep */
@@ -140,7 +185,7 @@
   background: linear-gradient(
     60deg,
     transparent 30%,
-    rgba(255, 255, 255, 0.28) 50%,
+    rgba(255, 255, 255, 0.35) 50%,
     transparent 70%
   );
   transform: rotate(30deg);
@@ -179,7 +224,32 @@
   z-index: 0;
 }
 
-/* 🌊 Animated EKG Waveform Stroke */
+/* Laser Border Pulse */
+@keyframes laserSweep {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.laser-border {
+  position: relative;
+  border: 1px solid transparent;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  background-image: 
+    linear-gradient(to right, #FFFFFF, #FFFFFF),
+    linear-gradient(90deg, rgba(232, 56, 79, 0.2), #E8384F, rgba(232, 56, 79, 0.2));
+  background-size: 200% 200%;
+  animation: laserSweep 4s ease infinite;
+}
+
+/* Animated EKG Waveform Stroke */
 @keyframes ekgFlow {
   0% {
     stroke-dashoffset: 200;
@@ -210,5 +280,5 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.65);
+  background: rgba(232, 56, 79, 0.5);
 }

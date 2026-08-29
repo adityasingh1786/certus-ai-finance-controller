@@ -20,8 +20,12 @@ import {
   Terminal,
 } from 'lucide-react';
 import ParticleCanvasBackground from './ParticleCanvasBackground';
+import ThreeRailCanvas from './ThreeRailCanvas';
+import ScrollyReconcileDemo from './ScrollyReconcileDemo';
+import MagneticButton from './MagneticButton';
 import CertusLogo from './CertusLogo';
 import AboutDeveloperSection from './AboutDeveloperSection';
+import { initLenis, destroyLenis } from '../lib/lenis';
 import { soundManager } from '../lib/soundFx';
 
 export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwagger }) {
@@ -29,12 +33,19 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
   const [selectedSector, setSelectedSector] = useState('ALL');
   const [hasScrolled, setHasScrolled] = useState(false);
 
+  // Initialize Lenis Smooth Scrolling
   useEffect(() => {
+    const lenis = initLenis();
+
     const handleScroll = () => {
       setHasScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      destroyLenis();
+    };
   }, []);
 
   const scrollToSection = (id) => {
@@ -60,7 +71,7 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
     if (onOpenSwagger) onOpenSwagger();
   };
 
-  // Section 4: 20 Enterprise Scenarios Catalog
+  // 20 Enterprise Scenarios Catalog
   const ALL_SCENARIOS = [
     { id: 1, name: 'D2C Fashion Flash Sale', sector: 'E-Commerce', bank: 'HDFC CMS', erp: 'Tally Prime' },
     { id: 2, name: 'B2B SaaS Milestone Invoicing', sector: 'SaaS', bank: 'ICICI Bank', erp: 'NetSuite' },
@@ -88,7 +99,7 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
     ? ALL_SCENARIOS
     : ALL_SCENARIOS.filter(s => s.sector === selectedSector);
 
-  // Section 5 Live Verdict Examples Data
+  // Verdict Examples Data
   const VERDICT_EXAMPLES = {
     Matched: {
       status: 'Matched',
@@ -128,8 +139,7 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
 
   return (
     <div className="relative min-h-screen bg-[#FAFAF9] text-slate-900 font-sans selection:bg-[#E8384F] selection:text-white aurora-canvas">
-      
-      {/* 🌌 Interactive Background: Crystal Particle Mesh + Ambient Aurora */}
+      {/* 🌌 Background Particle Canvas */}
       <ParticleCanvasBackground />
 
       {/* =========================================================================
@@ -138,15 +148,15 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
       <header
         className={`fixed top-0 inset-x-0 h-16 z-40 px-6 lg:px-12 flex items-center justify-between transition-all duration-300 ${
           hasScrolled
-            ? 'bg-white/85 backdrop-blur-2xl border-b border-slate-200/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)]'
+            ? 'bg-white/90 backdrop-blur-2xl border-b border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)]'
             : 'bg-white/70 backdrop-blur-xl border-b border-slate-200/50'
         }`}
       >
         <div className="flex items-center gap-3">
           <CertusLogo className="w-7 h-7" textClassName="text-lg font-bold" />
           <span className="text-slate-300 text-xs">|</span>
-          <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-bold">
-            Sovereign OS
+          <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200/80 text-[#E8384F] font-bold">
+            Track 4 Buildathon
           </span>
         </div>
 
@@ -186,93 +196,121 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
           </button>
         </nav>
 
-        {/* Right CTA: Strictly Enterprise Login */}
+        {/* Right CTA */}
         <div className="flex items-center gap-3">
-          <button
+          <MagneticButton
             onClick={handleLaunchClick}
-            className="shimmer-btn flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="shimmer-btn flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-[#E8384F] text-white text-xs font-bold shadow-xs transition-all"
           >
             <span>Enterprise Login</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#E8384F]" />
-          </button>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </MagneticButton>
         </div>
       </header>
 
       {/* =========================================================================
-          SECTION 2 — Hero Section with 3D Glass Elevation
+          SECTION 2 — Hero Section with 3D WebGL Rail Topology Canvas
          ========================================================================= */}
-      <section className="relative pt-32 pb-20 px-6 lg:px-12 max-w-6xl mx-auto text-center z-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-slate-200/80 shadow-xs text-xs font-semibold text-slate-700 mb-6 backdrop-blur-md">
+      <section className="relative pt-28 pb-16 px-6 lg:px-12 max-w-7xl mx-auto text-center z-10">
+        {/* Architect Attribution Badge */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/90 shadow-xs text-xs font-semibold text-slate-700 mb-6 backdrop-blur-md">
           <span className="w-2 h-2 rounded-full bg-[#E8384F] breathing-dot" />
           <span>Lead Architect: <strong>Aditya Singh</strong></span>
           <span className="text-slate-300">•</span>
-          <span className="font-mono text-[11px] text-emerald-700 font-bold">55 / 55 Invariants Passing</span>
+          <span className="font-mono text-[11px] text-emerald-700 font-bold">55 / 55 Invariants Active</span>
         </div>
 
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 max-w-4xl mx-auto leading-[1.12] font-display">
-          Autonomous Financial Controller & Sovereign Reconciler
+        {/* Hero Title */}
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 max-w-5xl mx-auto leading-[1.12] font-display">
+          Sovereign Autonomous <span className="text-[#E8384F]">AI Financial Controller</span> & Multi-Rail Reconciler
         </h1>
 
-        <p className="mt-6 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          Zero-hallucination multi-model reconciliation across Razorpay Gateway, Bank CMS narrations, and ERP General Ledgers. Guaranteed by Layer 1 Deterministic Rules + Layer 2 Serial Consensus.
+        <p className="mt-5 text-base sm:text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed font-sans">
+          Zero-hallucination multi-model reconciliation across Razorpay Gateways, Corporate Bank CMS statements, and ERP General Ledgers. Guaranteed by Layer 1 Deterministic Invariants + Layer 2 Double-Lock Consensus.
         </p>
 
-        {/* Hero Actions */}
+        {/* Hero Actions (Magnetic Buttons) */}
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5">
-          <button
+          <MagneticButton
             onClick={handleLaunchClick}
-            className="shimmer-btn flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-[#E8384F] hover:bg-[#d42d43] text-white text-sm font-bold shadow-md shadow-rose-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
+            className="shimmer-btn flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#E8384F] hover:bg-[#d42d43] text-white text-sm font-bold shadow-lg shadow-rose-500/25 transition-all w-full sm:w-auto"
           >
-            <span>Launch Financial OS</span>
+            <span>Launch Sovereign Controller</span>
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </MagneticButton>
 
-          <button
+          <MagneticButton
             onClick={handleArchClick}
-            className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white/80 hover:bg-white text-slate-700 border border-slate-200/80 text-sm font-bold shadow-xs backdrop-blur-md transition-all hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-white/90 hover:bg-white text-slate-700 border border-slate-200/90 text-sm font-bold shadow-xs backdrop-blur-md transition-all hover:border-rose-200 w-full sm:w-auto"
           >
             <Layers className="w-4 h-4 text-[#E8384F]" />
             <span>Explore 6-Layer Architecture</span>
-          </button>
+          </MagneticButton>
+        </div>
+
+        {/* 3D WebGL Multi-Rail Interactive Canvas Container */}
+        <div className="mt-10 relative w-full h-[360px] sm:h-[420px] rounded-3xl overflow-hidden luxury-glass-card border border-slate-200/90 bg-white/60">
+          <ThreeRailCanvas className="w-full h-full" />
+          
+          {/* Subtle Canvas Overlay Badges */}
+          <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 rounded-xl bg-white/90 border border-slate-200/80 shadow-xs text-[11px] font-mono font-bold text-slate-800">
+            <span className="w-2 h-2 rounded-full bg-[#E8384F] animate-pulse" />
+            <span>RAZORPAY ↔ BANK CMS ↔ GENERAL LEDGER</span>
+          </div>
+
+          <div className="absolute bottom-4 right-4 flex items-center gap-2 px-3 py-1 rounded-xl bg-white/90 border border-slate-200/80 shadow-xs text-[11px] font-mono text-slate-500">
+            <span>Mouse-Reactive 3D Spatial Topology</span>
+          </div>
         </div>
 
         {/* 3D KPI Hero Grid */}
-        <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
-          <div className="glass-3d hover-lift-3d p-5 rounded-2xl specular-top">
-            <span className="text-xs font-semibold text-slate-500 block">Throughput Velocity</span>
-            <span className="font-mono text-2xl font-bold text-slate-900 mt-1 block tabular-nums">4,666 /s</span>
-            <span className="text-[11px] text-emerald-700 font-semibold mt-1 block font-mono">Vectorized NumPy</span>
+        <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
+          <div className="luxury-glass-card hover-lift-3d p-5 rounded-2xl bg-white">
+            <span className="text-xs font-semibold text-slate-500 block font-sans">Throughput Velocity</span>
+            <span className="font-mono text-2xl font-bold text-slate-900 mt-1 block tabular-nums">729 ops/s</span>
+            <span className="text-[11px] text-emerald-700 font-semibold mt-1 block font-mono">1.37 ms / Record</span>
           </div>
 
-          <div className="glass-3d hover-lift-3d p-5 rounded-2xl specular-top">
-            <span className="text-xs font-semibold text-slate-500 block">Initial Relay Latency</span>
-            <span className="font-mono text-2xl font-bold text-slate-900 mt-1 block tabular-nums">118 ms</span>
-            <span className="text-[11px] text-slate-500 font-semibold mt-1 block font-mono">Groq LLaMA 3.3 70B</span>
+          <div className="luxury-glass-card hover-lift-3d p-5 rounded-2xl bg-white">
+            <span className="text-xs font-semibold text-slate-500 block font-sans">Verification Engine</span>
+            <span className="font-mono text-2xl font-bold text-[#E8384F] mt-1 block tabular-nums">55 Rules</span>
+            <span className="text-[11px] text-slate-500 font-semibold mt-1 block font-mono">Layer 1 Invariants</span>
           </div>
 
-          <div className="glass-3d hover-lift-3d p-5 rounded-2xl specular-top">
-            <span className="text-xs font-semibold text-slate-500 block">Double-Lock Gate</span>
-            <span className="font-mono text-2xl font-bold text-[#E8384F] mt-1 block tabular-nums">≥ 0.75</span>
-            <span className="text-[11px] text-slate-500 font-semibold mt-1 block font-mono">Zero Hallucination</span>
+          <div className="luxury-glass-card hover-lift-3d p-5 rounded-2xl bg-white">
+            <span className="text-xs font-semibold text-slate-500 block font-sans">Double-Lock Gate</span>
+            <span className="font-mono text-2xl font-bold text-slate-900 mt-1 block tabular-nums">≥ 0.75</span>
+            <span className="text-[11px] text-emerald-700 font-semibold mt-1 block font-mono">Zero Hallucination</span>
           </div>
 
-          <div className="glass-3d hover-lift-3d p-5 rounded-2xl specular-top">
-            <span className="text-xs font-semibold text-slate-500 block">Enterprise Scenarios</span>
+          <div className="luxury-glass-card hover-lift-3d p-5 rounded-2xl bg-white">
+            <span className="text-xs font-semibold text-slate-500 block font-sans">Enterprise Scenarios</span>
             <span className="font-mono text-2xl font-bold text-slate-900 mt-1 block tabular-nums">20 Domains</span>
-            <span className="text-[11px] text-emerald-700 font-semibold mt-1 block font-mono">4-Channel Dense</span>
+            <span className="text-[11px] text-slate-500 font-semibold mt-1 block font-mono">Dense 4-Channel Datasets</span>
           </div>
         </div>
       </section>
 
       {/* =========================================================================
-          SECTION 3 — 6-Layer Architecture Blueprint Teardown
+          SECTION 3 — GSAP Pinned Scrollytelling Reconciliation Walkthrough
+         ========================================================================= */}
+      <ScrollyReconcileDemo />
+
+      {/* =========================================================================
+          SECTION 4 — 6-Layer Architecture Blueprint Teardown
          ========================================================================= */}
       <section id="architecture" className="py-20 px-6 lg:px-12 max-w-6xl mx-auto z-10 relative">
         <div className="text-center max-w-2xl mx-auto mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 shadow-xs mb-3">
+            <Layers className="w-3.5 h-3.5 text-[#E8384F]" />
+            <span className="text-xs font-mono font-semibold text-[#E8384F] uppercase tracking-wider">
+              SYSTEM TOPOLOGY
+            </span>
+          </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-display">
             The 6-Layer Invariant Pipeline
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-2">
+          <p className="text-xs sm:text-sm text-slate-500 mt-2 font-sans">
             Every transaction is mathematically bound through deterministic rules and serial multi-agent consensus.
           </p>
         </div>
@@ -282,43 +320,43 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
             {
               layer: 'Layer 0',
               title: 'Streaming Ingestion Engine',
-              desc: 'Normalizes Gateway JSON, Indian Bank CSVs, and ERP ledgers into unified immutable vectors.',
+              desc: 'Normalizes Gateway JSON, Indian Bank CSVs, and ERP ledgers into unified immutable integer paisa vectors.',
               icon: Database,
             },
             {
               layer: 'Layer 1',
               title: 'Deterministic Invariant Rules',
-              desc: 'Vectorized NumPy engine trapping negative credits, MDR fee deviations >50 bps, and impossible dates.',
+              desc: '55 mathematical invariant checks trapping negative credits, MDR deviations >50 bps, and impossible dates.',
               icon: ShieldCheck,
             },
             {
               layer: 'Layer 2',
-              title: 'Serial Consensus Relay',
-              desc: 'Groq LLaMA 3.3 (118ms) → Gemini 2.5 Pro early exit with Claude & GPT-4o dissent escalation.',
+              title: 'Hybrid Multi-Signal Consensus',
+              desc: 'RapidFuzz token matching + weighted composite score (50% Amount, 30% Ref, 20% Date) with double-lock gate.',
               icon: Cpu,
             },
             {
               layer: 'Layer 3',
-              title: 'Autonomous HITL Quarantine',
-              desc: 'Isolates exceptions with interactive UTR override, MDR fee write-off, and manual match workflows.',
+              title: 'Fail-Closed Quarantine Engine',
+              desc: 'Isolates discrepancies with exact paisa variances, UTR overrides, and audit log generation.',
               icon: ShieldAlert,
             },
             {
               layer: 'Layer 4',
-              title: 'Continuous Cash Forecaster',
+              title: 'Sovereign Treasury Forecaster',
               desc: '14-day hybrid moving average tracking in-flight gateway settlement transit in T+1/T+2 bank windows.',
               icon: Activity,
             },
             {
               layer: 'Layer 5',
-              title: 'Read-Only MCP Copilot',
-              desc: 'Natural language treasury analyst enforcing mandatory transaction citations on every answer.',
+              title: 'Dual-Loop ReAct AI Copilot',
+              desc: 'Read-only treasury analyst delivering 4-tier forensic audit reports with air-gapped SQLite WAL fallback.',
               icon: Sparkles,
             },
           ].map((item, idx) => (
-            <div key={idx} className="glass-3d hover-lift-3d p-6 rounded-2xl specular-top space-y-3">
+            <div key={idx} className="luxury-glass-card hover-lift-3d p-6 rounded-2xl bg-white space-y-3">
               <div className="flex items-center justify-between">
-                <div className="p-2 rounded-xl bg-slate-100 text-[#E8384F]">
+                <div className="p-2.5 rounded-xl bg-rose-50 text-[#E8384F] border border-rose-100">
                   <item.icon className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">{item.layer}</span>
@@ -331,17 +369,17 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
       </section>
 
       {/* =========================================================================
-          SECTION 4 — 20 Enterprise Scenarios Showcase (With Target ID)
+          SECTION 5 — 20 Enterprise Scenarios Showcase
          ========================================================================= */}
       <section id="scenarios" className="py-20 px-6 lg:px-12 max-w-6xl mx-auto z-10 relative">
-        <div className="glass-3d-elevated p-8 rounded-3xl specular-top shadow-xl space-y-6">
+        <div className="luxury-glass-card p-8 rounded-3xl bg-white border border-slate-200/90 shadow-xl space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-display">
                 20 Enterprise Financial Scenarios
               </h2>
               <p className="text-xs text-slate-500 font-sans mt-0.5">
-                Pre-configured dense 4-channel datasets covering high-volume e-commerce, milestone SaaS, credit, and trade.
+                Pre-configured dense datasets covering high-volume e-commerce, milestone SaaS, credit, logistics, and healthcare.
               </p>
             </div>
 
@@ -372,11 +410,11 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
               <div
                 key={sc.id}
                 onClick={handleLaunchClick}
-                className="glass-3d hover-lift-3d p-4 rounded-2xl cursor-pointer border border-slate-200/80 bg-white/70 hover:bg-white text-left space-y-2 group"
+                className="luxury-glass-card hover-lift-3d p-4 rounded-2xl cursor-pointer border border-slate-200/80 bg-white/70 hover:bg-white text-left space-y-2 group"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono font-bold text-[#E8384F]">#{String(sc.id).padStart(2, '0')}</span>
-                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-500 uppercase">{sc.sector}</span>
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 uppercase">{sc.sector}</span>
                 </div>
                 <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#E8384F] transition-colors line-clamp-1">{sc.name}</h4>
                 <p className="text-[10px] font-mono text-slate-400">{sc.bank} ↔ {sc.erp}</p>
@@ -385,29 +423,29 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
           </div>
 
           <div className="pt-2 text-center">
-            <button
+            <MagneticButton
               onClick={handleLaunchClick}
-              className="shimmer-btn inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all"
+              className="shimmer-btn inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-[#E8384F] text-white text-xs font-bold shadow-sm transition-all"
             >
               <span>Test All 20 Scenarios in Dashboard</span>
               <ArrowRight className="w-3.5 h-3.5 text-[#E8384F]" />
-            </button>
+            </MagneticButton>
           </div>
         </div>
       </section>
 
       {/* =========================================================================
-          SECTION 5 — Interactive Live Verdict Explorer
+          SECTION 6 — Interactive Live Verdict Explorer
          ========================================================================= */}
       <section id="verdicts" className="py-20 px-6 lg:px-12 max-w-5xl mx-auto z-10 relative">
-        <div className="glass-3d-elevated p-8 rounded-3xl specular-top shadow-xl space-y-6">
+        <div className="luxury-glass-card p-8 rounded-3xl bg-white border border-slate-200/90 shadow-xl space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
             <div>
               <h2 className="text-xl font-bold text-slate-900 font-display">
                 Interactive Double-Lock Signal Verdicts
               </h2>
               <p className="text-xs text-slate-500 font-sans mt-0.5">
-                Select a match classification to view real-world 3-way stream alignment and diagnostic proofs.
+                Select a match classification to inspect 3-way stream alignment and diagnostic proofs.
               </p>
             </div>
 
@@ -433,22 +471,22 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
 
           {/* 3-Stream Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-1.5">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gateway Record</span>
+            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-xs space-y-1.5">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Gateway Record</span>
               <p className="font-mono text-xs font-bold text-slate-900">{currentVerdict.gateway.label}</p>
               <p className="font-mono text-sm font-bold text-slate-900">{currentVerdict.gateway.amount}</p>
               <p className="text-[11px] text-slate-500">{currentVerdict.gateway.extra}</p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-1.5">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Bank Statement</span>
+            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-xs space-y-1.5">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">Bank Statement</span>
               <p className="font-mono text-xs font-bold text-slate-900">{currentVerdict.bank.label}</p>
               <p className="font-mono text-sm font-bold text-slate-900">{currentVerdict.bank.amount}</p>
               <p className="text-[11px] text-slate-500">{currentVerdict.bank.extra}</p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-1.5">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">ERP Ledger</span>
+            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-xs space-y-1.5">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">ERP Ledger</span>
               <p className="font-mono text-xs font-bold text-slate-900">{currentVerdict.erp.label}</p>
               <p className="font-mono text-sm font-bold text-slate-900">{currentVerdict.erp.amount}</p>
               <p className="text-[11px] text-slate-500">{currentVerdict.erp.extra}</p>
@@ -464,20 +502,20 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
       </section>
 
       {/* =========================================================================
-          SECTION 6 — Bespoke Slanted-Frame Executive Developer Showcase
+          SECTION 7 — Revolutionized About Developer Section
          ========================================================================= */}
       <AboutDeveloperSection />
 
       {/* =========================================================================
-          SECTION 7 — Footer with Aditya Singh attribution & GitHub link
+          SECTION 8 — Footer with Aditya Singh attribution & GitHub link
          ========================================================================= */}
-      <footer className="py-12 border-t border-slate-200/60 bg-white/70 backdrop-blur-xl text-xs text-slate-500 px-6 lg:px-12 z-10 relative">
+      <footer className="py-12 border-t border-slate-200/60 bg-white/80 backdrop-blur-xl text-xs text-slate-500 px-6 lg:px-12 z-10 relative">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <CertusLogo className="w-5 h-5" />
             <span className="font-semibold text-slate-900">Certus AI Finance Controller</span>
             <span className="text-slate-300">•</span>
-            <span>Designed & Built by <strong>Aditya Singh</strong></span>
+            <span>Architected & Built by <strong>Aditya Singh</strong></span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -495,7 +533,6 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
           </div>
         </div>
       </footer>
-
     </div>
   );
 }
