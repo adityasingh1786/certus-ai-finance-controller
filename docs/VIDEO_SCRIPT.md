@@ -2,8 +2,7 @@
 
 > **Razorpay AI Buildathon 2026 — Track 4 (Autonomous Financial Controller & Revenue Recovery)**  
 > **Target Video Length**: 3 minutes 30 seconds – 4 minutes  
-> **Pacing**: Confident, technical, authoritative (~130 words/minute)  
-> **Team Submission**: Aditya Singh, Niraj Singh, and Team
+> **Presenter / Author**: Aditya Singh (Lead Architect & Systems Engineer)
 
 ---
 

@@ -7,11 +7,9 @@
 - **Product**: Certus AI Finance Controller (v2.4)
 - **Tagline**: Autonomous 3-Way Reconciliation & Revenue Recovery for Multi-Rail Digital Commerce
 - **Track**: Razorpay AI Buildathon 2026 — Track 04 (Autonomous Financial Controller)
-- **The Team (4-Person Buildathon Squad)**:
-  - **Aditya Singh** — *Lead Architect & Backend Systems Engineer* (Reconciliation Engine, Fast/Async Ingestion)
-  - **Niraj Singh** — *Compliance & Regulatory Logic Engineer* (Deterministic RBI, IT Act §194-O, CGST Gates)
-  - **Frontend & Visualization Lead** — *UI/UX & Interactive Telemetry* (React 18, Three.js Multi-Rail Visualizer)
-  - **QA & Reliability Engineer** — *Test Hardening & Benchmarking* (127 Pytest Test Harness, Invariant Verification)
+- **Author & Team**:
+  - **Aditya Singh** — *Lead Architect & Systems Engineer* (Reconciliation Engine, Invariant Rules, Compliance Gates)
+  - **Team Certus** — *Frontend UI/UX, Data Visualization & Test Reliability*
 
 ---
 
