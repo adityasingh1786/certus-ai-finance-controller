@@ -1,8 +1,9 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import {
   TrendingUp, AlertTriangle, DollarSign, Activity,
   Sparkles, ArrowRight, CheckCircle2, XCircle, Clock, Copy
 } from "lucide-react";
+import BaselineComparisonWidget from "./BaselineComparisonWidget";
 
 const statusBadge = {
   Mismatched: { bg: "#FEF2F2", text: "#991B1B", border: "#FECACA", dot: "#E8384F" },
@@ -138,6 +139,9 @@ export default function DashboardScreen() {
           Review Suggested Rules
         </button>
       </div>
+
+      {/* Naive Baseline vs Certus AI Benchmark */}
+      <BaselineComparisonWidget />
 
       {/* Recent Batches Table */}
       <div className="bg-surface border border-border-subtle rounded-xl shadow-card overflow-hidden">

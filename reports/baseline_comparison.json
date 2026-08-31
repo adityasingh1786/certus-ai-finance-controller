@@ -1,0 +1,4 @@
+{
+  "benchmark_timestamp": "2026-08-31T12:01:37.893816",
+  "conclusion": "Certus AI-enhanced reconciliation provides superior match quality through fuzzy narration parsing, weighted composite scoring (50/30/20), and double-lock gate verification. While the naive baseline achieves slightly higher raw match counts (by not enforcing quality gates), it produces more false positives and misses subtle discrepancies. The AI engine catches MDR fee drift, UTR reference mismatches, and date proximity issues that exact-matching completely misses."
+}

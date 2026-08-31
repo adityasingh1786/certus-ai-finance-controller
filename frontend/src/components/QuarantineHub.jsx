@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import SubTabBar from './SubTabBar';
 import QuarantineQueue from './QuarantineQueue';
+import RecoveryEnginePanel from './RecoveryEnginePanel';
 import { soundManager } from '../lib/soundFx';
 
 const DEFAULT_QUARANTINE_RECORDS = [
@@ -104,6 +105,12 @@ export default function QuarantineHub({
       label: 'Active Containment Queue',
       icon: AlertOctagon,
       badge: activeRecords.length,
+    },
+    {
+      id: 'recovery',
+      label: 'Autonomous Revenue Recovery',
+      icon: Zap,
+      badge: 'AI Loop',
     },
     {
       id: 'resolved',
@@ -242,6 +249,11 @@ export default function QuarantineHub({
             }}
           />
         </div>
+      )}
+
+      {/* Sub-View 1.5: Autonomous Revenue Recovery Pipeline */}
+      {activeSubTab === 'recovery' && (
+        <RecoveryEnginePanel onInspectRecord={onInspectRecord} />
       )}
 
       {/* Sub-View 2: Resolved Archive */}

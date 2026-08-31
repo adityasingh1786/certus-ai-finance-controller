@@ -1,0 +1,45 @@
+{
+  "test_name": "LIVE_LLM_CONSENSUS_PROOF",
+  "timestamp": "2026-08-31T06:33:02.371672+00:00",
+  "input_case": {
+    "transaction_id": "TXN_LIVE_PROOF_001",
+    "gross_amount": 14500.0,
+    "gateway_fee": 290.0,
+    "gst_tax": 52.2,
+    "net_amount": 13940.3,
+    "bank_credit": 13940.3,
+    "payment_method": "CREDIT_CARD",
+    "utr_number": "UTR44910283910",
+    "reason_code": "AMOUNT_MISMATCH",
+    "variance_paisa": 21750,
+    "discrepancy_note": "Expected fee Rs. 290.00 (2.0% MDR), actual bank credit shows Rs. 217.50 excess fee deduction."
+  },
+  "active_providers": {
+    "Groq": true,
+    "Gemini": true,
+    "OpenAI": true,
+    "Anthropic": true
+  },
+  "execution_latency_ms": 14139,
+  "relay_output": {
+    "verdict": "no-match",
+    "confidence": 0.0,
+    "confidence_source": "consensus_relay",
+    "hops_executed": 1,
+    "exit_point": "hard_red_flag_triggered",
+    "hard_red_flag": true,
+    "trail": [
+      {
+        "hop": 1,
+        "provider": "groq",
+        "model": "openai/gpt-oss-120b",
+        "verdict": "no-match",
+        "confidence": 0.95,
+        "reason": "Net amount calculation (\u20b914,500\u202f\u2013\u202f\u20b9290\u202f\u2013\u202f\u20b952.20) \u2260 reported net/credit, showing a \u20b9217.50 excess deduction.",
+        "red_flag": true,
+        "duration_ms": 3762
+      }
+    ],
+    "final_reasoning": "Hard red flag raised by Hop 1 (groq): Net amount calculation (\u20b914,500\u202f\u2013\u202f\u20b9290\u202f\u2013\u202f\u20b952.20) \u2260 reported net/credit, showing a \u20b9217.50 excess deduction."
+  }
+}

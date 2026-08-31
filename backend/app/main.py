@@ -19,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.middleware import SecurityHeadersMiddleware, TokenBucketRateLimiterMiddleware
-from app.api.v1 import settlements, cash_position, agent, quarantine, audit, reconcile
+from app.api.v1 import settlements, cash_position, agent, quarantine, audit, reconcile, recovery
 from app.services.ingestion_service import IngestionService
 from app.services.cash_position_service import CashPositionService
 from app.services.reconciliation_service import MultiSourceReconciliationEngine
@@ -113,6 +113,7 @@ def create_app() -> FastAPI:
     app.include_router(agent.router, prefix="/api/v1/agent", tags=["Agent Query"])
     app.include_router(quarantine.router, prefix="/api/v1", tags=["Quarantine"])
     app.include_router(audit.router, prefix="/api/v1/audit-log", tags=["Audit Log"])
+    app.include_router(recovery.router, prefix="/api/v1", tags=["Revenue Recovery & Baseline"])
 
     # 5. Core Health & Liveness Telemetry
     @app.get("/health", tags=["Health"])

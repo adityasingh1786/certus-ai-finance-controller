@@ -266,3 +266,77 @@ export async function sendAgentQuery(query, chatHistory = [], context = {}, mode
 }
 
 export const queryAgent = sendAgentQuery;
+
+/**
+ * 9. Autonomous Revenue Recovery Pipeline
+ */
+export async function runRecoveryPipeline() {
+  const res = await fetch(`${API_BASE}/recovery/run`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(errData.detail || 'Recovery pipeline run failed');
+  }
+  return await res.json();
+}
+
+export async function fetchRecoveryCases(status = null) {
+  const url = status ? `${API_BASE}/recovery/cases?status=${status}` : `${API_BASE}/recovery/cases`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Failed to fetch recovery cases');
+  return await res.json();
+}
+
+export async function fetchRecoveryStats() {
+  const res = await fetch(`${API_BASE}/recovery/stats`);
+  if (!res.ok) throw new Error('Failed to fetch recovery statistics');
+  return await res.json();
+}
+
+export async function fetchRecoveryMemory() {
+  const res = await fetch(`${API_BASE}/recovery/memory`);
+  if (!res.ok) throw new Error('Failed to fetch recovery memory');
+  return await res.json();
+}
+
+export async function checkCompliance(action, recordId) {
+  const res = await fetch(`${API_BASE}/recovery/compliance-check`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, record_id: recordId }),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(errData.detail || 'Compliance check failed');
+  }
+  return await res.json();
+}
+
+export async function fetchComplianceSummary() {
+  const res = await fetch(`${API_BASE}/compliance/summary`);
+  if (!res.ok) throw new Error('Failed to fetch compliance summary');
+  return await res.json();
+}
+
+/**
+ * 10. Naive Baseline vs AI Comparison
+ */
+export async function runBaselineReconciliation() {
+  const res = await fetch(`${API_BASE}/baseline/run`);
+  if (!res.ok) throw new Error('Failed to run baseline reconciliation');
+  return await res.json();
+}
+
+export async function compareBaselineVsCertus() {
+  const res = await fetch(`${API_BASE}/baseline/compare`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(errData.detail || 'Baseline comparison failed');
+  }
+  return await res.json();
+}

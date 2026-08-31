@@ -80,22 +80,27 @@ yarn-error.log*
 scratch/
 
 # Internal Audit Reports, Plans & Review Documents
-*AUDIT*
-*audit*
+*AUDIT*.md
+*audit*.md
 AUDIT_REPORT.md
 audit_report.md
 audit_and_overhaul_plan.md
 implementation_plan.md
 walkthrough.md
-*PLAN*
-*plan*
-*BLUEPRINT*
-*blueprint*
-*STRATEGY*
-*strategy*
-*DRAFT*
-*draft*
+*PLAN*.md
+*plan*.md
+*BLUEPRINT*.md
+*blueprint*.md
+*STRATEGY*.md
+*strategy*.md
+*DRAFT*.md
+*draft*.md
 *.timestamp*
 .gemini/
+
+# Ensure core python files and scripts are tracked
+!backend/scripts/calibration_audit.py
+!backend/app/api/v1/audit.py
+!backend/app/models/orm.py
 
 
