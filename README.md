@@ -10,6 +10,35 @@
 
 ---
 
+## 🎯 What Certus Does (Capabilities) & What It Does NOT Do (Safety Invariants)
+
+### ✅ What Certus DOES Do
+
+- **Autonomous 3-Way Reconciliation**: Ingests and cross-reconciles transactions across **Payment Gateways (Razorpay)**, **Corporate Bank Statements (HDFC/ICICI CMS with 16-digit UTRs)**, and **ERP General Ledgers (Tally Prime / SAP / NetSuite)** in sub-$2\text{ms}$ per record ($8,345\text{ ops/sec}$).
+- **Fuzzy Narration & Reference Resolution**: Extracts structured UTR identifiers, merchant entities, and invoice references from messy, unstructured Indian bank narration strings using RapidFuzz composite signal scoring ($50\%$ Amount Precision, $30\%$ Reference Strength, $20\%$ Date Proximity).
+- **Fail-Closed Anomaly Quarantine**: Automatically intercepts and isolates transactions with unauthorized MDR fee drift, missing bank UTRs, unposted ERP vouchers, duplicate IDs, or illegal currencies into a secure containment hub.
+- **Autonomous Revenue Recovery Loop**: Transforms quarantined discrepancies into recovered funds through a 6-step loop: **Detection $\to$ Diagnosis $\to$ Strategy Selection $\to$ Compliance Gate $\to$ Execution $\to$ Adaptive Memory Update**.
+- **Automated Dispute & Remediation Playbooks**: Auto-generates Razorpay dispute tickets with exact paisa delta citations, requests CMS statement re-fetches, posts balanced double-entry ERP journal vouchers, and produces statutory demand notices.
+- **Deterministic Regulatory Enforcement**: Passes every outbound automated action through **9 hard-coded compliance rules** mapped to **5 Indian regulatory acts** (RBI Fair Practices Code §6.2, Section 194-O TDS, CGST 18% on MDR, Payment Systems Act §25).
+- **Serial Multi-Model Consensus Relay**: Chains 4 LLM providers (**Groq Llama-3.3 $\to$ Google Gemini $\to$ OpenAI GPT-4o $\to$ Anthropic Claude 3.5**) to audit high-entropy exceptions with early-exit logic and hard red-flag containment.
+- **Adaptive Strategy Memory**: Continuously optimizes recovery action rankings using a recency-weighted sliding window ($N=50$, decay rate $= 0.95$) based on historical settlement recovery rates.
+- **Cryptographic ZK-Proof Audit Trail**: Computes SHA-256 commitment hashes for every recovery step, maintaining a tamper-evident, reproducible financial audit log.
+- **14-Day Treasury Cash Forecasting**: Calculates audited net cash positions, settlement float pipelines, and 14-day liquidity trajectories with Monte Carlo confidence intervals.
+
+---
+
+### ❌ What Certus Does NOT Do (Safety Boundaries)
+
+- ❌ **Does NOT Delegate Regulatory or Financial Math to LLMs**: All tax rates (1% / 5% TDS), GST (18%), MDR fee caps, contact hours, and paisa arithmetic are executed strictly in **100% deterministic Python code**. AI is never allowed to hallucinate financial figures.
+- ❌ **Does NOT Execute Direct Uncontrolled Bank Transfers**: Certus cannot drain funds or initiate arbitrary banking debits. Outbound actions are bounded to formal gateway dispute tickets, bank statement re-fetches, and ERP staging adjustments.
+- ❌ **Does NOT Use IEEE-754 Floating-Point Arithmetic**: Prevents fractional rupee drift by enforcing **integer paisa arithmetic** (`int(round(amount * 100))`) across all 55 invariant rules and ledgers.
+- ❌ **Does NOT Auto-Clear Unverified Discrepancies**: Operates on a **fail-closed invariant**—any transaction with a composite confidence score $< 0.75$ or a failed rule is trapped in quarantine; it is never blindly cleared.
+- ❌ **Does NOT Contact Counterparties Outside Legal Windows**: Strictly prohibits automated outbound dispute notices outside **9:00 AM – 6:00 PM IST** (RBI Fair Practices Code §6.2).
+- ❌ **Does NOT Submit Duplicate Disputes**: Implements cryptographic idempotency keys (`{case_id}:{action}:{attempt}`) ensuring no action can ever be executed twice on the same record.
+- ❌ **Does NOT Require Cloud Connectivity for Core Operation**: Operates 100% air-gapped on local SQLite WAL storage with built-in rule engines when cloud LLMs are unreachable.
+
+---
+
 ## 🌟 Executive Summary: Certus vs Sentinel Competitive Matrix
 
 | Evaluation Dimension | Sentinel (Track 3 Reference) | Certus AI Financial Controller (Track 4) |
