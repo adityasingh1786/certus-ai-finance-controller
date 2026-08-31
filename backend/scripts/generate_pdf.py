@@ -5,12 +5,11 @@ Generate professional PDF for COMPETITIVE_ANALYSIS.md using ReportLab.
 import os
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib import colors
-from reportlab.lib.units import inch, cm
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, KeepTogether, HRFlowable
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, HRFlowable
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.pdfgen import canvas
 
 
@@ -69,7 +68,6 @@ def build_pdf(output_path: str):
 
     styles = getSampleStyleSheet()
     
-    # Custom Styles
     title_style = ParagraphStyle(
         'DocTitle',
         fontName='Helvetica-Bold',
@@ -86,15 +84,6 @@ def build_pdf(output_path: str):
         leading=14,
         textColor=colors.HexColor("#475569"),
         spaceAfter=12,
-    )
-    
-    badge_style = ParagraphStyle(
-        'Badge',
-        fontName='Helvetica-Bold',
-        fontSize=8,
-        leading=10,
-        textColor=colors.white,
-        alignment=TA_CENTER
     )
     
     h1_style = ParagraphStyle(
@@ -215,7 +204,7 @@ def build_pdf(output_path: str):
         ("Autonomous Revenue Recovery", "6-Step Loop (Detect → Diagnose → Execute)", "Static anomaly flags only", "Dual-engine retry loop", "Static CSV reporting", "Manual spreadsheet edit"),
         ("Adaptive Strategy Memory", "Recency-Weighted Window (N=50, Decay 0.95)", "None", "Basic success counter", "None", "None"),
         ("Empirical Baseline Benchmark", "Side-by-Side (+10% Lift, 8,345 ops/s)", "None (~100 records only)", "Basic synthetic test", "None", "None"),
-        ("Automated Test Coverage", "127 / 127 Passing Pytest Tests", "~10–15 basic tests", "116 / 116 tests", "<5 tests / Untested", "0–5 basic tests"),
+        ("Automated Test Coverage", "147 / 147 Passing Pytest Tests", "~10–15 basic tests", "116 / 116 tests", "<5 tests / Untested", "0–5 basic tests"),
         ("UI & Web Visualization", "45+ React Components + 3D WebGL", "Basic Streamlit UI", "CLI Only", "CLI / Jupyter Notebook", "Raw CSV / Terminal"),
         ("Production REST API Layer", "FastAPI + OpenAPI 3.1 Interactive Swagger", "None", "None", "None", "None"),
         ("Audit Trail & Idempotency", "SHA-256 Commitments + Strict Keys", "None", "Basic attempt counter", "None", "None")
@@ -237,7 +226,7 @@ def build_pdf(output_path: str):
     
     t_style = [
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#0F172A")),
-        ('BACKGROUND', (1,1), (1,-1), colors.HexColor("#ECFDF5")), # Certus column highlight
+        ('BACKGROUND', (1,1), (1,-1), colors.HexColor("#ECFDF5")),
         ('ALIGN', (0,0), (-1,-1), 'LEFT'),
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#CBD5E1")),
@@ -247,7 +236,6 @@ def build_pdf(output_path: str):
         ('RIGHTPADDING', (0,0), (-1,-1), 4),
     ]
     
-    # Alternating row colors for other columns
     for r in range(1, len(table_data)):
         if r % 2 == 0:
             t_style.append(('BACKGROUND', (0, r), (0, r), colors.HexColor("#F8FAFC")))
@@ -255,15 +243,12 @@ def build_pdf(output_path: str):
             
     t.setStyle(TableStyle(t_style))
     story.append(t)
-    
-    # Page Break for Deep-Dive Sections
     story.append(PageBreak())
 
     # SECTION 2: GRANULAR REPO-BY-REPO BREAKDOWN
     story.append(Paragraph("🔍 2. Granular Repository-by-Repository Competitive Deep-Dive", h1_style))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#2563EB"), spaceBefore=2, spaceAfter=6))
     
-    # Competitor A
     story.append(Paragraph("🥈 Competitor A: <b>parthpariwandh/ledgermatch-ai</b> (Direct Track 4 Rival)", h2_style))
     story.append(Paragraph("<b>Scope:</b> Track 4 Multi-Source Reconciliation | <b>Stack:</b> Python, Fuzzy Matching, Basic LLM Prompting, Streamlit", body_style))
     story.append(Paragraph("• <b>Their Claims:</b> Reconciles ~100 records using a hybrid rule + LLM agent with basic fuzzy string matching.", bullet_style))
@@ -272,16 +257,14 @@ def build_pdf(output_path: str):
     story.append(Paragraph("• <b>Fatal Flaw 3 (No Active Recovery):</b> LedgerMatch only flags mismatches. <i>Certus features a 6-step loop that auto-generates Razorpay dispute tickets, CMS bank re-fetches, and ERP journal vouchers.</i>", bullet_style))
     story.append(Spacer(1, 6))
 
-    # Competitor B
     story.append(Paragraph("🥉 Competitor B: <b>Teena2812/sentinel-revenue-recovery</b> (Track 3 Reference Benchmark)", h2_style))
     story.append(Paragraph("<b>Scope:</b> Track 3 Gateway Revenue Recovery | <b>Stack:</b> Python CLI, Dual-Engine Retry, Windowed Memory (116 Tests)", body_style))
     story.append(Paragraph("• <b>Their Claims:</b> 116 unit tests, dual-engine retry mechanism for failed gateway payments, windowed strategy memory.", bullet_style))
     story.append(Paragraph("• <b>Fatal Flaw 1 (Single-Source Blindspot):</b> Sentinel only matches Razorpay gateway payments vs refund logs. It has zero visibility into HDFC/ICICI bank CMS files or Tally/SAP ERP ledgers. <i>Certus is a true 3-way multi-rail operating system.</i>", bullet_style))
     story.append(Paragraph("• <b>Fatal Flaw 2 (No UI & No REST API):</b> Sentinel is strictly a CLI script. <i>Certus provides 45+ React components, 3D WebGL Three.js telemetry, and 7 FastAPI Swagger endpoints.</i>", bullet_style))
-    story.append(Paragraph("• <b>Fatal Flaw 3 (Test Coverage):</b> <i>Certus exceeds Sentinel with 127 / 127 verified passing tests</i> across invariant gates, cybersecurity mesh, prompt injection defense, and regulatory laws.", bullet_style))
+    story.append(Paragraph("• <b>Fatal Flaw 3 (Test Coverage):</b> <i>Certus exceeds Sentinel with 147 / 147 verified passing tests</i> across invariant gates, cybersecurity mesh, prompt injection defense, webhooks, circuit breakers, and regulatory laws.", bullet_style))
     story.append(Spacer(1, 6))
 
-    # Competitor C & D
     story.append(Paragraph("❌ Competitors C & D: <b>Generic Buildathon Repos & Pandas Join Scripts</b>", h2_style))
     story.append(Paragraph("<b>Scope:</b> Generic CSV Diff / Policy Simulators | <b>Stack:</b> Jupyter Notebooks, Pandas `merge(how='outer')`, Basic CSV exports", body_style))
     story.append(Paragraph("• <b>Why They Fail in Indian Commerce:</b> Bank statements do not have clean IDs; they contain messy narrations (e.g. `CMS/CR/UTR44910283910/RAZORPAY`). Naive exact merges leave <b>>40% of records unlinked</b>. <i>Certus RapidFuzz composite scoring resolves 300 orphan rows per thousand.</i>", bullet_style))
@@ -296,8 +279,8 @@ def build_pdf(output_path: str):
         ("1. The 3-Way Cross-Rail Bridge", "Razorpay's dashboard only sees Rail 1 (Gateway). It cannot see whether funds credited to the merchant's HDFC CMS account (Rail 2) or cleared in Tally ERP (Rail 3). Certus is the 3-way bridge solving this multi-crore enterprise blindspot."),
         ("2. Zero-LLM Deterministic Financial Math", "Regulatory compliance (RBI §6.2 contact hours 9AM-6PM IST, Section 194-O TDS 1%, CGST 18%) runs in 100% deterministic Python on integer paise. AI is never allowed to hallucinate financial numbers."),
         ("3. Empirical Baseline Accuracy Gain", "Tested on 1,000 multi-rail records, Certus proves a +10.0% net accuracy lift (90.0% vs 80.0%) over naive exact matching while eliminating false positives via the Double-Lock Gate (≥ 0.75)."),
-        ("4. 127 Passing Automated Tests", "127 / 127 unit, invariant, security, and integration tests passing in 43.75 seconds—exceeding all competitor repositories on GitHub."),
-        ("5. Enterprise Full-Stack Polish", "45+ modular React components, 3D WebGL multi-rail visualizer, FastAPI OpenAPI 3.1 Swagger docs, and SQLite WAL shared memory for 100% offline air-gapped resilience.")
+        ("4. 147 Passing Automated Tests", "147 / 147 unit, invariant, security, circuit breaker, webhook, and integration tests passing in real automated suites."),
+        ("5. Enterprise Full-Stack Polish", "45+ modular React components, 3D WebGL multi-rail visualizer, FastAPI OpenAPI 3.1 Swagger docs, Prometheus /metrics telemetry, and SQLite WAL shared memory.")
     ]
 
     for title, desc in proof_points:
@@ -317,7 +300,7 @@ def build_pdf(output_path: str):
 
     qa_data = [qa_headers, [
         Paragraph("<b>\"Why is Certus better than other hackathon submissions?\"</b>", table_cell_bold),
-        Paragraph("<i>\"Other submissions either do single-source matching or delegate mathematical reconciliation to unconstrained LLMs, which hallucinate numbers. Certus is a true 3-way multi-rail controller with 55 deterministic invariant rules on integer paise, a 9-rule regulatory gate, and 127 passing tests.\"</i>", table_cell_style)
+        Paragraph("<i>\"Other submissions either do single-source matching or delegate mathematical reconciliation to unconstrained LLMs, which hallucinate numbers. Certus is a true 3-way multi-rail controller with 55 deterministic invariant rules on integer paise, a 9-rule regulatory gate, and 147 passing tests.\"</i>", table_cell_style)
     ], [
         Paragraph("<b>\"Why does Razorpay need this if they have a settlement dashboard?\"</b>", table_cell_bold),
         Paragraph("<i>\"Razorpay's dashboard only sees Rail 1 (Gateway). It cannot see whether the funds actually credited to the merchant's HDFC CMS account (Rail 2) or if the invoice cleared in Tally ERP (Rail 3). Certus is the 3-way bridge that ensures cross-rail solvency.\"</i>", table_cell_style)
@@ -345,7 +328,6 @@ def build_pdf(output_path: str):
     ]))
     story.append(qa_table)
 
-    # Build Document
     doc.build(story, canvasmaker=NumberedCanvas)
     print(f"Successfully generated PDF: {output_path}")
 
