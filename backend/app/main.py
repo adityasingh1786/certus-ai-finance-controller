@@ -19,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.middleware import SecurityHeadersMiddleware, TokenBucketRateLimiterMiddleware
-from app.api.v1 import settlements, cash_position, agent, quarantine, audit, reconcile, recovery, metrics
+from app.api.v1 import settlements, cash_position, agent, quarantine, audit, reconcile, recovery, metrics, webhooks
 from app.services.ingestion_service import IngestionService
 from app.services.cash_position_service import CashPositionService
 from app.services.reconciliation_service import MultiSourceReconciliationEngine
@@ -114,6 +114,7 @@ def create_app() -> FastAPI:
     app.include_router(quarantine.router, prefix="/api/v1", tags=["Quarantine"])
     app.include_router(audit.router, prefix="/api/v1/audit-log", tags=["Audit Log"])
     app.include_router(recovery.router, prefix="/api/v1", tags=["Revenue Recovery & Baseline"])
+    app.include_router(webhooks.router, prefix="/api/v1")
     app.include_router(metrics.router, prefix="")
     app.include_router(metrics.router, prefix="/api/v1")
 
