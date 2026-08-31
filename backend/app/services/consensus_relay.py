@@ -21,6 +21,7 @@ import re
 import time
 from typing import Dict, List, Any, Optional, Tuple
 from app.core.config import get_settings
+from app.services.circuit_breaker import circuit_breaker_manager
 
 logger = logging.getLogger(__name__)
 
@@ -266,6 +267,14 @@ class ConsensusRelayEngine:
         if provider in self._disabled_providers:
             return None
 
+        # Check circuit breaker status
+        if not circuit_breaker_manager.can_execute(provider):
+            logger.info(
+                f"ConsensusRelay: Skipping Hop {hop_index} ({provider}) because circuit is "
+                f"{circuit_breaker_manager.get_state(provider).value}"
+            )
+            return None
+
         t0 = time.time()
         try:
             raw_text = await asyncio.wait_for(
@@ -273,6 +282,9 @@ class ConsensusRelayEngine:
                 timeout=timeout,
             )
             duration_ms = int((time.time() - t0) * 1000)
+
+            # Record success in circuit breaker
+            circuit_breaker_manager.record_success(provider)
 
             # Parse structured output from trailing JSON
             verdict, conf, reason, red_flag = self._parse_hop_output(raw_text)
@@ -287,11 +299,13 @@ class ConsensusRelayEngine:
                 "red_flag": red_flag,
                 "duration_ms": duration_ms,
             }
-        except asyncio.TimeoutError:
+        except asyncio.TimeoutError as e:
             logger.warning(f"ConsensusRelay: Hop {hop_index} ({provider}) timed out after {timeout}s.")
+            circuit_breaker_manager.record_failure(provider, e)
             return None
         except Exception as e:
             logger.warning(f"ConsensusRelay: Hop {hop_index} ({provider}) failed: {e}")
+            circuit_breaker_manager.record_failure(provider, e)
             return None
 
     async def _call_provider(self, provider: str, prompt: str) -> str:
