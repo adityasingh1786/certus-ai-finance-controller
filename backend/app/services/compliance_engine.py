@@ -28,6 +28,8 @@ from enum import Enum
 from dataclasses import dataclass, field
 from uuid import uuid4
 
+from app.services.banking_calendar import RbiBankingCalendar
+
 logger = logging.getLogger(__name__)
 
 
@@ -249,9 +251,7 @@ class ComplianceEngine:
 
     def _check_contact_window(self) -> ComplianceResult:
         """RBI Fair Practices Code: Outbound contact only 9 AM – 6 PM IST."""
-        now_utc = datetime.now(timezone.utc)
-        ist_offset = timedelta(hours=5, minutes=30)
-        now_ist = now_utc + ist_offset
+        now_ist = RbiBankingCalendar.get_current_ist_time()
         current_hour = now_ist.hour
 
         if CONTACT_HOUR_START <= current_hour < CONTACT_HOUR_END:
@@ -582,7 +582,7 @@ class ComplianceEngine:
             )
 
     def _check_settlement_window(self, record: Dict[str, Any]) -> ComplianceResult:
-        """Check if the settlement is still within the T+1/T+2 window."""
+        """Check if the settlement is still within the T+1/T+2 window according to RBI clearing business days."""
         try:
             settlement_date_str = record.get("settlement_date", "")
             if not settlement_date_str:
@@ -600,23 +600,25 @@ class ComplianceEngine:
             else:
                 settlement_date = datetime.strptime(str(settlement_date_str).split("T")[0], "%Y-%m-%d").date()
 
-            days_elapsed = (datetime.now(timezone.utc).date() - settlement_date).days
+            current_ist_date = RbiBankingCalendar.get_current_ist_time().date()
+            # Calendar-aware statutory business clearing days per RBI/2015-16/160
+            days_elapsed = max(0, RbiBankingCalendar.business_days_between(settlement_date, current_ist_date))
 
             if days_elapsed <= 1:
                 return ComplianceResult(
                     rule_id="COMP-09-SETTLEMENT-WINDOW",
                     status=ComplianceStatus.PASS,
                     category=ComplianceCategory.SETTLEMENT_TIMING,
-                    regulatory_citation="RBI Payment & Settlement Systems Act §25 — T+1 Window",
-                    reason_detail=f"Settlement is {days_elapsed} day(s) old — within T+1 window. WAIT is appropriate.",
+                    regulatory_citation="RBI Payment & Settlement Systems Act §25 — T+1 Window (RBI/2015-16/160)",
+                    reason_detail=f"Settlement is {days_elapsed} clearing business day(s) old — within T+1 window. WAIT is appropriate.",
                 )
             elif days_elapsed <= 2:
                 return ComplianceResult(
                     rule_id="COMP-09-SETTLEMENT-WINDOW",
                     status=ComplianceStatus.PASS,
                     category=ComplianceCategory.SETTLEMENT_TIMING,
-                    regulatory_citation="RBI Payment & Settlement Systems Act §25 — T+2 Window",
-                    reason_detail=f"Settlement is {days_elapsed} days old — within T+2 window. WAIT may still be appropriate.",
+                    regulatory_citation="RBI Payment & Settlement Systems Act §25 — T+2 Window (RBI/2015-16/160)",
+                    reason_detail=f"Settlement is {days_elapsed} clearing business days old — within T+2 statutory window. WAIT may still be appropriate.",
                 )
             elif days_elapsed <= 3:
                 return ComplianceResult(
@@ -624,7 +626,7 @@ class ComplianceEngine:
                     status=ComplianceStatus.WARNING,
                     category=ComplianceCategory.SETTLEMENT_TIMING,
                     regulatory_citation="RBI Payment & Settlement Systems Act §25 — T+3 Escalation",
-                    reason_detail=f"Settlement is {days_elapsed} days old — past T+2 window. Consider escalation.",
+                    reason_detail=f"Settlement is {days_elapsed} clearing business days old — past T+2 window. Consider escalation.",
                     recommended_action="ESCALATE_TO_TREASURY if bank credit not received.",
                 )
             else:
@@ -633,7 +635,7 @@ class ComplianceEngine:
                     status=ComplianceStatus.FAIL,
                     category=ComplianceCategory.SETTLEMENT_TIMING,
                     regulatory_citation="RBI Payment & Settlement Systems Act §25 — Settlement SLA Breach",
-                    reason_detail=f"Settlement is {days_elapsed} days old — significantly past T+2 SLA. Immediate action required.",
+                    reason_detail=f"Settlement is {days_elapsed} clearing business days old — significantly past T+2 SLA. Immediate action required.",
                     recommended_action="RAISE_GATEWAY_DISPUTE — settlement SLA breach.",
                 )
         except (ValueError, TypeError) as e:

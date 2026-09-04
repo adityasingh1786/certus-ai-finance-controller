@@ -53,3 +53,20 @@ def test_forecast_calculation():
     assert forecast["method"] == "weighted_moving_average"
     assert "confidence_band_low" in forecast
     assert "confidence_band_high" in forecast
+
+
+def test_14_day_trajectory_seasonality_and_banking_calendar():
+    service = CashPositionService()
+    trajectory = service.get_14_day_trajectory()
+
+    assert len(trajectory) == 14
+    for day in trajectory:
+        assert "is_banking_holiday" in day
+        assert "clearing_status" in day
+        assert day["clearing_status"] in ("ACTIVE_SETTLEMENT_CLEARING", "DEFERRED_NON_CLEARING_DAY")
+        assert "seasonal_multiplier" in day
+        assert 0.70 <= day["seasonal_multiplier"] <= 1.30
+        assert "projected" in day
+        assert "lower_95" in day
+        assert "upper_95" in day
+        assert day["lower_95"] <= day["projected"] <= day["upper_95"]

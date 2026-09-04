@@ -13,21 +13,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def _extract_paisa(record: Dict[str, Any], key_paisa: str, key_fallback: str) -> int:
-    """Safely extracts integer paisa from record with fallback float conversion."""
-    val_paisa = record.get(key_paisa)
-    if val_paisa is not None:
-        try:
-            return int(val_paisa)
-        except (ValueError, TypeError):
-            pass
+def _extract_paisa(record: Dict[str, Any], key_paisa: str = "", key_fallback: str = "") -> int:
+    """Safely extracts integer paisa from record with broad field fallback."""
+    for k in (key_paisa, "net_amount_paisa", "amount_paisa", "credit_amount_paisa"):
+        if k and record.get(k) is not None:
+            try:
+                return int(record[k])
+            except (ValueError, TypeError):
+                pass
 
-    val_fallback = record.get(key_fallback)
-    if val_fallback is not None:
-        try:
-            return round(float(val_fallback) * 100)
-        except (ValueError, TypeError):
-            pass
+    for k in (key_fallback, "deposit_amount", "net_amount", "amount", "gross_amount", "credit_amount"):
+        if k and record.get(k) is not None:
+            try:
+                return int(round(float(record[k]) * 100))
+            except (ValueError, TypeError):
+                pass
 
     return 0
 
@@ -35,7 +35,7 @@ def _extract_paisa(record: Dict[str, Any], key_paisa: str, key_fallback: str) ->
 def solve_many_to_one_settlements(
     unmatched_gateway_records: List[Dict[str, Any]],
     unmatched_bank_credits: List[Dict[str, Any]],
-    max_batch_size: int = 6,
+    max_batch_size: int = 12,
     tolerance_paisa: int = 0,
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[Dict[str, Any]]]:
     """

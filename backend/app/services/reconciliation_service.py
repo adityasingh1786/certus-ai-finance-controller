@@ -31,6 +31,9 @@ from rapidfuzz import fuzz
 
 from app.agent.schemas import ReconciliationMatch, ReconciliationSummary
 from app.core.config import get_settings
+from app.services.batch_solver import solve_many_to_one_settlements
+from app.services.bipartite_matcher import bipartite_matcher
+from app.core.merkle_sum_tree import MerkleSumTree
 
 logger = logging.getLogger(__name__)
 
@@ -202,13 +205,15 @@ class MultiSourceReconciliationEngine:
         gateway_records: list[dict],
         bank_records: list[dict],
         erp_records: list[dict],
+        threshold: Optional[float] = None,
     ) -> dict:
         """
         Main reconciliation pipeline with real confidence and double-lock gate.
         Returns match summary with four-label status vocabulary.
         """
         start_time = datetime.now(timezone.utc)
-        threshold = self.settings.confidence_threshold
+        if threshold is None:
+            threshold = self.settings.confidence_threshold
         results: list[dict] = []
         exceptions: list[dict] = []
 
@@ -224,7 +229,7 @@ class MultiSourceReconciliationEngine:
         for b in bank_records:
             if not b:
                 continue
-            utr = b.get("utr_number") or b.get("chq_ref_no")
+            utr = b.get("utr_number") or b.get("chq_ref_no") or b.get("bank_reference")
             tx_id = b.get("transaction_id")
             narration = b.get("narration", "")
 
@@ -242,9 +247,13 @@ class MultiSourceReconciliationEngine:
         erp_by_order = {str(e.get("order_id")).strip(): e for e in erp_records if e.get("order_id")}
         erp_by_payment = {str(e.get("razorpay_payment_id") or e.get("payment_id")).strip(): e
                          for e in erp_records if (e.get("razorpay_payment_id") or e.get("payment_id"))}
+        erp_by_txn = {str(e.get("transaction_id") or e.get("razorpay_payment_id") or e.get("payment_id")).strip(): e
+                     for e in erp_records if (e.get("transaction_id") or e.get("razorpay_payment_id") or e.get("payment_id"))}
 
         matched_bank_ids = set()
         matched_erp_ids = set()
+        matched_gateway_ids = set()
+        results_by_record_id: Dict[str, Dict[str, Any]] = {}
 
         # ---- Step 3: Match each gateway record ----
         for g in gateway_records:
@@ -265,7 +274,7 @@ class MultiSourceReconciliationEngine:
 
             # Check if this record is a duplicate
             if g_txn_id and g_txn_id in all_dupe_ids:
-                results.append({
+                res_entry = {
                     "record_id": g_txn_id,
                     "source": "gateway",
                     "status": MatchStatus.DUPLICATE,
@@ -274,7 +283,9 @@ class MultiSourceReconciliationEngine:
                     "confidence": 1.0,
                     "confidence_source": "rule_computed",
                     "matched_sources": ["gateway"],
-                })
+                }
+                results.append(res_entry)
+                results_by_record_id[str(g_txn_id)] = res_entry
                 continue
 
             # ---- Bank matching ----
@@ -303,8 +314,8 @@ class MultiSourceReconciliationEngine:
                         break
 
             if candidate_bank:
-                b_net = _safe_decimal(candidate_bank.get("deposit_amount") or candidate_bank.get("net_amount"))
-                b_date = candidate_bank.get("settlement_date") or candidate_bank.get("date") or ""
+                b_net = _safe_decimal(candidate_bank.get("deposit_amount") or candidate_bank.get("net_amount") or candidate_bank.get("credit_amount"))
+                b_date = candidate_bank.get("settlement_date") or candidate_bank.get("date") or candidate_bank.get("deposit_date") or ""
 
                 amount_conf = compute_amount_confidence(g_net, b_net)
                 ref_conf = compute_reference_confidence(bank_ref_type)
@@ -341,9 +352,12 @@ class MultiSourceReconciliationEngine:
             erp_ref_type = None
 
             candidate_erp = None
-            if g_txn_id and str(g_txn_id).strip() in erp_by_payment:
-                candidate_erp = erp_by_payment[str(g_txn_id).strip()]
+            if g_txn_id and str(g_txn_id).strip() in erp_by_txn:
+                candidate_erp = erp_by_txn[str(g_txn_id).strip()]
                 erp_ref_type = "exact_txn_id"
+            elif g_txn_id and str(g_txn_id).strip() in erp_by_payment:
+                candidate_erp = erp_by_payment[str(g_txn_id).strip()]
+                erp_ref_type = "exact_payment_id"
             elif g_invoice and str(g_invoice).strip() in erp_by_invoice:
                 candidate_erp = erp_by_invoice[str(g_invoice).strip()]
                 erp_ref_type = "exact_invoice"
@@ -359,7 +373,7 @@ class MultiSourceReconciliationEngine:
                     if e_id in matched_erp_ids:
                         continue
                     e_merch = str(e_rec.get("ledger_name") or e_rec.get("merchant_name") or "")
-                    e_gross = _safe_decimal(e_rec.get("gross_invoice_value") or e_rec.get("gross_amount"))
+                    e_gross = _safe_decimal(e_rec.get("gross_invoice_value") or e_rec.get("gross_amount") or e_rec.get("gross_revenue"))
 
                     if abs(g_gross - e_gross) <= Decimal("1.00") and g_merch and e_merch:
                         sim = max(
@@ -373,8 +387,8 @@ class MultiSourceReconciliationEngine:
                             break
 
             if candidate_erp:
-                e_gross = _safe_decimal(candidate_erp.get("gross_invoice_value") or candidate_erp.get("gross_amount"))
-                e_date = candidate_erp.get("settlement_date") or candidate_erp.get("voucher_date") or candidate_erp.get("date") or ""
+                e_gross = _safe_decimal(candidate_erp.get("gross_invoice_value") or candidate_erp.get("gross_amount") or candidate_erp.get("gross_revenue"))
+                e_date = candidate_erp.get("settlement_date") or candidate_erp.get("voucher_date") or candidate_erp.get("posting_date") or candidate_erp.get("date") or ""
 
                 amount_conf = compute_amount_confidence(g_gross, e_gross)
                 if erp_ref_type == "fuzzy_merchant":
@@ -427,12 +441,13 @@ class MultiSourceReconciliationEngine:
                         f"Three-way match: Gateway ↔ Bank (UTR {g_utr}, confidence {bank_confidence_parts.get('composite', 0):.2f}) "
                         f"↔ ERP (invoice {g_invoice}, confidence {erp_confidence_parts.get('composite', 0):.2f})"
                     )
+                    matched_gateway_ids.add(g_txn_id)
                 else:
                     status = MatchStatus.MISMATCHED
                     detail = MatchDetail.LOW_CONFIDENCE
                     reason = f"References matched but confidence below threshold ({threshold}) — routed to exception"
 
-                results.append({
+                res_entry = {
                     "record_id": g_txn_id,
                     "source": "gateway",
                     "status": status,
@@ -445,7 +460,9 @@ class MultiSourceReconciliationEngine:
                         "erp": erp_confidence_parts,
                     },
                     "matched_sources": ["gateway", "bank_statement", "erp_ledger"],
-                })
+                }
+                results.append(res_entry)
+                results_by_record_id[str(g_txn_id)] = res_entry
 
             elif bank_match:
                 conf = bank_confidence_parts.get("composite", 0)
@@ -453,12 +470,13 @@ class MultiSourceReconciliationEngine:
                     status = MatchStatus.MATCHED
                     detail = MatchDetail.GATEWAY_BANK
                     reason = f"Gateway ↔ Bank match via UTR {g_utr} (confidence {conf:.2f}). Missing from ERP."
+                    matched_gateway_ids.add(g_txn_id)
                 else:
                     status = MatchStatus.MISMATCHED
                     detail = MatchDetail.LOW_CONFIDENCE
                     reason = f"Bank reference matched but confidence {conf:.2f} below threshold {threshold}"
 
-                results.append({
+                res_entry = {
                     "record_id": g_txn_id,
                     "source": "gateway",
                     "status": status,
@@ -468,7 +486,9 @@ class MultiSourceReconciliationEngine:
                     "confidence_source": "rule_computed",
                     "confidence_breakdown": {"bank": bank_confidence_parts},
                     "matched_sources": ["gateway", "bank_statement"],
-                })
+                }
+                results.append(res_entry)
+                results_by_record_id[str(g_txn_id)] = res_entry
 
             elif erp_match:
                 conf = erp_confidence_parts.get("composite", 0)
@@ -476,12 +496,13 @@ class MultiSourceReconciliationEngine:
                     status = MatchStatus.MATCHED
                     detail = MatchDetail.GATEWAY_ERP
                     reason = f"Gateway ↔ ERP match via {erp_ref_type} (confidence {conf:.2f}). Missing from bank."
+                    matched_gateway_ids.add(g_txn_id)
                 else:
                     status = MatchStatus.MISMATCHED
                     detail = MatchDetail.LOW_CONFIDENCE
                     reason = f"ERP reference matched but confidence {conf:.2f} below threshold {threshold}"
 
-                results.append({
+                res_entry = {
                     "record_id": g_txn_id,
                     "source": "gateway",
                     "status": status,
@@ -491,11 +512,13 @@ class MultiSourceReconciliationEngine:
                     "confidence_source": "rule_computed",
                     "confidence_breakdown": {"erp": erp_confidence_parts},
                     "matched_sources": ["gateway", "erp_ledger"],
-                })
+                }
+                results.append(res_entry)
+                results_by_record_id[str(g_txn_id)] = res_entry
 
             else:
                 # No match found at all
-                results.append({
+                res_entry = {
                     "record_id": g_txn_id,
                     "source": "gateway",
                     "status": MatchStatus.MISSING,
@@ -504,7 +527,90 @@ class MultiSourceReconciliationEngine:
                     "confidence": 0.0,
                     "confidence_source": "rule_computed",
                     "matched_sources": ["gateway"],
-                })
+                }
+                results.append(res_entry)
+                results_by_record_id[str(g_txn_id)] = res_entry
+
+        # ---- Step 3.5: Phase 2 - Many-to-One Batch Solver ----
+        unmatched_gw = [
+            g for g in gateway_records
+            if (g.get("transaction_id") or g.get("entity_id") or g.get("payment_id")) not in matched_gateway_ids
+            and (g.get("transaction_id") or g.get("entity_id") or g.get("payment_id")) not in all_dupe_ids
+        ]
+        unmatched_bk = [
+            b for b in bank_records
+            if b.get("transaction_id") not in matched_bank_ids
+            and b.get("transaction_id") not in all_dupe_ids
+        ]
+
+        if unmatched_gw and unmatched_bk:
+            try:
+                batch_matches, _, _ = solve_many_to_one_settlements(
+                    unmatched_gateway_records=unmatched_gw,
+                    unmatched_bank_credits=unmatched_bk,
+                    tolerance_paisa=100,
+                    max_batch_size=12,
+                )
+                for bm in batch_matches:
+                    b_rec = bm.get("bank_credit", {})
+                    b_id = b_rec.get("transaction_id")
+                    if b_id:
+                        matched_bank_ids.add(b_id)
+                    for g_part in bm.get("constituent_transactions", []):
+                        g_id = str(g_part.get("transaction_id") or g_part.get("entity_id") or g_part.get("payment_id"))
+                        if g_id:
+                            matched_gateway_ids.add(g_id)
+                            if g_id in results_by_record_id:
+                                r_entry = results_by_record_id[g_id]
+                                r_entry["status"] = MatchStatus.MATCHED
+                                r_entry["status_detail"] = "MANY_TO_ONE_BATCH_MATCH"
+                                r_entry["confidence"] = bm.get("confidence", 0.95)
+                                r_entry["confidence_source"] = "subset_sum_batch_solver"
+                                r_entry["reason"] = (
+                                    f"Many-to-One batch match: Settled in bank credit {b_id} (₹{bm.get('bank_credit_amount')}) "
+                                    f"with {len(bm.get('constituent_transactions', []))} sibling transactions (tolerance: ₹{bm.get('paisa_discrepancy', 0)/100:.2f})"
+                                )
+                                r_entry["matched_sources"] = ["gateway", "bank_statement"]
+            except Exception as e:
+                logger.error(f"Error in batch solver during reconciliation: {e}")
+
+        # ---- Step 3.6: Phase 3 - Kuhn-Munkres Bipartite Matcher ----
+        remaining_gw = [
+            g for g in unmatched_gw
+            if (g.get("transaction_id") or g.get("entity_id") or g.get("payment_id")) not in matched_gateway_ids
+        ]
+        remaining_bk = [
+            b for b in unmatched_bk
+            if b.get("transaction_id") not in matched_bank_ids
+        ]
+
+        if remaining_gw and remaining_bk:
+            try:
+                bipartite_matches, _, _ = bipartite_matcher.match_bipartite(
+                    unmatched_gw=remaining_gw,
+                    unmatched_bank=remaining_bk,
+                )
+                for bm in bipartite_matches:
+                    gw_rec = bm.get("gateway_record", {})
+                    bk_rec = bm.get("bank_record", {})
+                    g_id = str(gw_rec.get("transaction_id") or gw_rec.get("entity_id") or gw_rec.get("payment_id"))
+                    b_id = str(bk_rec.get("transaction_id"))
+                    if g_id and b_id:
+                        matched_gateway_ids.add(g_id)
+                        matched_bank_ids.add(b_id)
+                        if g_id in results_by_record_id:
+                            r_entry = results_by_record_id[g_id]
+                            r_entry["status"] = MatchStatus.MATCHED
+                            r_entry["status_detail"] = "BIPARTITE_HUNGARIAN_MATCH"
+                            r_entry["confidence"] = bm.get("confidence", 0.85)
+                            r_entry["confidence_source"] = "kuhn_munkres_bipartite"
+                            r_entry["reason"] = (
+                                f"Kuhn-Munkres optimal bipartite match with bank credit {b_id} "
+                                f"(assignment cost: {bm.get('cost', 0):.4f}, confidence: {bm.get('confidence', 0):.2f})"
+                            )
+                            r_entry["matched_sources"] = ["gateway", "bank_statement"]
+            except Exception as e:
+                logger.error(f"Error in bipartite matcher during reconciliation: {e}")
 
         # ---- Step 4: Find unmatched bank records ----
         for b in bank_records:
@@ -588,6 +694,50 @@ class MultiSourceReconciliationEngine:
             for r in results if r["status"] == MatchStatus.MATCHED
         ]
 
+        # Compute Cryptographic Merkle Sum Tree Proof of Solvency over all matched records
+        matched_leaves = []
+        for r in results:
+            if r.get("status") == MatchStatus.MATCHED:
+                rec_id = str(r.get("record_id", ""))
+                gw_obj = next((g for g in gateway_records if str(g.get("transaction_id") or g.get("payment_id")) == rec_id), None)
+                if gw_obj:
+                    paisa_amt = int(round(float(_safe_decimal(gw_obj.get("net_amount") or gw_obj.get("amount") or 0)) * 100))
+                else:
+                    bk_obj = next((b for b in bank_records if str(b.get("transaction_id")) == rec_id), None)
+                    if bk_obj:
+                        paisa_amt = int(round(float(_safe_decimal(bk_obj.get("deposit_amount") or bk_obj.get("net_amount") or 0)) * 100))
+                    else:
+                        paisa_amt = 0
+                matched_leaves.append((rec_id, max(0, paisa_amt)))
+
+        if matched_leaves:
+            try:
+                solvency_tree = MerkleSumTree(matched_leaves)
+                merkle_summary = {
+                    "root_hash": solvency_tree.root_hash,
+                    "total_paisa": solvency_tree.total_paisa,
+                    "total_inr": f"₹{solvency_tree.total_paisa / 100:,.2f}",
+                    "leaf_count": len(solvency_tree.leaves),
+                    "solvency_status": "PROVEN_AUDIT_READY",
+                }
+            except Exception as e:
+                logger.error(f"Failed to generate Merkle Sum Tree: {e}")
+                merkle_summary = {
+                    "root_hash": "error",
+                    "total_paisa": 0,
+                    "total_inr": "₹0.00",
+                    "leaf_count": 0,
+                    "solvency_status": "GENERATION_FAILED",
+                }
+        else:
+            merkle_summary = {
+                "root_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "total_paisa": 0,
+                "total_inr": "₹0.00",
+                "leaf_count": 0,
+                "solvency_status": "EMPTY_RECONCILIATION",
+            }
+
         # Uppercase alias on exceptions for legacy compatibility
         for exc in exceptions:
             if "type" in exc:
@@ -609,6 +759,7 @@ class MultiSourceReconciliationEngine:
                 "confidence_threshold": threshold,
                 "throughput_records_per_second": throughput,
                 "duration_ms": duration_ms,
+                "merkle_tree": merkle_summary,
             },
             "results": results,
             "matches": matches_list,

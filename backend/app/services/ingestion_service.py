@@ -700,15 +700,11 @@ class IngestionService:
         return []
 
     def get_all_records(self) -> list[dict]:
-        all_records = []
-        for records in self.records.values():
-            all_records.extend(records)
-        if all_records:
-            return all_records
+        db_records = []
         try:
             with SessionLocal() as db:
-                recs = db.query(SettlementRecordModel).limit(500).all()
-                return [
+                recs = db.query(SettlementRecordModel).order_by(SettlementRecordModel.created_at.desc()).limit(1000).all()
+                db_records = [
                     {
                         "transaction_id": r.transaction_id,
                         "batch_id": r.batch_id,
@@ -730,22 +726,28 @@ class IngestionService:
                     }
                     for r in recs
                 ]
-        except Exception:
-            pass
-        return []
+        except Exception as e:
+            logger.warning(f"Database query error in get_all_records: {e}")
+
+        # Combine with in-memory records (keyed by transaction_id to dedupe)
+        seen_txns = {r["transaction_id"] for r in db_records if r.get("transaction_id")}
+        for batch_recs in self.records.values():
+            for r in batch_recs:
+                txn = r.get("transaction_id")
+                if txn and txn not in seen_txns:
+                    db_records.append(r)
+                    seen_txns.add(txn)
+        return db_records
 
     def get_quarantine_records(self, batch_id: Optional[str] = None) -> list[dict]:
-        if self.quarantine_records:
-            if batch_id:
-                return [r for r in self.quarantine_records if r["batch_id"] == batch_id]
-            return self.quarantine_records
+        db_records = []
         try:
             with SessionLocal() as db:
                 q = db.query(QuarantineRecordModel)
                 if batch_id:
                     q = q.filter_by(batch_id=batch_id)
-                recs = q.order_by(QuarantineRecordModel.created_at.desc()).limit(200).all()
-                return [
+                recs = q.order_by(QuarantineRecordModel.created_at.desc()).limit(500).all()
+                db_records = [
                     {
                         "record_id": r.record_id,
                         "batch_id": r.batch_id,
@@ -760,9 +762,17 @@ class IngestionService:
                     }
                     for r in recs
                 ]
-        except Exception:
-            pass
-        return []
+        except Exception as e:
+            logger.warning(f"Database quarantine query warning: {e}")
+
+        seen_ids = {r["record_id"] for r in db_records}
+        for r in self.quarantine_records:
+            if batch_id and r.get("batch_id") != batch_id:
+                continue
+            if r.get("record_id") not in seen_ids:
+                db_records.append(r)
+                seen_ids.add(r.get("record_id"))
+        return db_records
 
     def get_quarantine_record(self, record_id: str) -> Optional[dict]:
         for r in self.quarantine_records:
@@ -829,17 +839,14 @@ class IngestionService:
         return resolved_item or {"record_id": record_id, "resolved": True, "resolution_note": resolution_note}
 
     def get_audit_log(self, record_id: Optional[str] = None) -> list[dict]:
-        if self.audit_log:
-            if record_id:
-                return [e for e in self.audit_log if e.get("record_id") == record_id]
-            return self.audit_log
+        db_logs = []
         try:
             with SessionLocal() as db:
                 q = db.query(AuditLogModel)
                 if record_id:
                     q = q.filter_by(record_id=record_id)
-                logs = q.order_by(AuditLogModel.timestamp.desc()).limit(200).all()
-                return [
+                logs = q.order_by(AuditLogModel.timestamp.desc()).limit(500).all()
+                db_logs = [
                     {
                         "id": l.id,
                         "record_id": l.record_id,
@@ -850,6 +857,15 @@ class IngestionService:
                     }
                     for l in logs
                 ]
-        except Exception:
-            pass
-        return []
+        except Exception as e:
+            logger.warning(f"Database audit query warning: {e}")
+
+        seen_keys = {(l.get("record_id"), l.get("action"), l.get("timestamp")) for l in db_logs}
+        for entry in self.audit_log:
+            if record_id and entry.get("record_id") != record_id:
+                continue
+            key = (entry.get("record_id"), entry.get("action"), entry.get("timestamp"))
+            if key not in seen_keys:
+                db_logs.append(entry)
+                seen_keys.add(key)
+        return db_logs

@@ -17,6 +17,8 @@ from decimal import Decimal
 from typing import Dict, List, Any, Optional
 
 from app.services.dataset_registry import generate_vast_4_channel_dataset, get_scenario_manifest, SCENARIO_CATALOG
+from app.services.reconciliation_service import MultiSourceReconciliationEngine
+from app.core.merkle_sum_tree import MerkleSumTree
 
 logger = logging.getLogger(__name__)
 
@@ -63,14 +65,23 @@ class OperationalStateManager:
         self._quarantine_records = dataset.get("quarantine_audit_records", [])
         self._journal_vouchers = []
 
-        # Run 3-Way Reconcile Matrix
+        # Run Real MultiSourceReconciliationEngine across channels
+        engine = MultiSourceReconciliationEngine()
+        recon_output = engine.reconcile_sources(
+            gateway_records=dataset.get("gateway_records", []),
+            bank_records=dataset.get("bank_records", []),
+            erp_records=dataset.get("erp_records", []),
+            threshold=0.75,
+        )
+        recon_map = {str(r["record_id"]): r for r in recon_output.get("results", []) if r.get("source") == "gateway"}
+
         gw_map = {r["transaction_id"]: r for r in dataset.get("gateway_records", [])}
         bank_map = {r["transaction_id"]: r for r in dataset.get("bank_records", [])}
         erp_map = {r["transaction_id"]: r for r in dataset.get("erp_records", [])}
         quarantine_ids = {q["transaction_id"] for q in self._quarantine_records}
 
         results = []
-        leaves = []
+        paisa_leaves = []
 
         for i, gw in enumerate(dataset.get("gateway_records", []), 1):
             txn_id = gw["transaction_id"]
@@ -78,8 +89,12 @@ class OperationalStateManager:
             erp_rec = erp_map.get(txn_id)
             is_quarantined = txn_id in quarantine_ids
 
-            if is_quarantined:
-                # Find reason
+            recon_item = recon_map.get(str(txn_id))
+            if recon_item:
+                status = recon_item.get("status", "Missing")
+                confidence = float(recon_item.get("confidence", 0.0))
+                reason = recon_item.get("reason", "Multi-Source Reconciliation processed.")
+            elif is_quarantined:
                 reason = "EXCEPTION"
                 for q in self._quarantine_records:
                     if q["transaction_id"] == txn_id:
@@ -90,26 +105,27 @@ class OperationalStateManager:
             else:
                 status = "Matched"
                 confidence = 0.98
+                reason = f"3-Way Invariant verification against {dataset.get('primary_bank', 'HDFC')} and {dataset.get('erp_system', 'Tally')}."
 
             rec_item = {
                 "id": i,
                 "record_id": txn_id,
                 "transaction_id": txn_id,
-                "gateway_id": gw["entity_id"],
+                "gateway_id": gw.get("entity_id", txn_id),
                 "bank_ref": bank_rec["bank_reference"] if bank_rec else "N/A",
                 "invoice_no": erp_rec["invoice_number"] if erp_rec else "N/A",
-                "merchant_name": gw["merchant_name"],
-                "gross_amount": gw["amount"],
-                "gateway_fee": gw["fee"],
-                "gst_tax": gw["tax"],
-                "tds_amount": gw["tds"],
-                "net_amount": gw["net"],
+                "merchant_name": gw.get("merchant_name", "Merchant"),
+                "gross_amount": gw.get("amount", 0.0),
+                "gateway_fee": gw.get("fee", 0.0),
+                "gst_tax": gw.get("tax", 0.0),
+                "tds_amount": gw.get("tds", 0.0),
+                "net_amount": gw.get("net", 0.0),
                 "bank_amount": bank_rec["credit_amount"] if bank_rec else 0.0,
                 "erp_amount": erp_rec["gross_revenue"] if erp_rec else 0.0,
                 "status": status,
-                "reason": f"3-Way Double-Lock Invariant verification against {dataset.get('primary_bank', 'HDFC')} and {dataset.get('erp_system', 'Tally')} with zero variance.",
-                "confidence": confidence,
-                "created_at": gw["created_at"],
+                "reason": reason,
+                "confidence": round(confidence, 4),
+                "created_at": gw.get("created_at", datetime.now(timezone.utc).isoformat()),
                 "channel_match": {
                     "gateway": True,
                     "bank": bank_rec is not None and bank_rec.get("clearing_status") == "CLEARED",
@@ -118,31 +134,17 @@ class OperationalStateManager:
             }
             results.append(rec_item)
 
-            # Generate SHA-256 Merkle leaf
-            leaf_raw = f"{txn_id}:{status}:{confidence}:{gw['amount']}:{gw['created_at']}"
-            leaf_hash = hashlib.sha256(leaf_raw.encode("utf-8")).hexdigest()
-            leaves.append(leaf_hash)
+            if status == "Matched":
+                paisa_val = int(round(float(gw.get("net", gw.get("amount", 0.0))) * 100))
+                paisa_leaves.append((str(txn_id), max(0, paisa_val)))
 
         self._reconciliation_results = results
-        self._merkle_tree_leaves = leaves
-        self._compute_merkle_root()
-
-    def _compute_merkle_root(self):
-        """Computes SHA-256 Merkle Root Hash over all transaction leaves."""
-        if not self._merkle_tree_leaves:
+        if paisa_leaves:
+            self._solvency_tree = MerkleSumTree(paisa_leaves)
+            self._merkle_root = self._solvency_tree.root_hash
+        else:
+            self._solvency_tree = None
             self._merkle_root = hashlib.sha256(b"EMPTY_LEDGER").hexdigest()
-            return
-
-        current_level = self._merkle_tree_leaves[:]
-        while len(current_level) > 1:
-            if len(current_level) % 2 != 0:
-                current_level.append(current_level[-1])
-            next_level = []
-            for j in range(0, len(current_level), 2):
-                combined = current_level[j] + current_level[j + 1]
-                next_level.append(hashlib.sha256(combined.encode("utf-8")).hexdigest())
-            current_level = next_level
-        self._merkle_root = current_level[0]
 
     def set_active_scenario(self, scenario_id: int) -> Dict[str, Any]:
         """Atomically switches the active scenario across the entire platform."""
@@ -182,6 +184,13 @@ class OperationalStateManager:
                 "throughput_records_per_second": 4666.0,
                 "confidence_score": 0.98 if matched == total else 0.94,
                 "merkle_root": self._merkle_root,
+                "merkle_sum_tree": {
+                    "root_hash": self._merkle_root,
+                    "total_paisa": self._solvency_tree.total_paisa if getattr(self, "_solvency_tree", None) else 0,
+                    "total_inr": f"₹{self._solvency_tree.total_paisa / 100:,.2f}" if getattr(self, "_solvency_tree", None) else "₹0.00",
+                    "leaf_count": len(self._solvency_tree.leaves) if getattr(self, "_solvency_tree", None) else 0,
+                    "solvency_status": "PROVEN_AUDIT_READY" if getattr(self, "_solvency_tree", None) else "EMPTY",
+                },
             },
             "results": self._reconciliation_results,
             "exceptions": self._quarantine_records,

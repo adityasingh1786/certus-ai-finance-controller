@@ -7,8 +7,10 @@ Uses a weighted moving average for forecasting — auditable, not a black box.
 
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, Dict
 import logging
+
+from app.services.banking_calendar import RbiBankingCalendar
 
 logger = logging.getLogger(__name__)
 
@@ -211,9 +213,21 @@ class CashPositionService:
             "last_updated": datetime.now(timezone.utc).isoformat(),
         }
 
+    # 7-day cyclical weekly seasonality multipliers (Retail & payment gateway patterns)
+    SEASONAL_FACTORS: Dict[int, Decimal] = {
+        0: Decimal("0.92"),  # Monday (batch backlog processing)
+        1: Decimal("1.00"),  # Tuesday (baseline)
+        2: Decimal("1.05"),  # Wednesday (mid-week peak)
+        3: Decimal("1.08"),  # Thursday (pre-weekend ramp)
+        4: Decimal("1.25"),  # Friday (highest weekly transaction surge)
+        5: Decimal("1.10"),  # Saturday (consumer spending)
+        6: Decimal("0.80"),  # Sunday (lower banking activity)
+    }
+
     def get_14_day_trajectory(self) -> list[dict]:
         """
-        14-day forward cash trajectory with 95% confidence intervals and in-flight transit tracker.
+        14-day forward cash trajectory with 95% confidence intervals,
+        7-day cyclical seasonality decomposition, and RBI statutory clearing calendar deferral.
         """
         history = self.get_history(range_days=30)
         records = self.ingestion_service.get_all_records() if self.ingestion_service else []
@@ -235,11 +249,32 @@ class CashPositionService:
         
         trajectory = []
         running = current_balance
+        deferred_inflow = Decimal("0.00")
         
         for i in range(1, 15):
             d = today + timedelta(days=i)
-            # Add base trend + transit settlement release
-            running += avg_daily + (daily_transit_release * Decimal("0.85") if i <= 3 else daily_transit_release * Decimal("0.3"))
+            day_of_week = d.weekday()
+            season_mult = self.SEASONAL_FACTORS.get(day_of_week, Decimal("1.00"))
+
+            # Calculate raw seasonal daily inflow
+            transit_component = (daily_transit_release * Decimal("0.85") if i <= 3 else daily_transit_release * Decimal("0.3"))
+            raw_daily_inflow = (avg_daily * season_mult) + transit_component
+
+            # RBI Banking clearing holiday deferral check (RBI/2015-16/160)
+            is_holiday = RbiBankingCalendar.is_banking_holiday(d)
+            if is_holiday:
+                # Bank clearing house is closed (Sunday, 2nd/4th Saturday, Gazette Holiday)
+                # Inflows buffer into deferred pool
+                deferred_inflow += raw_daily_inflow
+                clearing_status = "DEFERRED_NON_CLEARING_DAY"
+                actual_day_credit = Decimal("0.00")
+            else:
+                # Active business clearing day: credits today's inflow PLUS any accumulated deferred pool
+                actual_day_credit = raw_daily_inflow + deferred_inflow
+                deferred_inflow = Decimal("0.00")
+                clearing_status = "ACTIVE_SETTLEMENT_CLEARING"
+
+            running += actual_day_credit
             band = daily_std * Decimal(str(i ** 0.5)) * Decimal("1.96")
             
             trajectory.append({
@@ -250,6 +285,9 @@ class CashPositionService:
                 "lower_95": round(float(max(Decimal("0"), running - band)), 2),
                 "upper_95": round(float(running + band), 2),
                 "in_flight_transit": round(float(max(Decimal("0"), total_transit - (daily_transit_release * Decimal(i)))), 2),
+                "is_banking_holiday": is_holiday,
+                "clearing_status": clearing_status,
+                "seasonal_multiplier": float(season_mult),
             })
             
         return trajectory
