@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   AlertTriangle,
 } from 'lucide-react';
+import ThreeRailCanvas from './ThreeRailCanvas';
 
 export default function DashboardScreen({
   reconciliationData,
@@ -114,6 +115,99 @@ export default function DashboardScreen({
           <p className="text-[11px] text-sterling font-medium">
             {quarantineRecords.length} Exceptions Trapped
           </p>
+        </div>
+      </div>
+
+      {/* 3D Multi-Rail Settlement Topology Centerpiece */}
+      <div className="bg-surface border border-border-subtle rounded-xl p-5 shadow-subtle space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border-subtle">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-page border border-border-subtle flex items-center justify-center text-ink-primary">
+              <Zap className="w-4 h-4 text-rose-600" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="font-display font-bold text-base text-ink-primary">
+                  Live Autonomous Multi-Rail Consensus Topology
+                </h2>
+                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  REAL-TIME GLIDING PACKETS
+                </span>
+              </div>
+              <p className="text-xs text-ink-muted mt-0.5">
+                Dynamic 3D vector mesh routing transactions between Razorpay Gateways, Bank CMS Statement Rails, and ERP General Ledgers through Layer 2 Double-Lock Consensus.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onNavigateTab && onNavigateTab('recon')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-page hover:bg-surface border border-border-subtle text-ink-secondary hover:text-ink-primary text-xs font-medium transition-fast"
+            >
+              <span>Inspect 3-Way Matrix</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* 3D Spatial Canvas Container */}
+        <div className="relative w-full h-[420px] rounded-xl overflow-hidden bg-page border border-border-subtle/80 shadow-inner">
+          <ThreeRailCanvas className="w-full h-full" />
+
+          {/* Top-Left Telemetry HUD Badge */}
+          <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/95 border border-slate-200/90 shadow-subtle text-xs font-mono font-semibold text-slate-800 backdrop-blur-xs">
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            <span>3D SPATIAL TOPOLOGY: DOUBLE-LOCK GATE (≥ 0.75)</span>
+          </div>
+
+          {/* Bottom-Right Instruction Badge */}
+          <div className="absolute bottom-4 right-4 flex items-center gap-2 px-3 py-1 rounded-lg bg-white/90 border border-slate-200/80 shadow-2xs text-[11px] font-mono text-slate-500 backdrop-blur-xs">
+            <span>Hover Nodes to Inspect Live Rail Health & Metrics</span>
+          </div>
+        </div>
+
+        {/* 3 Rails Telemetry Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+          <div className="p-3 rounded-lg bg-page border border-border-subtle space-y-1">
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-rose-700 font-semibold flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-600" /> Razorpay Gateway Hub
+              </span>
+              <span className="text-slate-400">28ms</span>
+            </div>
+            <p className="font-mono text-xs font-bold text-ink-primary tabular-nums">
+              14,250 rec/mo • 2.0% MDR
+            </p>
+            <p className="text-[10px] text-ink-muted">Instant Gross Capture (T+0)</p>
+          </div>
+
+          <div className="p-3 rounded-lg bg-page border border-border-subtle space-y-1">
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-amber-700 font-semibold flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-600" /> Bank CMS Statement Rail
+              </span>
+              <span className="text-slate-400">62ms</span>
+            </div>
+            <p className="font-mono text-xs font-bold text-ink-primary tabular-nums">
+              12,890 credits/mo • 16-Digit UTR
+            </p>
+            <p className="text-[10px] text-ink-muted">Net Settlement (T+1 Window)</p>
+          </div>
+
+          <div className="p-3 rounded-lg bg-page border border-border-subtle space-y-1">
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-indigo-700 font-semibold flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-600" /> General Ledger Rail
+              </span>
+              <span className="text-slate-400">0.00ms Jitter</span>
+            </div>
+            <p className="font-mono text-xs font-bold text-ink-primary tabular-nums">
+              Tally Prime & SAP S/4HANA
+            </p>
+            <p className="text-[10px] text-ink-muted">Section 194-O TDS & GST Reconciled</p>
+          </div>
         </div>
       </div>
 
