@@ -13,6 +13,7 @@ import {
   Database,
   Fingerprint,
   Settings,
+  Terminal,
 } from 'lucide-react';
 
 /**
@@ -24,6 +25,7 @@ export default function CommandPaletteModal({
   onClose,
   onSelectTab,
   onRunScenario,
+  onOpenBootScreen,
   scenarios = [],
 }) {
   const [query, setQuery] = useState('');
@@ -45,6 +47,7 @@ export default function CommandPaletteModal({
     { id: 'datasources', name: 'Data Sources & Connectors', icon: Database, desc: 'Multi-rail connectors & API telemetry' },
     { id: 'audit', name: 'Audit Logs Ledger', icon: Fingerprint, desc: 'Cryptographic SHA-256 event trail' },
     { id: 'settings', name: 'System & Policy Settings', icon: Settings, desc: 'Organization, policies & invariant rules' },
+    { id: 'boot', name: 'Sovereign OS Boot Diagnostics', icon: Terminal, hotkey: 'B', desc: 'Hardware enclave, 3-rail handshake & mathematical invariants', isBoot: true },
   ];
 
   const defaultScenarios = [
@@ -112,7 +115,11 @@ export default function CommandPaletteModal({
                   <button
                     key={hub.id}
                     onClick={() => {
-                      onSelectTab(hub.id);
+                      if (hub.isBoot) {
+                        if (onOpenBootScreen) onOpenBootScreen();
+                      } else {
+                        onSelectTab(hub.id);
+                      }
                       onClose();
                     }}
                     className="w-full flex items-center justify-between p-2.5 rounded-md hover:bg-page border border-transparent hover:border-border-subtle transition-fast text-left group"

@@ -20,6 +20,7 @@ export default function TopBar({
   onLoadDemo,
   isReconciling,
   onOpenLanding,
+  onOpenBootScreen,
   onLogout,
   onOpenCommandPalette,
 }) {
@@ -173,6 +174,19 @@ export default function TopBar({
                 >
                   <Globe className="w-3.5 h-3.5 text-slate-400" />
                   <span>Landing Page</span>
+                </button>
+              )}
+
+              {onOpenBootScreen && (
+                <button
+                  onClick={() => {
+                    onOpenBootScreen();
+                    setIsProfileOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  <Terminal className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Re-run OS Boot Diagnostics</span>
                 </button>
               )}
 

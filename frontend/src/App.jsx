@@ -33,8 +33,8 @@ const SwaggerModal = lazy(() => import('./components/SwaggerModal'));
 const KeyboardShortcutsModal = lazy(() => import('./components/KeyboardShortcutsModal'));
 
 export default function App() {
-  // Navigation & Screen State
-  const [currentScreen, setCurrentScreen] = useState('landing'); // 'landing' | 'auth' | 'dashboard'
+  // Navigation & Screen State — Initialized to 'boot' for sovereign financial OS terminal initialization
+  const [currentScreen, setCurrentScreen] = useState('boot'); // 'boot' | 'landing' | 'auth' | 'dashboard'
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('recon'); // 'recon' | 'quarantine' | 'treasury' | 'copilot' | 'governance'
 
@@ -237,6 +237,7 @@ export default function App() {
           onOpenAuth={() => setCurrentScreen('auth')}
           onOpenArchitecture={() => setShowArchModal(true)}
           onOpenSwagger={() => setShowSwaggerModal(true)}
+          onOpenBootScreen={() => setCurrentScreen('boot')}
         />
       )}
 
@@ -270,6 +271,7 @@ export default function App() {
             onLoadDemo={() => handleRunDemo(null)}
             isReconciling={isReconciling}
             onOpenLanding={() => setCurrentScreen('landing')}
+            onOpenBootScreen={() => setCurrentScreen('boot')}
             onLogout={() => {
               setIsAuthenticated(false);
               setCurrentScreen('landing');
@@ -405,6 +407,7 @@ export default function App() {
           setCurrentScreen('dashboard');
           handleRunDemo(scId);
         }}
+        onOpenBootScreen={() => setCurrentScreen('boot')}
         scenarios={scenarioCatalog}
       />
 

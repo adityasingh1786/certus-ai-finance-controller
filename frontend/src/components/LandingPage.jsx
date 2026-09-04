@@ -31,7 +31,12 @@ import AboutDeveloperSection from './AboutDeveloperSection';
 import { initLenis, destroyLenis } from '../lib/lenis';
 import { soundManager } from '../lib/soundFx';
 
-export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwagger }) {
+export default function LandingPage({
+  onOpenAuth,
+  onOpenArchitecture,
+  onOpenSwagger,
+  onOpenBootScreen,
+}) {
   const [activeTab, setActiveTab] = useState('Matched');
   const [selectedSector, setSelectedSector] = useState('ALL');
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -203,6 +208,20 @@ export default function LandingPage({ onOpenAuth, onOpenArchitecture, onOpenSwag
 
         {/* Right CTA */}
         <div className="flex items-center gap-3">
+          {onOpenBootScreen && (
+            <button
+              onClick={() => {
+                try { soundManager.playClick(); } catch (_) {}
+                onOpenBootScreen();
+              }}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200/90 hover:border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all shadow-2xs hover:bg-slate-50 cursor-pointer"
+              title="Run Sovereign OS Kernel Boot Diagnostic Sequence"
+            >
+              <Terminal className="w-3.5 h-3.5 text-emerald-600" />
+              <span>OS Boot Diagnostic</span>
+            </button>
+          )}
+
           <MagneticButton
             onClick={handleLaunchClick}
             className="shimmer-btn flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-[#E8384F] text-white text-xs font-bold shadow-xs transition-all"
