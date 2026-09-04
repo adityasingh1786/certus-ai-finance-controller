@@ -7,7 +7,7 @@
 
 <div align="center">
 
-[![Tests Passing](https://img.shields.io/badge/Tests-147%20%2F%20147%20PASSED%20(0%20Warnings)-10B981?style=for-the-badge&logo=pytest&logoColor=white)](file:///backend/tests/)
+[![Tests Passing](https://img.shields.io/badge/Tests-152%20%2F%20152%20PASSED%20(0%20Warnings)-10B981?style=for-the-badge&logo=pytest&logoColor=white)](file:///backend/tests/)
 [![RBI Compliance](https://img.shields.io/badge/RBI%20Compliance-100%25%20VERIFIED-0284C7?style=for-the-badge&logo=shield&logoColor=white)](file:///docs/COMPLIANCE.md)
 [![Throughput Velocity](https://img.shields.io/badge/Throughput-8%2C345%20ops%2Fsec-F59E0B?style=for-the-badge&logo=fastapi&logoColor=white)](file:///reports/)
 [![Precision Math](https://img.shields.io/badge/Precision-64--Bit%20Integer%20Paisa%20(Zero%20Float%20Drift)-6366F1?style=for-the-badge)](file:///backend/app/services/rules_engine.py)
@@ -33,8 +33,7 @@
 
 ---
 
-## 🧒 What Are We Actually Building?
-### *(Explained so simply that a 10-year-old child or an 80-year-old grandparent understands it in 60 seconds)*
+## 💡 What We Are Building: The Problem & The Solution
 
 ### 🔍 The Mystery of the Missing ₹21.80
 Imagine you run a small shoe shop on the internet. A customer visits your website and buys a pair of sneakers for **₹1,000** using UPI.
