@@ -54,7 +54,7 @@ def wrap_untrusted_financial_data(record_context: Dict[str, Any], discrepancy_co
     clean_context = json.dumps(record_context, default=str)
     # Strip any closing XML envelope tags to prevent boundary escaping
     sanitized_context = clean_context.replace("</untrusted_transaction_data>", "")
-    sanitized_disc = str(discrepancy_context).replace("</untrusted_transaction_data>", "")
+    sanitized_disc = (discrepancy_context or "").replace("</untrusted_transaction_data>", "")
 
     return (
         f"<untrusted_transaction_data>\n"
