@@ -11,6 +11,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
+# Ensure UTF-8 stdout encoding on Windows
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 # Add backend directory to sys.path
 backend_dir = Path(__file__).resolve().parent.parent / "backend"
 sys.path.insert(0, str(backend_dir))

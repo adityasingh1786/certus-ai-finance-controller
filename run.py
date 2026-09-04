@@ -29,6 +29,13 @@ import re
 import shutil
 from pathlib import Path
 
+# Ensure UTF-8 stdout encoding on Windows
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 # Resolve root directory & configure sys.path
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = SCRIPT_DIR if (SCRIPT_DIR / "backend").exists() else SCRIPT_DIR / "ai-finance-controller"

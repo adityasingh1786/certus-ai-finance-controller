@@ -15,6 +15,13 @@ import json
 import os
 from pathlib import Path
 
+# Ensure UTF-8 stdout encoding on Windows
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 # Add project root
 sys.path.insert(0, str(Path(__file__).resolve().parent / "backend"))
 
