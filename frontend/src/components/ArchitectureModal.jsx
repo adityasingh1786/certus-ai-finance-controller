@@ -2,15 +2,10 @@ import React, { useState } from 'react';
 import {
   X,
   ShieldCheck,
-  CheckCircle2,
   ChevronRight,
   ExternalLink,
-  Zap,
-  Activity,
-  Layers,
 } from 'lucide-react';
 import CertusLogo from './CertusLogo';
-import { soundManager } from '../lib/soundFx';
 
 export default function ArchitectureModal({ isOpen, onClose }) {
   const [activeLayer, setActiveLayer] = useState(1);
@@ -106,40 +101,37 @@ export default function ArchitectureModal({ isOpen, onClose }) {
   const active = ARCH_LAYERS.find((l) => l.id === activeLayer) || ARCH_LAYERS[1];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/50 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="relative w-full max-w-4xl bg-white border border-slate-200/90 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-ink-primary/30 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="relative w-full max-w-4xl bg-surface border border-border-subtle rounded-lg shadow-modal overflow-hidden flex flex-col max-h-[88vh]">
         
-        {/* 🌿 Minimalist Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between bg-page">
           <div className="flex items-center gap-3">
             <CertusLogo className="w-6 h-6" />
             <div>
-              <h3 className="font-display font-bold text-base text-slate-900">
+              <h3 className="font-display font-bold text-sm text-ink-primary">
                 Certus 6-Layer Architecture Blueprint
               </h3>
-              <p className="text-xs text-slate-500 font-sans">
+              <p className="text-xs text-ink-muted">
                 Deterministic Invariant Boundary • Double-Lock Consensus • Read-Only AI
               </p>
             </div>
           </div>
 
           <button
-            onClick={() => {
-              soundManager.playClick();
-              onClose();
-            }}
-            className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors"
+            onClick={onClose}
+            className="text-ink-muted hover:text-ink-primary p-1.5 rounded-md hover:bg-surface transition-fast"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* 🌿 2-Column Spacious Editorial Layout */}
-        <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden bg-white">
+        {/* 2-Column Layout */}
+        <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden bg-surface">
           
-          {/* Left Column: Minimal Layer Selector */}
-          <div className="w-full md:w-72 border-r border-slate-100 p-4 space-y-1 overflow-y-auto bg-slate-50/50 shrink-0">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 px-3 py-1 block">
+          {/* Left Column: Layer Selector */}
+          <div className="w-full md:w-72 border-r border-border-subtle p-3 space-y-1 overflow-y-auto bg-page shrink-0">
+            <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-ink-muted px-2 py-1 block">
               Architectural Layers (0–5)
             </span>
 
@@ -148,114 +140,98 @@ export default function ArchitectureModal({ isOpen, onClose }) {
               return (
                 <button
                   key={layer.id}
-                  onClick={() => {
-                    soundManager.playClick();
-                    setActiveLayer(layer.id);
-                  }}
-                  className={`w-full p-3 rounded-2xl text-left transition-all flex items-center justify-between group ${
+                  onClick={() => setActiveLayer(layer.id)}
+                  className={`w-full p-2.5 rounded-md text-left transition-fast flex items-center justify-between group ${
                     isSelected
-                      ? 'bg-slate-900 text-white shadow-sm'
-                      : 'hover:bg-white text-slate-700'
+                      ? 'bg-ink-primary text-white shadow-subtle'
+                      : 'hover:bg-surface text-ink-secondary hover:text-ink-primary'
                   }`}
                 >
                   <div>
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                        isSelected ? 'bg-white/10 text-white' : 'bg-slate-200 text-slate-600'
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className={`text-[9px] font-mono font-medium px-1 py-0.2 rounded ${
+                        isSelected ? 'bg-white/10 text-white' : 'bg-surface border border-border-subtle text-ink-muted'
                       }`}>
                         {layer.badge}
                       </span>
                       <span className={`text-[10px] font-mono ${
-                        isSelected ? 'text-rose-300' : 'text-slate-400'
+                        isSelected ? 'text-slate-300' : 'text-ink-muted'
                       }`}>
                         {layer.latency}
                       </span>
                     </div>
-                    <h4 className="text-xs font-bold font-display line-clamp-1">
+                    <h4 className="text-xs font-semibold line-clamp-1">
                       {layer.title.split('&')[0].trim()}
                     </h4>
                   </div>
-                  <ChevronRight className={`w-4 h-4 transition-transform ${
-                    isSelected ? 'text-[#E8384F] translate-x-0.5' : 'text-slate-300 group-hover:text-slate-500'
+                  <ChevronRight className={`w-3.5 h-3.5 ${
+                    isSelected ? 'text-white' : 'text-ink-muted group-hover:text-ink-primary'
                   }`} />
                 </button>
               );
             })}
           </div>
 
-          {/* Right Column: Spacious Layer Specification */}
-          <div className="flex-1 p-6 sm:p-8 overflow-y-auto space-y-6 bg-white">
+          {/* Right Column: Layer Specification */}
+          <div className="flex-1 p-6 sm:p-8 overflow-y-auto space-y-5 bg-surface">
             
             {/* Header info */}
-            <div className="space-y-2 pb-4 border-b border-slate-100">
+            <div className="space-y-2 pb-4 border-b border-border-subtle">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-bold text-[#E8384F] bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+                <span className="text-xs font-mono font-medium text-ink-primary bg-page px-2.5 py-0.5 rounded border border-border-subtle">
                   {active.badge} • {active.techTag}
                 </span>
-                <span className="text-xs font-mono font-bold text-slate-600 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                <span className="text-xs font-mono text-ink-muted bg-page px-2 py-0.5 rounded border border-border-subtle">
                   Latency: {active.latency}
                 </span>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-display font-bold text-slate-900 pt-1">
+              <h2 className="text-lg font-display font-bold text-ink-primary pt-1">
                 {active.title}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 font-sans leading-relaxed">
+              <p className="text-xs text-ink-secondary leading-relaxed">
                 {active.summary}
               </p>
             </div>
 
-            {/* Invariant Specs List (No nested boxed cards!) */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">
+            {/* Invariant Specs List */}
+            <div className="space-y-2.5">
+              <h4 className="text-[10px] font-mono font-semibold text-ink-muted uppercase tracking-wider">
                 Formal Mathematical Invariants & Verification Rules:
               </h4>
 
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {active.details.map((item, idx) => (
-                  <div key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-slate-700">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#E8384F] mt-2 shrink-0" />
+                  <div key={idx} className="flex items-start gap-2.5 text-xs text-ink-secondary">
+                    <div className="w-1.5 h-1.5 rounded-full bg-ink-primary mt-1.5 shrink-0" />
                     <span className="leading-relaxed font-sans">{item}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Bottom Fail-Closed Guarantee */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs text-slate-700">
-              <div className="flex items-center gap-2.5">
+            {/* Fail-Closed Guarantee */}
+            <div className="p-3.5 rounded-md bg-page border border-border-subtle flex items-center justify-between text-xs text-ink-secondary">
+              <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="font-medium">Deterministic Boundary: Zero unverified data reaches trusted storage.</span>
+                <span>Deterministic Boundary: Zero unverified data reaches trusted storage.</span>
               </div>
-              <span className="font-mono text-[10px] font-bold text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
+              <span className="font-mono text-[10px] font-medium text-ink-muted bg-surface px-1.5 py-0.5 rounded border border-border-subtle">
                 AIR-GAP ENFORCED
               </span>
             </div>
           </div>
         </div>
 
-        {/* 🌿 Clean Footer */}
-        <div className="px-6 py-3.5 border-t border-slate-100 bg-white flex items-center justify-between text-xs text-slate-500">
+        {/* Footer */}
+        <div className="px-6 py-3 border-t border-border-subtle bg-page flex items-center justify-between text-xs text-ink-muted">
           <div className="flex items-center gap-2 font-mono text-[11px]">
-            <span>Certus v2.4 Enterprise</span>
-            <span>•</span>
-            <a
-              href="https://github.com/adityasingh1786/certus-ai-finance-controller"
-              target="_blank"
-              rel="noreferrer"
-              className="text-slate-800 hover:text-[#E8384F] flex items-center gap-1 font-sans font-semibold transition-colors"
-            >
-              <span>GitHub Repository</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
+            <span>Certus v2.5 Enterprise</span>
           </div>
 
           <button
-            onClick={() => {
-              soundManager.playClick();
-              onClose();
-            }}
-            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-[#E8384F] text-white text-xs font-semibold shadow-xs transition-colors"
+            onClick={onClose}
+            className="px-3.5 py-1.5 rounded-md bg-ink-primary hover:bg-slate-800 text-white text-xs font-medium shadow-subtle transition-fast"
           >
             Close Blueprint
           </button>

@@ -8,6 +8,11 @@ import QuarantineHub from './components/QuarantineHub';
 import TreasuryHub from './components/TreasuryHub';
 import CopilotHub from './components/CopilotHub';
 import GovernanceHub from './components/GovernanceHub';
+import DashboardScreen from './components/DashboardScreen';
+import DataSourcesScreen from './components/DataSourcesScreen';
+import AuditLogsScreen from './components/AuditLogsScreen';
+import LedgerAnalysisScreen from './components/LedgerAnalysisScreen';
+import SettingsScreen from './components/SettingsScreen';
 import RecordAuditDrawer from './components/RecordAuditDrawer';
 import PipelineTelemetryModal from './components/PipelineTelemetryModal';
 import CommandPaletteModal from './components/CommandPaletteModal';
@@ -29,7 +34,7 @@ const KeyboardShortcutsModal = lazy(() => import('./components/KeyboardShortcuts
 
 export default function App() {
   // Navigation & Screen State
-  const [currentScreen, setCurrentScreen] = useState('boot'); // 'boot' | 'landing' | 'auth' | 'dashboard'
+  const [currentScreen, setCurrentScreen] = useState('landing'); // 'landing' | 'auth' | 'dashboard'
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('recon'); // 'recon' | 'quarantine' | 'treasury' | 'copilot' | 'governance'
 
@@ -83,6 +88,11 @@ export default function App() {
     }
   }, []);
 
+  // Mute sound effects by default for a professional experience
+  useEffect(() => {
+    try { soundManager.mute(); } catch (_) {}
+  }, []);
+
   useEffect(() => {
     if (isAuthenticated) {
       loadInitialData();
@@ -110,6 +120,9 @@ export default function App() {
       } else if (e.key.toLowerCase() === 'e' && !e.metaKey && !e.ctrlKey) {
         try { soundManager.playClick(); } catch (_) {}
         setShowSwaggerModal((prev) => !prev);
+      } else if (e.key === '0') {
+        try { soundManager.playClick(); } catch (_) {}
+        setActiveTab('dashboard');
       } else if (e.key === '1') {
         try { soundManager.playClick(); } catch (_) {}
         setActiveTab('recon');
@@ -244,7 +257,7 @@ export default function App() {
           STEP 4: Fixed Sovereign Financial Controller Operating System Workspace
          ========================================================================= */}
       {currentScreen === 'dashboard' && isAuthenticated && (
-        <div className="h-screen w-screen overflow-hidden bg-[#FAFAF9] text-slate-900 flex flex-col antialiased select-none aurora-canvas">
+        <div className="h-screen w-screen overflow-hidden bg-[#F8FAFC] text-slate-900 flex flex-col antialiased select-none">
           
           {/* Fixed Sovereign TopBar (64px) */}
           <TopBar
@@ -274,8 +287,18 @@ export default function App() {
             />
 
             {/* Fluid Momentum Central Workspace */}
-            <main className="ml-64 mt-16 h-[calc(100vh-64px)] flex-1 p-8 overflow-y-auto overflow-x-hidden space-y-6">
+            <main className="ml-60 mt-14 h-[calc(100vh-56px)] flex-1 p-8 overflow-y-auto overflow-x-hidden space-y-6">
               
+              {/* Screen 0: Executive Dashboard */}
+              {activeTab === 'dashboard' && (
+                <DashboardScreen
+                  reconciliationData={reconciliationData}
+                  cashPosition={cashPosition}
+                  quarantineRecords={quarantineRecords}
+                  onNavigateTab={setActiveTab}
+                />
+              )}
+
               {/* Hub 1: 3-Way Match Matrix Hub */}
               {activeTab === 'recon' && (
                 <ReconciliationHub
@@ -331,6 +354,26 @@ export default function App() {
                   onOpenArchitecture={() => setShowArchModal(true)}
                   onOpenSwagger={() => setShowSwaggerModal(true)}
                 />
+              )}
+
+              {/* Screen 6: Ledger Variance & Financial Analytics */}
+              {activeTab === 'ledger' && (
+                <LedgerAnalysisScreen />
+              )}
+
+              {/* Screen 7: Multi-Rail Data Sources & Connectors */}
+              {activeTab === 'datasources' && (
+                <DataSourcesScreen />
+              )}
+
+              {/* Screen 8: Immutable Cryptographic Audit Logs */}
+              {activeTab === 'audit' && (
+                <AuditLogsScreen onInspectRecord={setSelectedAuditRecord} />
+              )}
+
+              {/* Screen 9: System & Invariant Policy Settings */}
+              {activeTab === 'settings' && (
+                <SettingsScreen />
               )}
             </main>
           </div>

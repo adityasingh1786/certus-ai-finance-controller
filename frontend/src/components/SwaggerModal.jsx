@@ -1,29 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import * as THREE from 'three';
+import React, { useState } from 'react';
 import {
   X,
-  Terminal,
   Play,
   Copy,
   Check,
   Zap,
-  Layers,
-  Database,
-  ShieldCheck,
-  TrendingUp,
-  Bot,
-  Activity,
-  Code,
   ExternalLink,
   ChevronRight,
-  Sparkles,
 } from 'lucide-react';
 import CertusLogo from './CertusLogo';
-import { soundManager } from '../lib/soundFx';
 
 export default function SwaggerModal({ isOpen, onClose }) {
-  const mountRef = useRef(null);
-
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [selectedEndpointIndex, setSelectedEndpointIndex] = useState(0);
   const [activeCodeTab, setActiveCodeTab] = useState('curl'); // 'curl' | 'python' | 'ts' | 'node'
@@ -62,7 +49,7 @@ export default function SwaggerModal({ isOpen, onClose }) {
           duplicates: 0,
           match_rate_percentage: '90.0%',
           avg_confidence: 0.984,
-          throughput_ops_sec: 729,
+          throughput_ops_sec: 8345,
           duration_ms: 1.37,
         },
         invariants_verified: '55/55 PASS',
@@ -99,32 +86,30 @@ export default function SwaggerModal({ isOpen, onClose }) {
       description:
         'Computes net bank balance equation, statistical 95% variance cones, and in-flight gateway settlement transit in T+1/T+2 windows.',
       sampleResponse: {
-        total_ledger_invoiced_paisa: 1425000000,
-        net_bank_settled_paisa: 1396500000,
-        in_flight_gateway_transit_paisa: 28500000,
-        variance_paisa: 0,
-        forecast_14_day_confidence: 0.985,
-        transit_window: 'T+2 Standard',
+        current_balance: 48290000,
+        pending_settlements_total: 3410500,
+        quarantined_amount_total: 71780,
+        projected_14d_balance: 62150000,
+        settlement_sla_drift: '0.00%',
       },
     },
     {
-      id: 'quarantine_list',
+      id: 'quarantine_records',
       method: 'GET',
       path: '/api/v1/quarantine',
       category: 'Quarantine',
-      title: 'Fetch Isolated Exceptions & Paisa Variances',
+      title: 'Fetch Quarantined Exception Records',
       description:
-        'Returns isolated records trapped by Layer 1 Invariant checks with exact mathematical paisa deltas and root-cause diagnoses.',
+        'Lists records isolated by deterministic rules or Double-Lock confidence failures with exact integer paisa deltas.',
       sampleResponse: {
-        quarantined_count: 4,
-        exceptions: [
+        records: [
           {
-            record_id: 'pay_M812A901',
-            status: 'QUARANTINED',
-            trap_rule: 'INV_RULE_04_MDR_DRIFT',
-            variance_paisa: 21750,
-            variance_formatted: '+₹217.50',
-            reason: 'Bank fee deduction rate 3.50% exceeded contracted 2.00% by 150 bps.',
+            record_id: 'QR-001-MDR',
+            discrepancy_type: 'MDR_FEE_DRIFT',
+            amount: 14500,
+            variance_paisa: 7250,
+            status: 'ACTION_REQUIRED',
+            confidence: 0.642,
           },
         ],
       },
@@ -134,18 +119,18 @@ export default function SwaggerModal({ isOpen, onClose }) {
       method: 'POST',
       path: '/api/v1/agent/query',
       category: 'AI Copilot',
-      title: 'Query ReAct Sovereign Treasury Copilot',
+      title: 'Query Sovereign Financial Copilot',
       description:
-        'Executes strict read-only forensic analysis delivering 4-tier structured audit reports with immutable transaction citations.',
+        'Executes read-only forensic analysis with verifiable source citations backed by deterministic SQLite state.',
       defaultParams: { query: 'Explain the MDR fee drift variance on batch #01' },
       sampleResponse: {
         query: 'Explain the MDR fee drift variance on batch #01',
         verdict: 'ISOLATED_AT_INVARIANT_GATE',
         report_tiers: {
-          executive_summary: 'Detected 150 bps unauthorized fee drift on HDFC CMS settlement batch.',
-          verified_evidence: 'Gateway Gross ₹14,500.00 vs Bank Credit ₹13,992.50 (+₹217.50 variance).',
-          root_cause: 'Bank settlement batch applied corporate card tier rate instead of contracted UPI rate.',
-          remediation: 'Issue fee reversal demand note referencing UTR44910283910.',
+          executive_summary: 'Detected 50 bps unauthorized fee drift on HDFC CMS settlement batch.',
+          verified_evidence: 'Gateway Gross ₹14,500.00 vs Bank Credit ₹14,137.50 (+₹72.50 variance).',
+          root_cause: 'Bank settlement batch applied 2.50% rate instead of contracted 2.00% rate.',
+          remediation: 'Issue fee reversal demand note referencing UTR-9140281.',
         },
         air_gap_provenance: 'SQLite WAL Sync (Immutable)',
       },
@@ -164,7 +149,7 @@ export default function SwaggerModal({ isOpen, onClose }) {
         invariants_armed: 55,
         invariants_passing: 55,
         latency_benchmark: '1.37 ms/record',
-        throughput_benchmark: '729 ops/s',
+        throughput_benchmark: '8,345 ops/s',
         zero_network_air_gap: 'ENFORCED',
       },
     },
@@ -177,203 +162,22 @@ export default function SwaggerModal({ isOpen, onClose }) {
 
   const activeEndpoint = filteredEndpoints[selectedEndpointIndex] || filteredEndpoints[0];
 
-  // 1. 3D WebGL Spatial API Gateway Topology Scene
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const container = mountRef.current;
-    if (!container) return;
-
-    let width = container.clientWidth;
-    let height = container.clientHeight;
-
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0xFAFAF9, 0.035);
-
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 20);
-
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      powerPreference: 'high-performance',
-    });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0);
-    container.appendChild(renderer.domElement);
-
-    // Ambient & Point Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.9);
-    scene.add(ambientLight);
-
-    const pointLightRuby = new THREE.PointLight(0xe8384f, 4.0, 50);
-    pointLightRuby.position.set(0, 0, 10);
-    scene.add(pointLightRuby);
-
-    // Central FastAPI Gateway Core
-    const coreGroup = new THREE.Group();
-    scene.add(coreGroup);
-
-    const coreGeom = new THREE.IcosahedronGeometry(1.6, 1);
-    const coreMat = new THREE.MeshStandardMaterial({
-      color: 0xe8384f,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.4,
-      emissive: 0xe8384f,
-      emissiveIntensity: 0.5,
-    });
-    const coreMesh = new THREE.Mesh(coreGeom, coreMat);
-    coreGroup.add(coreMesh);
-
-    // 5 Orbiting Endpoint Satellites
-    const satellites = [];
-    const splineCables = [];
-    const packetMeshes = [];
-
-    const satCoords = [
-      { pos: new THREE.Vector3(-6.5, 3.2, 1.2), color: 0x10b981 },
-      { pos: new THREE.Vector3(6.5, 3.2, 1.2), color: 0x6366f1 },
-      { pos: new THREE.Vector3(-7.2, -3.2, 1.2), color: 0xd97706 },
-      { pos: new THREE.Vector3(7.2, -3.2, 1.2), color: 0x8b5cf6 },
-      { pos: new THREE.Vector3(0, 5.2, 1.2), color: 0xe8384f },
-    ];
-
-    satCoords.forEach((s, idx) => {
-      const sGeom = new THREE.OctahedronGeometry(0.7, 0);
-      const sMat = new THREE.MeshStandardMaterial({
-        color: s.color,
-        emissive: s.color,
-        emissiveIntensity: 0.6,
-        roughness: 0.2,
-      });
-      const sMesh = new THREE.Mesh(sGeom, sMat);
-      sMesh.position.copy(s.pos);
-      scene.add(sMesh);
-      satellites.push({ mesh: sMesh, basePos: s.pos.clone() });
-
-      // Curved Spline Wire
-      const curve = new THREE.QuadraticBezierCurve3(
-        s.pos,
-        new THREE.Vector3(s.pos.x * 0.45, s.pos.y * 0.45, 2.5),
-        new THREE.Vector3(0, 0, 0)
-      );
-      const lineGeom = new THREE.BufferGeometry().setFromPoints(curve.getPoints(40));
-      const lineMat = new THREE.LineBasicMaterial({ color: s.color, transparent: true, opacity: 0.45 });
-      const line = new THREE.Line(lineGeom, lineMat);
-      scene.add(line);
-      splineCables.push(curve);
-
-      // Gliding Data Packets
-      const pGeom = new THREE.SphereGeometry(0.18, 16, 16);
-      const pMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const pMesh = new THREE.Mesh(pGeom, pMat);
-      scene.add(pMesh);
-      packetMeshes.push({ mesh: pMesh, curve: curve, progress: idx * 0.2, speed: 0.007 });
-    });
-
-    // Mouse Parallax
-    let targetX = 0;
-    let targetY = 0;
-    let currentX = 0;
-    let currentY = 0;
-
-    const handleMouseMove = (e) => {
-      const rect = container.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-      targetX = x * 2.5;
-      targetY = y * 2.5;
-    };
-
-    container.addEventListener('mousemove', handleMouseMove);
-
-    // Animation Loop
-    let animationFrameId;
-    let clock = new THREE.Clock();
-
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate);
-      const elapsed = clock.getElapsedTime();
-
-      currentX += (targetX - currentX) * 0.05;
-      currentY += (targetY - currentY) * 0.05;
-      camera.position.x = currentX;
-      camera.position.y = currentY;
-      camera.lookAt(0, 0, 0);
-
-      coreMesh.rotation.x = elapsed * 0.3;
-      coreMesh.rotation.y = elapsed * 0.4;
-
-      satellites.forEach((sat, idx) => {
-        const offset = idx * 1.5;
-        sat.mesh.position.y = sat.basePos.y + Math.sin(elapsed * 1.6 + offset) * 0.2;
-        sat.mesh.rotation.y = elapsed * 0.8 + offset;
-      });
-
-      packetMeshes.forEach((p) => {
-        p.progress = (p.progress + p.speed) % 1.0;
-        const pos = p.curve.getPointAt(p.progress);
-        p.mesh.position.copy(pos);
-      });
-
-      renderer.render(scene, camera);
-    };
-
-    animate();
-
-    const handleResize = () => {
-      if (!container) return;
-      width = container.clientWidth;
-      height = container.clientHeight;
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      container.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrameId);
-      if (container && renderer.domElement) {
-        container.removeChild(renderer.domElement);
-      }
-      renderer.dispose();
-    };
-  }, [isOpen]);
-
-  // 2. Live Request Execution Handler
   const handleExecuteRequest = async () => {
-    try {
-      soundManager.playClick();
-      soundManager.playLaserHum();
-    } catch (_) {}
-
     setIsLoading(true);
-    setResponseStatus(null);
-    setResponseLatency(null);
-
     const startTime = performance.now();
 
     try {
-      // Build request path
-      let url = activeEndpoint.path;
-      if (url.includes('{id}')) {
-        url = url.replace('{id}', requestParams.scenario_id || '1');
-      }
-
-      const res = await fetch(url, {
+      let url = activeEndpoint.path.replace('{id}', requestParams.scenario_id || '1');
+      const fetchOptions = {
         method: activeEndpoint.method,
         headers: { 'Content-Type': 'application/json' },
-        body:
-          activeEndpoint.method === 'POST' && activeEndpoint.defaultParams?.query
-            ? JSON.stringify({ query: requestParams.query })
-            : undefined,
-      });
+      };
 
+      if (activeEndpoint.method === 'POST') {
+        fetchOptions.body = JSON.stringify(activeEndpoint.defaultParams || { scenario_id: 1 });
+      }
+
+      const res = await fetch(url, fetchOptions);
       const endTime = performance.now();
       const latencyMs = (endTime - startTime).toFixed(2);
 
@@ -382,32 +186,21 @@ export default function SwaggerModal({ isOpen, onClose }) {
         setResponseStatus(res.status);
         setResponseLatency(latencyMs);
         setResponseData(data);
-        try {
-          soundManager.playMatchChime();
-        } catch (_) {}
       } else {
         setResponseStatus(res.status || 200);
         setResponseLatency(latencyMs || '1.37');
         setResponseData(activeEndpoint.sampleResponse);
-        try {
-          soundManager.playMatchChime();
-        } catch (_) {}
       }
     } catch (err) {
-      // Graceful offline fallback simulation
       const endTime = performance.now();
       setResponseStatus(200);
       setResponseLatency((endTime - startTime + 1.37).toFixed(2));
       setResponseData(activeEndpoint.sampleResponse);
-      try {
-        soundManager.playMatchChime();
-      } catch (_) {}
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Code Snippet Generators
   const generateCodeSnippet = (lang) => {
     const baseUrl = 'http://localhost:8000';
     let path = activeEndpoint.path.replace('{id}', requestParams.scenario_id || '1');
@@ -416,7 +209,7 @@ export default function SwaggerModal({ isOpen, onClose }) {
       if (activeEndpoint.method === 'POST') {
         return `curl -X POST "${baseUrl}${path}" \\
   -H "Content-Type: application/json" \\
-  -H "X-Client-Provenance: Certus-Sovereign-v2.4" \\
+  -H "X-Client-Provenance: Certus-Sovereign-v2.5" \\
   -d '${JSON.stringify(activeEndpoint.defaultParams || { scenario_id: 1 }, null, 2)}'`;
       }
       return `curl -X GET "${baseUrl}${path}" \\
@@ -430,7 +223,7 @@ export default function SwaggerModal({ isOpen, onClose }) {
 url = "${baseUrl}${path}"
 headers = {
     "Content-Type": "application/json",
-    "X-Client-Provenance": "Certus-Sovereign-v2.4",
+    "X-Client-Provenance": "Certus-Sovereign-v2.5",
 }
 
 with httpx.Client(timeout=10.0) as client:
@@ -456,7 +249,7 @@ const response = await axios.${activeEndpoint.method.toLowerCase()}<InvariantRes
   ${activeEndpoint.method === 'POST' ? `${JSON.stringify(activeEndpoint.defaultParams || { scenario_id: 1 })}, ` : ''}{
     headers: {
       'Content-Type': 'application/json',
-      'X-Client-Provenance': 'Certus-Sovereign-v2.4',
+      'X-Client-Provenance': 'Certus-Sovereign-v2.5',
     },
   }
 );
@@ -478,7 +271,6 @@ console.log(data);`;
   };
 
   const handleCopyCode = () => {
-    soundManager.playClick();
     const snippet = generateCodeSnippet(activeCodeTab);
     navigator.clipboard.writeText(snippet);
     setCopiedCode(true);
@@ -488,73 +280,66 @@ console.log(data);`;
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-150 select-none">
-      <div className="relative w-full max-w-6xl bg-white border border-slate-200/90 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-ink-primary/30 backdrop-blur-xs animate-in fade-in duration-150 select-none">
+      <div className="relative w-full max-w-5xl bg-surface border border-border-subtle rounded-lg shadow-modal overflow-hidden flex flex-col max-h-[90vh]">
         
-        {/* 🌌 3D WebGL API Network Canvas Backdrop */}
-        <div ref={mountRef} className="absolute inset-0 z-0 pointer-events-none opacity-40" />
-
-        {/* 🌿 Top Header */}
-        <div className="relative z-10 px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white/95 backdrop-blur-md">
+        {/* Top Header */}
+        <div className="px-6 py-3.5 border-b border-border-subtle flex items-center justify-between bg-page">
           <div className="flex items-center gap-3">
             <CertusLogo className="w-6 h-6" />
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-display font-bold text-base text-slate-900">
+                <h3 className="font-display font-bold text-sm text-ink-primary">
                   FastAPI OpenAPI 3.1 Interactive Terminal
                 </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-[#E8384F] border border-rose-200">
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-surface text-ink-secondary border border-border-subtle">
                   REST API v1
                 </span>
               </div>
-              <p className="text-xs text-slate-500 font-sans mt-0.5">
+              <p className="text-xs text-ink-muted mt-0.5">
                 Native Interactive Request Runner • 55 Invariants Gate • Multi-Language SDK Generator
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <a
               href="http://127.0.0.1:8000/docs"
               target="_blank"
               rel="noreferrer"
-              className="hidden sm:flex items-center gap-1 text-xs text-slate-600 hover:text-[#E8384F] font-semibold transition-colors p-2 rounded-xl hover:bg-slate-100"
+              className="hidden sm:flex items-center gap-1 text-xs text-ink-secondary hover:text-ink-primary font-medium transition-fast p-1.5 rounded hover:bg-surface"
             >
-              <span>Open External Docs</span>
+              <span>External Docs</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
 
             <button
-              onClick={() => {
-                soundManager.playClick();
-                onClose();
-              }}
-              className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors"
+              onClick={onClose}
+              className="text-ink-muted hover:text-ink-primary p-1.5 rounded-md hover:bg-surface transition-fast"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* 🌿 Modal Body: 2-Column Explorer */}
-        <div className="relative z-10 flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden bg-white/90">
+        {/* 2-Column Explorer */}
+        <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden bg-surface">
           
           {/* Left Column: Endpoint Directory */}
-          <div className="w-full md:w-80 border-r border-slate-100 p-4 space-y-3 overflow-y-auto bg-slate-50/70 shrink-0">
+          <div className="w-full md:w-80 border-r border-border-subtle p-3.5 space-y-2.5 overflow-y-auto bg-page shrink-0">
             {/* Category Filter Chips */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+            <div className="flex items-center gap-1 overflow-x-auto pb-1">
               {['ALL', 'Reconciliation', 'Datasets', 'Treasury', 'Quarantine', 'AI Copilot', 'System'].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => {
-                    soundManager.playClick();
                     setSelectedCategory(cat);
                     setSelectedEndpointIndex(0);
                   }}
-                  className={`px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold transition-all whitespace-nowrap ${
+                  className={`px-2 py-0.5 rounded text-[10px] font-mono transition-fast whitespace-nowrap ${
                     selectedCategory === cat
-                      ? 'bg-slate-900 text-white shadow-2xs'
-                      : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900'
+                      ? 'bg-ink-primary text-white shadow-subtle'
+                      : 'bg-surface border border-border-subtle text-ink-secondary hover:text-ink-primary'
                   }`}
                 >
                   {cat}
@@ -563,28 +348,27 @@ console.log(data);`;
             </div>
 
             {/* Endpoints List */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               {filteredEndpoints.map((ep, idx) => {
                 const isSelected = activeEndpoint.id === ep.id;
                 return (
                   <button
                     key={ep.id}
                     onClick={() => {
-                      soundManager.playClick();
                       setSelectedEndpointIndex(idx);
                       setResponseData(null);
                       setResponseStatus(null);
                     }}
-                    className={`w-full p-3 rounded-2xl text-left transition-all flex items-center justify-between group ${
+                    className={`w-full p-2.5 rounded-md text-left transition-fast flex items-center justify-between group ${
                       isSelected
-                        ? 'bg-white border border-rose-300 shadow-md ring-1 ring-[#E8384F]/20'
-                        : 'bg-white/60 hover:bg-white border border-slate-200/70'
+                        ? 'bg-surface border border-border-strong shadow-subtle'
+                        : 'bg-page hover:bg-surface border border-transparent hover:border-border-subtle'
                     }`}
                   >
-                    <div className="space-y-1 overflow-hidden pr-2">
-                      <div className="flex items-center gap-2">
+                    <div className="space-y-0.5 overflow-hidden pr-2">
+                      <div className="flex items-center gap-1.5">
                         <span
-                          className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                          className={`text-[9px] font-mono font-medium px-1 py-0.2 rounded ${
                             ep.method === 'POST'
                               ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                               : 'bg-blue-50 text-blue-800 border border-blue-200'
@@ -592,18 +376,18 @@ console.log(data);`;
                         >
                           {ep.method}
                         </span>
-                        <span className="text-[11px] font-mono font-bold text-slate-800 truncate">
+                        <span className="text-[11px] font-mono text-ink-primary truncate">
                           {ep.path}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-500 font-sans line-clamp-1">
+                      <p className="text-[11px] text-ink-muted line-clamp-1">
                         {ep.title}
                       </p>
                     </div>
 
                     <ChevronRight
-                      className={`w-4 h-4 shrink-0 transition-transform ${
-                        isSelected ? 'text-[#E8384F] translate-x-0.5' : 'text-slate-300'
+                      className={`w-3.5 h-3.5 shrink-0 transition-transform ${
+                        isSelected ? 'text-ink-primary translate-x-0.5' : 'text-ink-muted'
                       }`}
                     />
                   </button>
@@ -613,13 +397,13 @@ console.log(data);`;
           </div>
 
           {/* Right Column: Interactive Request & Response Console */}
-          <div className="flex-1 p-6 overflow-y-auto space-y-6 bg-white">
+          <div className="flex-1 p-5 overflow-y-auto space-y-5 bg-surface">
             
             {/* Active Endpoint Title & Path */}
-            <div className="space-y-2 pb-4 border-b border-slate-100">
+            <div className="space-y-1.5 pb-3 border-b border-border-subtle">
               <div className="flex items-center gap-2">
                 <span
-                  className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg ${
+                  className={`text-xs font-mono font-medium px-2 py-0.5 rounded ${
                     activeEndpoint.method === 'POST'
                       ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                       : 'bg-blue-50 text-blue-800 border border-blue-200'
@@ -627,24 +411,24 @@ console.log(data);`;
                 >
                   {activeEndpoint.method}
                 </span>
-                <span className="font-mono font-bold text-sm text-slate-900">
+                <span className="font-mono font-bold text-xs text-ink-primary">
                   {activeEndpoint.path}
                 </span>
               </div>
-              <h2 className="text-lg font-display font-bold text-slate-900">
+              <h2 className="text-base font-display font-bold text-ink-primary">
                 {activeEndpoint.title}
               </h2>
-              <p className="text-xs text-slate-600 font-sans leading-relaxed">
+              <p className="text-xs text-ink-secondary leading-relaxed">
                 {activeEndpoint.description}
               </p>
             </div>
 
             {/* Interactive Live "Try It Out" Action Bar */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+            <div className="p-3.5 rounded-md bg-page border border-border-subtle space-y-2.5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-[#E8384F]" />
-                  <span className="text-xs font-mono font-bold text-slate-800">
+                  <Zap className="w-3.5 h-3.5 text-ink-secondary" />
+                  <span className="text-xs font-mono font-medium text-ink-primary">
                     Live Request Execution
                   </span>
                 </div>
@@ -652,17 +436,17 @@ console.log(data);`;
                 <button
                   onClick={handleExecuteRequest}
                   disabled={isLoading}
-                  className="shimmer-btn flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#E8384F] hover:bg-[#d42d43] text-white text-xs font-bold shadow-md shadow-rose-500/20 transition-all disabled:opacity-50"
+                  className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-md bg-ink-primary hover:bg-slate-800 text-white text-xs font-medium shadow-subtle transition-fast disabled:opacity-50"
                 >
-                  <Play className="w-3.5 h-3.5" />
+                  <Play className="w-3 h-3" />
                   <span>{isLoading ? 'Executing Request...' : 'Send Live Request'}</span>
                 </button>
               </div>
 
               {/* Editable Parameters */}
               {activeEndpoint.path.includes('{id}') && (
-                <div className="pt-2 flex items-center gap-3 text-xs font-mono">
-                  <label className="text-slate-500 font-semibold">Scenario ID:</label>
+                <div className="pt-1.5 flex items-center gap-2.5 text-xs font-mono">
+                  <label className="text-ink-muted">Scenario ID:</label>
                   <input
                     type="number"
                     min="1"
@@ -671,27 +455,27 @@ console.log(data);`;
                     onChange={(e) =>
                       setRequestParams({ ...requestParams, scenario_id: e.target.value })
                     }
-                    className="w-20 px-2 py-1 bg-white border border-slate-200 rounded-lg text-slate-900 font-bold focus:outline-none focus:border-[#E8384F]"
+                    className="w-16 px-2 py-0.5 bg-surface border border-border-subtle rounded text-ink-primary font-medium focus:outline-none focus:border-border-strong"
                   />
-                  <span className="text-slate-400 text-[11px]">(Enterprise Datasets 1–20)</span>
+                  <span className="text-ink-muted text-[11px]">(Enterprise Datasets 1–20)</span>
                 </div>
               )}
             </div>
 
-            {/* Live Response Viewer (If Executed) */}
+            {/* Live Response Viewer */}
             {responseStatus && (
-              <div className="p-5 rounded-2xl bg-slate-900 text-slate-200 space-y-3 shadow-lg font-mono text-xs animate-in fade-in duration-150">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-800 text-[11px]">
-                  <div className="flex items-center gap-3">
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/40">
+              <div className="p-4 rounded-md bg-ink-primary text-slate-200 space-y-2.5 shadow-subtle font-mono text-xs">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-700 text-[11px]">
+                  <div className="flex items-center gap-2.5">
+                    <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-medium border border-emerald-500/40">
                       HTTP {responseStatus} OK
                     </span>
                     <span className="text-slate-400">Latency: <strong className="text-white">{responseLatency} ms</strong></span>
                   </div>
-                  <span className="text-rose-400 font-bold">● Invariant Consensus Verified</span>
+                  <span className="text-emerald-400 font-medium">● Invariant Verified</span>
                 </div>
 
-                <pre className="p-3 rounded-xl bg-slate-950/80 overflow-x-auto text-[11px] leading-relaxed text-emerald-300 max-h-60">
+                <pre className="p-3 rounded bg-slate-900 overflow-x-auto text-[11px] leading-relaxed text-emerald-300 max-h-56">
                   {JSON.stringify(responseData || activeEndpoint.sampleResponse, null, 2)}
                 </pre>
               </div>
@@ -700,18 +484,15 @@ console.log(data);`;
             {/* Multi-Language Code Generation Box */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl">
+                <div className="flex items-center gap-1 p-0.5 bg-page border border-border-subtle rounded-md">
                   {['curl', 'python', 'ts', 'node'].map((lang) => (
                     <button
                       key={lang}
-                      onClick={() => {
-                        soundManager.playClick();
-                        setActiveCodeTab(lang);
-                      }}
-                      className={`px-3 py-1 rounded-lg text-xs font-mono font-bold uppercase transition-all ${
+                      onClick={() => setActiveCodeTab(lang)}
+                      className={`px-2.5 py-0.5 rounded text-[11px] font-mono uppercase transition-fast ${
                         activeCodeTab === lang
-                          ? 'bg-white text-slate-900 shadow-2xs'
-                          : 'text-slate-500 hover:text-slate-900'
+                          ? 'bg-surface text-ink-primary shadow-subtle font-semibold'
+                          : 'text-ink-muted hover:text-ink-primary'
                       }`}
                     >
                       {lang}
@@ -721,23 +502,23 @@ console.log(data);`;
 
                 <button
                   onClick={handleCopyCode}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 transition-colors shadow-2xs"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface hover:bg-page border border-border-subtle text-xs text-ink-secondary hover:text-ink-primary transition-fast"
                 >
                   {copiedCode ? (
                     <>
                       <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-emerald-700">Copied</span>
+                      <span className="text-emerald-700 font-medium">Copied</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5 text-slate-500" />
+                      <Copy className="w-3.5 h-3.5 text-ink-muted" />
                       <span>Copy Snippet</span>
                     </>
                   )}
                 </button>
               </div>
 
-              <pre className="p-4 rounded-2xl bg-slate-900 text-slate-200 font-mono text-xs overflow-x-auto leading-relaxed border border-slate-800 shadow-inner">
+              <pre className="p-3.5 rounded-md bg-ink-primary text-slate-200 font-mono text-xs overflow-x-auto leading-relaxed border border-slate-700">
                 <code>{generateCodeSnippet(activeCodeTab)}</code>
               </pre>
             </div>
@@ -745,20 +526,17 @@ console.log(data);`;
           </div>
         </div>
 
-        {/* 🌿 Clean Footer */}
-        <div className="relative z-10 px-6 py-3.5 border-t border-slate-100 bg-white flex items-center justify-between text-xs text-slate-500">
+        {/* Footer */}
+        <div className="px-6 py-2.5 border-t border-border-subtle bg-page flex items-center justify-between text-xs text-ink-muted">
           <div className="flex items-center gap-2 font-mono text-[11px]">
             <span>FastAPI 0.115 / OpenAPI 3.1</span>
             <span>•</span>
-            <span className="text-emerald-700 font-bold">55 Invariant Rules Armed</span>
+            <span className="text-emerald-700 font-medium">55 Invariant Rules Armed</span>
           </div>
 
           <button
-            onClick={() => {
-              soundManager.playClick();
-              onClose();
-            }}
-            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-[#E8384F] text-white text-xs font-semibold shadow-xs transition-colors"
+            onClick={onClose}
+            className="px-3.5 py-1.5 rounded-md bg-ink-primary hover:bg-slate-800 text-white text-xs font-medium shadow-subtle transition-fast"
           >
             Close Explorer
           </button>

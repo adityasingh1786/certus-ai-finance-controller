@@ -1,50 +1,99 @@
-﻿import React, { useState } from "react";
-import { TrendingUp, TrendingDown, BarChart3, PieChart, Download, Sparkles } from "lucide-react";
+import React, { useState } from 'react';
+import {
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  Download,
+  Sparkles,
+  ShieldCheck,
+  Building,
+  ArrowRight,
+} from 'lucide-react';
 
 const VARIANCE_DATA = [
-  { month: "Jul", planned: 48, actual: 45 },
-  { month: "Aug", planned: 52, actual: 51 },
-  { month: "Sep", planned: 55, actual: 58 },
-  { month: "Oct", planned: 60, actual: 54 },
-  { month: "Nov", planned: 58, actual: 62 },
-  { month: "Dec", planned: 65, actual: 61 },
+  { month: 'Apr', planned: 12.0, actual: 11.8, feeMdr: 0.24 },
+  { month: 'May', planned: 13.5, actual: 13.4, feeMdr: 0.27 },
+  { month: 'Jun', planned: 14.0, actual: 14.2, feeMdr: 0.28 },
+  { month: 'Jul', planned: 15.2, actual: 14.8, feeMdr: 0.30 },
+  { month: 'Aug', planned: 16.0, actual: 16.3, feeMdr: 0.32 },
+  { month: 'Sep', planned: 14.5, actual: 14.28, feeMdr: 0.29 },
 ];
 
 const CATEGORY_DATA = [
-  { label: "Payroll", amount: "$1.24M", pct: 38, color: "#E8384F" },
-  { label: "Vendor Payments", amount: "$845K", pct: 26, color: "#6366F1" },
-  { label: "Settlement Fees", amount: "$412K", pct: 13, color: "#10B981" },
-  { label: "SWIFT/Wire", amount: "$680K", pct: 21, color: "#F59E0B" },
-  { label: "Miscellaneous", amount: "$65K", pct: 2, color: "#9CA3AF" },
+  { label: 'Gross Captured Volume (Gateway)', amount: '₹14,285,400.00', pct: 100, color: '#0F172A' },
+  { label: 'Net Bank CMS Settlements', amount: '₹13,805,410.56', pct: 96.6, color: '#059669' },
+  { label: 'Contracted MDR Payment Fees (2%)', amount: '₹285,708.00', pct: 2.0, color: '#475569' },
+  { label: 'Section 194-O TDS Withholding (1%)', amount: '₹142,854.00', pct: 1.0, color: '#64748B' },
+  { label: 'GST on Payment Gateway Fees (18%)', amount: '₹51,427.44', pct: 0.36, color: '#94A3B8' },
+  { label: 'Quarantined Variance Delta (At Risk)', amount: '₹71,780.00', pct: 0.5, color: '#BE123C' },
 ];
 
 function BarChartSVG() {
-  const W = 560, H = 200, PL = 40, PR = 20, PT = 20, PB = 30;
+  const W = 560, H = 180, PL = 40, PR = 20, PT = 15, PB = 25;
   const innerW = W - PL - PR;
   const innerH = H - PT - PB;
-  const maxV = 70;
-  const barW = 18;
+  const maxV = 20;
+  const barW = 14;
   const groupW = innerW / VARIANCE_DATA.length;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 200 }}>
-      {[0, 20, 40, 60].map((v) => (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 180 }}>
+      {[0, 5, 10, 15, 20].map((v) => (
         <g key={v}>
-          <line x1={PL} x2={W - PR} y1={PT + innerH - (v / maxV) * innerH} y2={PT + innerH - (v / maxV) * innerH}
-            stroke="#E5E7EB" strokeDasharray="3 3" strokeWidth="1" />
-          <text x={PL - 4} y={PT + innerH - (v / maxV) * innerH + 4} textAnchor="end" fontSize={9} fill="#9CA3AF" fontFamily="IBM Plex Mono">{v}M</text>
+          <line
+            x1={PL}
+            x2={W - PR}
+            y1={PT + innerH - (v / maxV) * innerH}
+            y2={PT + innerH - (v / maxV) * innerH}
+            stroke="#E2E8F0"
+            strokeDasharray="2 2"
+            strokeWidth="1"
+          />
+          <text
+            x={PL - 4}
+            y={PT + innerH - (v / maxV) * innerH + 3}
+            textAnchor="end"
+            fontSize={9}
+            fill="#94A3B8"
+            fontFamily="JetBrains Mono"
+          >
+            ₹{v}M
+          </text>
         </g>
       ))}
       {VARIANCE_DATA.map((d, i) => {
         const cx = PL + i * groupW + groupW / 2;
         const plannedH = (d.planned / maxV) * innerH;
         const actualH = (d.actual / maxV) * innerH;
+
         return (
           <g key={d.month}>
-            <rect x={cx - barW - 2} y={PT + innerH - plannedH} width={barW} height={plannedH} rx={3} fill="#E5E7EB" />
-            <rect x={cx + 2} y={PT + innerH - actualH} width={barW} height={actualH} rx={3}
-              fill={d.actual >= d.planned ? "#10B981" : "#E8384F"} />
-            <text x={cx} y={H - 8} textAnchor="middle" fontSize={9} fill="#9CA3AF" fontFamily="IBM Plex Sans">{d.month}</text>
+            <rect
+              x={cx - barW - 1}
+              y={PT + innerH - plannedH}
+              width={barW}
+              height={plannedH}
+              rx={2}
+              fill="#E2E8F0"
+            />
+            <rect
+              x={cx + 1}
+              y={PT + innerH - actualH}
+              width={barW}
+              height={actualH}
+              rx={2}
+              fill={d.actual >= d.planned ? '#059669' : '#0F172A'}
+            />
+            <text
+              x={cx}
+              y={H - 6}
+              textAnchor="middle"
+              fontSize={10}
+              fill="#64748B"
+              fontFamily="Inter"
+            >
+              {d.month}
+            </text>
           </g>
         );
       })}
@@ -54,72 +103,92 @@ function BarChartSVG() {
 
 export default function LedgerAnalysisScreen() {
   const SUMMARY = [
-    { label: "Total Ledger Volume (Q4)", value: "$3.24M", delta: "+12.4%", up: true },
-    { label: "Variance vs Budget", value: "-$180K", delta: "-5.3%", up: false },
-    { label: "Unposted Entries", value: "24", delta: "Needs review", up: null },
+    { label: 'Total Verified Gross Volume', value: '₹14,285,400.00', delta: '+12.4% vs Prev Mo', isPositive: true },
+    { label: 'Net Bank Deposited Amount', value: '₹13,805,410.56', delta: '98.5% Settlement Ratio', isPositive: true },
+    { label: 'Quarantined Discrepancies', value: '₹71,780.00', delta: '4 Isolated Records', isPositive: false },
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 text-left">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-subtle">
         <div>
-          <h1 className="font-display font-bold text-2xl text-ink-primary tracking-tight">Ledger Analysis</h1>
-          <p className="text-sm text-ink-muted mt-1 font-sans">Q4 2023 financial ledger breakdown and variance analysis.</p>
+          <h1 className="font-display font-bold text-2xl text-ink-primary tracking-tight">
+            Financial General Ledger Analysis & Variance Audit
+          </h1>
+          <p className="text-xs text-ink-muted mt-0.5 font-sans">
+            Three-stream accounting equation verification (Gross - MDR - TDS = Net) with exact integer paisa arithmetic.
+          </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 border border-border-strong rounded-lg text-sm font-medium text-ink-secondary hover:border-ink-secondary transition-all">
-          <Download className="w-4 h-4" />
-          Export Report
+
+        <button
+          onClick={() => alert('Exporting Q2 General Ledger audit schedule...')}
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-page hover:bg-surface border border-border-subtle text-ink-secondary hover:text-ink-primary text-xs font-medium shadow-subtle transition-fast"
+        >
+          <Download className="w-3.5 h-3.5" />
+          <span>Export Ledger Audit</span>
         </button>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-4">
-        {SUMMARY.map((s) => (
-          <div key={s.label} className="bg-surface border border-border-subtle rounded-xl p-5 shadow-card hover:shadow-md transition-shadow">
-            <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider font-sans">{s.label}</p>
-            <p className="font-display font-bold text-3xl text-ink-primary mt-2 tracking-tight">{s.value}</p>
-            <p className="text-xs mt-1.5 font-semibold flex items-center gap-1"
-              style={{ color: s.up === true ? "#065F46" : s.up === false ? "#E8384F" : "#92400E" }}>
-              {s.up === true && <TrendingUp className="w-3 h-3" />}
-              {s.up === false && <TrendingDown className="w-3 h-3" />}
-              {s.delta}
+      {/* Summary KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {SUMMARY.map((s, idx) => (
+          <div key={idx} className="bg-surface border border-border-subtle rounded-lg p-4 shadow-subtle space-y-1">
+            <span className="text-[10px] font-medium text-ink-muted uppercase tracking-wider">{s.label}</span>
+            <p className="font-display font-bold text-xl text-ink-primary font-mono tabular-nums">{s.value}</p>
+            <p className={`text-xs font-medium flex items-center gap-1 ${s.isPositive ? 'text-emerald-700' : 'text-sterling'}`}>
+              {s.isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+              <span>{s.delta}</span>
             </p>
           </div>
         ))}
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-[1fr_280px] gap-6">
-        {/* Bar Chart */}
-        <div className="bg-surface border border-border-subtle rounded-xl shadow-card overflow-hidden">
-          <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
-            <h2 className="font-display font-semibold text-base text-ink-primary">Planned vs Actual (Monthly)</h2>
-            <div className="flex items-center gap-3 text-xs text-ink-muted font-sans">
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-border-strong inline-block" />Planned</span>
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" />Actual</span>
+      {/* Charts and Breakdown Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5">
+        {/* Monthly Trend Bar Chart */}
+        <div className="bg-surface border border-border-subtle rounded-lg shadow-subtle p-5 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
+            <div>
+              <h3 className="font-display font-bold text-sm text-ink-primary">
+                Monthly Planned vs Actual Volume (FY 2026-27)
+              </h3>
+              <p className="text-xs text-ink-muted">Comparing booked invoices against cleared settlement credits.</p>
+            </div>
+            <div className="flex items-center gap-3 text-xs text-ink-muted font-mono">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-xs bg-border-subtle inline-block" /> Planned
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-600 inline-block" /> Actual
+              </span>
             </div>
           </div>
-          <div className="px-4 py-4">
+
+          <div className="py-2">
             <BarChartSVG />
           </div>
         </div>
 
-        {/* Category Breakdown */}
-        <div className="bg-surface border border-border-subtle rounded-xl shadow-card overflow-hidden">
-          <div className="px-5 py-4 border-b border-border-subtle">
-            <h2 className="font-display font-semibold text-sm text-ink-primary">Category Breakdown</h2>
+        {/* Ledger Stream Breakdown */}
+        <div className="bg-surface border border-border-subtle rounded-lg shadow-subtle p-5 space-y-3">
+          <div className="pb-2 border-b border-border-subtle">
+            <h3 className="font-display font-bold text-sm text-ink-primary">Category Distribution</h3>
+            <p className="text-xs text-ink-muted">Paisa breakdown of settlement streams.</p>
           </div>
-          <div className="p-5 space-y-3">
-            {CATEGORY_DATA.map((cat) => (
-              <div key={cat.label}>
-                <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-ink-secondary font-sans">{cat.label}</span>
-                  <span className="font-mono font-semibold text-ink-primary">{cat.amount}</span>
+
+          <div className="space-y-3 pt-1">
+            {CATEGORY_DATA.map((cat, i) => (
+              <div key={i} className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-ink-secondary text-[11px]">{cat.label}</span>
+                  <span className="font-mono font-bold text-ink-primary text-xs">{cat.amount}</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-surface-subtle overflow-hidden">
-                  <div className="h-full rounded-full transition-all duration-700"
-                    style={{ width: `${cat.pct}%`, background: cat.color }} />
+                <div className="h-1 rounded-full bg-page overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, cat.pct)}%`, backgroundColor: cat.color }}
+                  />
                 </div>
               </div>
             ))}
@@ -127,18 +196,13 @@ export default function LedgerAnalysisScreen() {
         </div>
       </div>
 
-      {/* AI Insight */}
-      <div className="bg-surface border border-border-subtle rounded-xl p-5 shadow-card"
-        style={{ borderLeft: "3px solid #6366F1" }}>
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="w-4 h-4" style={{ color: "#6366F1" }} />
-          <span className="font-display font-semibold text-sm text-ink-primary">AI Variance Insight</span>
+      {/* AI Variance Insight */}
+      <div className="p-4 rounded-lg bg-page border border-border-subtle flex items-start gap-3 text-xs leading-relaxed text-ink-secondary">
+        <Sparkles className="w-4 h-4 text-ink-primary shrink-0 mt-0.5" />
+        <div>
+          <strong className="text-ink-primary font-semibold block mb-0.5">Automated Variance Diagnosis (Deterministic Engine):</strong>
+          Analysis of Q2 settlements reveals that net bank credits are within 0.12% of booked invoices. The primary variance is driven by a 50 bps MDR rate drift on Transaction <code className="px-1 py-0.2 rounded bg-surface border border-border-subtle font-mono text-[10px]">TXN-0002</code> (₹72.50 overcharge) and an awaiting CMS batch on <code className="px-1 py-0.2 rounded bg-surface border border-border-subtle font-mono text-[10px]">TXN-0003</code> (₹28,900.00). Both items are isolated in Quarantine with zero balance sheet leakage.
         </div>
-        <p className="text-sm text-ink-secondary font-sans leading-relaxed">
-          October actuals are 10% below plan, primarily driven by a <span className="font-semibold text-ink-primary">$230K delay</span> in SWIFT settlement processing
-          from EU counterparties. November forecast shows recovery based on confirmed wire schedules.
-          Recommend reviewing <code className="font-mono text-xs bg-surface-subtle px-1 py-0.5 rounded border border-border-subtle">SETTLEMENT-RULE-Q4</code> tolerance thresholds.
-        </p>
       </div>
     </div>
   );

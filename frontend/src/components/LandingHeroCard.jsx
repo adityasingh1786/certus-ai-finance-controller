@@ -1,120 +1,112 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, AlertOctagon, Clock, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Zap, Building, Database } from 'lucide-react';
 
 /**
- * Signature Motion: Auto-cycling Confidence Sweep demo card
- * Cycles through outcomes: Green (auto-reconciled), Red (exception), Amber (quarantined).
+ * LandingHeroCard — High-End Live Preview Card for Landing Page
+ * Demonstrates 3-way multi-rail consensus in real time with subtle transitions.
  */
-export default function LandingHeroCard() {
-  const outcomes = [
+export default function LandingHeroCard({ onExploreWorkspace }) {
+  const [activeStep, setActiveStep] = useState(0);
+
+  const steps = [
     {
-      status: 'AUTO_RECONCILED',
-      color: '#2FD97F',
-      dim: '#12261B',
-      glow: 'rgba(47, 217, 127, 0.30)',
-      badge: '3-Way Match Verified',
-      icon: CheckCircle2,
-      txId: 'pay_live_091823',
-      amount: '₹14,500.00',
-      reason: '100% exact match across Gateway, Bank UTR (UTR982341908234), and ERP Ledger (INV-2026-0891).',
-      confidence: '1.00',
+      rail: 'Gateway Instant Capture',
+      id: 'pay_82Xy9910',
+      amt: '₹14,500.00',
+      status: 'Gross Capture',
+      icon: Zap,
     },
     {
-      status: 'QUARANTINED',
-      color: '#E8384F',
-      dim: '#3A1414',
-      glow: 'rgba(232, 56, 79, 0.35)',
-      badge: 'Layer 1 Anomaly Isolated',
-      icon: AlertOctagon,
-      txId: 'pay_bad_019283',
-      amount: '-₹5,000.00',
-      reason: 'IMPOSSIBLE_VALUE: Gross amount cannot be negative for settlement credit. Isolated from trusted DB.',
-      confidence: '0.00',
+      rail: 'HDFC Corporate CMS',
+      id: 'UTR-9140281092',
+      amt: '₹14,137.50',
+      status: 'Net Settlement (T+1)',
+      icon: Building,
     },
     {
-      status: 'AMBIGUOUS_RESOLVED',
-      color: '#FFB020',
-      dim: '#2E2210',
-      glow: 'rgba(255, 176, 32, 0.30)',
-      badge: 'Fuzzy Entity Matched',
-      icon: Clock,
-      txId: 'pay_fuz_002931',
-      amount: '₹45,000.00',
-      reason: 'RapidFuzz score 0.88 resolved "Acme India Pvt Ltd" to "Acme Corp India Private Limited".',
-      confidence: '0.92',
+      rail: 'Tally Prime General Ledger',
+      id: 'INV-2026-1093',
+      amt: '₹14,500.00',
+      status: 'Voucher Synchronized',
+      icon: Database,
     },
   ];
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isSweeping, setIsSweeping] = useState(false);
-
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIsSweeping(true);
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % outcomes.length);
-        setIsSweeping(false);
-      }, 900);
-    }, 4500);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const current = outcomes[currentIndex];
-  const IconComponent = current.icon;
+    const timer = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % steps.length);
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [steps.length]);
 
   return (
-    <div
-      className={`glass-panel p-6 rounded-2xl w-full max-w-md transition-all duration-500 relative overflow-hidden`}
-      style={{
-        borderColor: current.color,
-        boxShadow: `0 8px 32px rgba(0, 0, 0, 0.40), 0 0 25px ${current.glow}`,
-      }}
-    >
-      {/* Sweep overlay */}
-      {isSweeping && (
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#4FD1FF]/20 to-transparent animate-pulse pointer-events-none" />
-      )}
-
-      {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+    <div className="bg-surface border border-border-subtle rounded-xl p-6 shadow-modal max-w-xl mx-auto space-y-5 text-left select-none">
+      {/* Top Banner */}
+      <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
         <div className="flex items-center gap-2">
-          <IconComponent className="h-4 w-4" style={{ color: current.color }} />
-          <span className="font-mono text-xs text-[#F7F5F2]">{current.txId}</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-xs font-mono font-semibold text-ink-primary uppercase tracking-wider">
+            Live Autonomous Consensus Mesh
+          </span>
         </div>
-        <span
-          className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-pill"
-          style={{ backgroundColor: current.dim, color: current.color }}
-        >
-          {current.badge}
+        <span className="text-[10px] font-mono text-ink-muted bg-page px-2 py-0.5 rounded border border-border-subtle">
+          8,345 ops/s
         </span>
       </div>
 
-      {/* Amount and Confidence */}
-      <div className="py-4 flex items-baseline justify-between">
-        <div>
-          <span className="text-[11px] uppercase tracking-wider text-[#9A9AA5] block">Settlement Amount</span>
-          <span className="text-2xl font-mono font-semibold text-[#F7F5F2]">{current.amount}</span>
-        </div>
-        <div className="text-right">
-          <span className="text-[11px] uppercase tracking-wider text-[#9A9AA5] block">Confidence</span>
-          <span className="text-sm font-mono font-semibold" style={{ color: current.color }}>
-            {current.confidence}
-          </span>
-        </div>
+      {/* 3 Rails Display */}
+      <div className="space-y-2.5">
+        {steps.map((s, idx) => {
+          const Icon = s.icon;
+          const isHighlighted = activeStep === idx;
+
+          return (
+            <div
+              key={idx}
+              className={`p-3 rounded-lg border transition-fast flex items-center justify-between ${
+                isHighlighted
+                  ? 'bg-page border-border-strong shadow-subtle'
+                  : 'bg-surface border-border-subtle opacity-70'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-md bg-surface border border-border-subtle flex items-center justify-center text-ink-primary">
+                  <Icon className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-ink-primary">{s.rail}</p>
+                  <p className="font-mono text-[10px] text-ink-muted">{s.id}</p>
+                </div>
+              </div>
+
+              <div className="text-right font-mono">
+                <span className="text-xs font-bold text-ink-primary block">{s.amt}</span>
+                <span className="text-[10px] text-emerald-700 font-medium">{s.status}</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Diagnostic Reason */}
-      <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5 text-xs text-[#9A9AA5] leading-relaxed">
-        <span className="text-white font-medium">Verdict: </span>
-        {current.reason}
+      {/* Double-Lock Status Strip */}
+      <div className="p-3.5 rounded-lg bg-page border border-border-subtle flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <span className="font-medium text-ink-primary">Double-Lock Gate: 98.4% Confidence Passed</span>
+        </div>
+        <span className="font-mono text-[10px] text-ink-muted">0.00 Paisa Drift</span>
       </div>
 
-      {/* Micro Status Bar */}
-      <div className="mt-4 pt-2 flex items-center justify-between text-[10px] text-[#5C5C68] font-mono">
-        <span>Dual-Layer Validation Gate</span>
-        <span>Auto-Cycling Demo</span>
-      </div>
+      {/* CTA Button */}
+      {onExploreWorkspace && (
+        <button
+          onClick={onExploreWorkspace}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-md bg-ink-primary hover:bg-slate-800 text-white text-xs font-semibold shadow-subtle transition-fast"
+        >
+          <span>Open Live Financial Workspace</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      )}
     </div>
   );
 }

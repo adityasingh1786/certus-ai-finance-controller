@@ -9,11 +9,7 @@ import {
   Volume2,
   HelpCircle,
   Sparkles,
-  Layers,
-  ArrowRight,
 } from 'lucide-react';
-import CertusLogo from './CertusLogo';
-import { soundManager } from '../lib/soundFx';
 
 export default function KeyboardShortcutsModal({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -24,74 +20,71 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }) {
       items: [
         { key: '⌘ / Ctrl + K', description: 'Spotlight Search & Command Palette', icon: Search },
         { key: '?', description: 'Toggle Keyboard Shortcuts HUD', icon: HelpCircle },
-        { key: 'M', description: 'Toggle Web Audio Synthesizer Sound', icon: Volume2 },
-        { key: 'Esc', description: 'Close any active modal or panel', icon: X },
+        { key: 'Esc', description: 'Close any active modal or slide-over drawer', icon: X },
       ],
     },
     {
-      title: 'Reconciliation & Invariant Controls',
+      title: 'Operational Hubs',
       items: [
-        { key: 'R', description: 'Run Multi-Rail 3-Way Reconciliation', icon: Zap },
-        { key: '1 – 9', description: 'Quick-Jump to Enterprise Scenarios 1–9', icon: Sparkles },
-        { key: 'A', description: 'Open ReAct Sovereign Copilot', icon: Bot },
-        { key: 'E', description: 'Open Native OpenAPI 3.1 REST Explorer', icon: Terminal },
+        { key: '1', description: 'Jump to 3-Way Reconciliation Hub', icon: Zap },
+        { key: '2', description: 'Jump to Quarantine & Exceptions Hub', icon: Sparkles },
+        { key: '3', description: 'Jump to Treasury & Liquidity Forecaster', icon: Sparkles },
+        { key: '4', description: 'Jump to Autonomous Financial Copilot', icon: Bot },
+        { key: '5', description: 'Jump to Regulatory Governance Hub', icon: Terminal },
       ],
     },
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-150 select-none">
-      <div className="relative w-full max-w-xl bg-white border border-slate-200/90 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-8 space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-primary/30 backdrop-blur-xs animate-in fade-in duration-150 select-none">
+      <div className="relative w-full max-w-lg bg-surface border border-border-subtle rounded-lg shadow-modal overflow-hidden p-6 space-y-5">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-2xl bg-rose-50 border border-rose-200/80 text-[#E8384F]">
-              <Command className="w-5 h-5" />
+        <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-md bg-page border border-border-subtle text-ink-primary">
+              <Command className="w-4 h-4 text-ink-primary" />
             </div>
             <div>
-              <h3 className="font-display font-bold text-base text-slate-900">
-                Keyboard Navigation Cheatsheet
+              <h3 className="font-display font-bold text-sm text-ink-primary">
+                Keyboard Navigation
               </h3>
-              <p className="text-xs text-slate-500 font-sans mt-0.5">
-                Power-user shortcuts for autonomous controller workflows
+              <p className="text-xs text-ink-muted">
+                Fast keyboard shortcuts for enterprise workflows
               </p>
             </div>
           </div>
 
           <button
-            onClick={() => {
-              soundManager.playClick();
-              onClose();
-            }}
-            className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors"
+            onClick={onClose}
+            className="text-ink-muted hover:text-ink-primary p-1 rounded-md hover:bg-page transition-fast"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Shortcuts Lists */}
-        <div className="space-y-5">
+        <div className="space-y-4">
           {SHORTCUT_GROUPS.map((group, gIdx) => (
-            <div key={gIdx} className="space-y-2.5">
-              <h4 className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">
+            <div key={gIdx} className="space-y-2">
+              <h4 className="text-[10px] font-mono font-semibold text-ink-muted uppercase tracking-wider">
                 {group.title}
               </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-1.5">
                 {group.items.map((item, idx) => {
                   const Icon = item.icon;
                   return (
                     <div
                       key={idx}
-                      className="p-3 rounded-2xl bg-slate-50 border border-slate-200/70 flex items-center justify-between gap-3"
+                      className="p-2.5 rounded-md bg-page border border-border-subtle flex items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-2 overflow-hidden">
-                        <Icon className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="text-xs font-sans text-slate-700 truncate">
+                        <Icon className="w-3.5 h-3.5 text-ink-muted shrink-0" />
+                        <span className="text-xs font-sans text-ink-secondary truncate">
                           {item.description}
                         </span>
                       </div>
-                      <kbd className="px-2 py-1 rounded-lg bg-white border border-slate-200 text-[11px] font-mono font-bold text-slate-900 shadow-2xs shrink-0">
+                      <kbd className="px-2 py-0.5 rounded bg-surface border border-border-subtle text-[11px] font-mono font-medium text-ink-primary shadow-subtle shrink-0">
                         {item.key}
                       </kbd>
                     </div>
@@ -103,14 +96,11 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-mono">
-          <span>Press <kbd className="px-1.5 py-0.5 rounded bg-slate-100 border text-[10px] font-bold">?</kbd> anywhere to toggle</span>
+        <div className="pt-3 border-t border-border-subtle flex items-center justify-between text-xs text-ink-muted font-mono">
+          <span>Press <kbd className="px-1.5 py-0.5 rounded bg-page border border-border-subtle text-[10px] font-bold">?</kbd> anywhere to toggle</span>
           <button
-            onClick={() => {
-              soundManager.playClick();
-              onClose();
-            }}
-            className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-[#E8384F] text-white text-xs font-semibold shadow-xs transition-colors"
+            onClick={onClose}
+            className="px-3.5 py-1.5 rounded-md bg-ink-primary hover:bg-slate-800 text-white text-xs font-medium shadow-subtle transition-fast"
           >
             Got it
           </button>

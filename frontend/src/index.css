@@ -4,20 +4,42 @@
 
 @layer base {
   :root {
-    --bg-page: #FAFAF9;
+    /* ── Canvas & Surfaces ── */
+    --bg-page: #F8FAFC;
     --bg-surface: #FFFFFF;
-    --bg-subtle: #F8FAFC;
+    --bg-subtle: #F1F5F9;
+    --bg-muted: #E2E8F0;
+
+    /* ── Typography & Contrast ── */
     --text-primary: #0F172A;
     --text-secondary: #475569;
     --text-muted: #94A3B8;
+
+    /* ── Hairline Dividers ── */
     --border-subtle: #E2E8F0;
     --border-strong: #CBD5E1;
-    --sterling-red: #E8384F;
-    --sterling-hover: #D02B41;
-    --neon-ruby: #FF2E4D;
-    --match-green: #10B981;
-    --missing-amber: #F59E0B;
-    --duplicate-slate: #8B5CF6;
+
+    /* ── Brand (Used ONLY for critical financial discrepancies) ── */
+    --accent-critical: #BE123C;
+    --accent-critical-bg: #FFF1F2;
+    --accent-critical-border: #FECDD3;
+
+    /* ── Semantic Status Signals ── */
+    --status-matched-bg: #ECFDF5;
+    --status-matched-text: #047857;
+    --status-matched-border: #A7F3D0;
+
+    --status-flagged-bg: #FFF1F2;
+    --status-flagged-text: #BE123C;
+    --status-flagged-border: #FECDD3;
+
+    --status-missing-bg: #FFFBEB;
+    --status-missing-text: #B45309;
+    --status-missing-border: #FDE68A;
+
+    --status-duplicate-bg: #F5F3FF;
+    --status-duplicate-text: #6D28D9;
+    --status-duplicate-border: #DDD6FE;
   }
 
   * {
@@ -48,10 +70,11 @@
   body {
     background-color: var(--bg-page);
     color: var(--text-primary);
-    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     overflow-x: hidden;
+    line-height: 1.5;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -61,17 +84,17 @@
 
   .font-mono,
   .tabular-nums {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
     font-variant-numeric: tabular-nums;
   }
 
   :focus-visible {
-    outline: 2px solid var(--sterling-red);
+    outline: 2px solid #64748B;
     outline-offset: 2px;
   }
 
   ::selection {
-    background-color: #E8384F;
+    background-color: #334155;
     color: #FFFFFF;
   }
 
@@ -84,187 +107,68 @@
   }
 }
 
-/* 🌌 Living Aurora Ambient Lighting Background */
-.aurora-canvas {
-  position: relative;
-  background-color: #FAFAF9;
-  background-image: 
-    radial-gradient(at 90% 10%, rgba(232, 56, 79, 0.06) 0px, transparent 50%),
-    radial-gradient(at 10% 90%, rgba(99, 102, 241, 0.04) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(255, 255, 255, 0.95) 0px, transparent 100%);
+/* ─────────────────────────────────────────────────────
+   Clean Surface & Card Utilities (Flat, No Glass)
+   ───────────────────────────────────────────────── */
+
+/* Standard card surface — crisp white, 1px border, ultra-subtle shadow */
+.surface-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.12s ease-out, border-color 0.12s ease-out;
 }
 
-/* 🪞 3D Glassmorphic Surface System - Red & White Luxury */
-.glass-3d {
-  background: rgba(255, 255, 255, 0.88);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  box-shadow: 
-    0 10px 30px -10px rgba(15, 23, 42, 0.04),
-    0 0 0 1px rgba(226, 232, 240, 0.6),
-    0 1px 0 0 rgba(255, 255, 255, 0.9) inset;
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+.surface-card:hover {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
 }
 
-.glass-3d-elevated {
-  background: rgba(255, 255, 255, 0.94);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  box-shadow: 
-    0 20px 45px -12px rgba(15, 23, 42, 0.07),
-    0 0 0 1px rgba(226, 232, 240, 0.7),
-    0 1px 0 0 rgba(255, 255, 255, 1) inset;
+/* Elevated card — slightly stronger presence */
+.surface-elevated {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.06), 0 1px 3px -1px rgba(0, 0, 0, 0.04);
 }
 
-/* Luxury Obsidian & Crimson Multi-Depth Shadow Card */
-.luxury-glass-card {
-  background: rgba(255, 255, 255, 0.92);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
-  backdrop-filter: blur(24px) saturate(190%);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  box-shadow: 
-    0 4px 6px -1px rgba(15, 23, 42, 0.03),
-    0 12px 32px -4px rgba(232, 56, 79, 0.05),
-    0 24px 60px -12px rgba(15, 23, 42, 0.07),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+/* Subtle inset panel (for metric tickers, stat bars) */
+.surface-inset {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
 }
 
-.luxury-glass-card:hover {
-  border-color: rgba(232, 56, 79, 0.35);
-  box-shadow: 
-    0 8px 20px -2px rgba(15, 23, 42, 0.04),
-    0 20px 45px -4px rgba(232, 56, 79, 0.12),
-    0 35px 80px -10px rgba(15, 23, 42, 0.09),
-    0 0 0 1px rgba(232, 56, 79, 0.15) inset;
+/* ─────────────────────────────────────────────────────
+   Status Pill Badges (Muted, Desaturated, Professional)
+   ───────────────────────────────────────────────── */
+.pill-matched {
+  background: var(--status-matched-bg);
+  color: var(--status-matched-text);
+  border: 1px solid var(--status-matched-border);
 }
 
-/* 3D Hover Tilt & Micro-Lift */
-.hover-lift-3d {
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease;
+.pill-flagged {
+  background: var(--status-flagged-bg);
+  color: var(--status-flagged-text);
+  border: 1px solid var(--status-flagged-border);
 }
 
-.hover-lift-3d:hover {
-  transform: translateY(-3px) scale(1.005);
-  box-shadow: 
-    0 25px 50px -12px rgba(232, 56, 79, 0.10),
-    0 0 0 1px rgba(232, 56, 79, 0.35),
-    0 1px 0 0 rgba(255, 255, 255, 1) inset;
+.pill-missing {
+  background: var(--status-missing-bg);
+  color: var(--status-missing-text);
+  border: 1px solid var(--status-missing-border);
 }
 
-.hover-lift-3d:active {
-  transform: scale(0.985);
+.pill-duplicate {
+  background: var(--status-duplicate-bg);
+  color: var(--status-duplicate-text);
+  border: 1px solid var(--status-duplicate-border);
 }
 
-/* Specular Top Bevel Edge */
-.specular-top {
-  border-top: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.9) inset;
-}
-
-/* Ambient Sterling Red Under-Glow */
-.ambient-glow-red {
-  box-shadow: 0 15px 35px -10px rgba(232, 56, 79, 0.16), 0 0 20px -3px rgba(232, 56, 79, 0.10);
-}
-
-/* ✨ Diagonal Specular Shimmer Light-Sweep */
-.shimmer-btn {
-  position: relative;
-  overflow: hidden;
-}
-
-.shimmer-btn::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -60%;
-  width: 220%;
-  height: 200%;
-  background: linear-gradient(
-    60deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.35) 50%,
-    transparent 70%
-  );
-  transform: rotate(30deg);
-  transition: all 0.75s ease;
-}
-
-.shimmer-btn:hover::after {
-  left: 110%;
-  top: 110%;
-}
-
-/* 🟢 Living Breathing Status Halo */
-@keyframes breathingPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: scale(1.35);
-    opacity: 0.4;
-  }
-}
-
-.breathing-dot {
-  position: relative;
-}
-
-.breathing-dot::after {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: 9999px;
-  background: inherit;
-  opacity: 0.6;
-  animation: breathingPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  z-index: 0;
-}
-
-/* Laser Border Pulse */
-@keyframes laserSweep {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.laser-border {
-  position: relative;
-  border: 1px solid transparent;
-  background-clip: padding-box, border-box;
-  background-origin: padding-box, border-box;
-  background-image: 
-    linear-gradient(to right, #FFFFFF, #FFFFFF),
-    linear-gradient(90deg, rgba(232, 56, 79, 0.2), #E8384F, rgba(232, 56, 79, 0.2));
-  background-size: 200% 200%;
-  animation: laserSweep 4s ease infinite;
-}
-
-/* Animated EKG Waveform Stroke */
-@keyframes ekgFlow {
-  0% {
-    stroke-dashoffset: 200;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-.ekg-line {
-  stroke-dasharray: 200;
-  animation: ekgFlow 3s linear infinite;
-}
-
-/* Custom Slim Scrollbars */
+/* ─────────────────────────────────────────────────────
+   Clean, Slim Scrollbars
+   ───────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -275,31 +179,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.35);
+  background: rgba(148, 163, 184, 0.3);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(232, 56, 79, 0.5);
+  background: rgba(100, 116, 139, 0.5);
 }
-
-/* 🚀 High-Velocity Telemetry Marquee Animation */
-@keyframes marqueeScroll {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  display: flex;
-  width: max-content;
-  animation: marqueeScroll 28s linear infinite;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
-}
-

@@ -16,13 +16,12 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-three': ['three'],
-          'vendor-gsap': ['gsap', 'gsap/ScrollTrigger'],
-          'vendor-motion': ['framer-motion', 'lenis'],
+          'vendor-react': ['react', 'react-dom'],
           'vendor-charts': ['recharts', 'lucide-react'],
+          'vendor-animation': ['framer-motion', 'gsap', 'lenis'],
         },
       },
     },
-    chunkSizeWarningLimit: 900,
+    chunkSizeWarningLimit: 1200,
   },
 });

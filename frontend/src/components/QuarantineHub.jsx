@@ -3,22 +3,12 @@ import {
   AlertOctagon,
   CheckCircle2,
   ShieldAlert,
-  Search,
-  Filter,
   RefreshCw,
-  Sliders,
-  Check,
-  X,
-  Lock,
-  Sparkles,
-  Shield,
-  Activity,
   Zap,
 } from 'lucide-react';
 import SubTabBar from './SubTabBar';
 import QuarantineQueue from './QuarantineQueue';
 import RecoveryEnginePanel from './RecoveryEnginePanel';
-import { soundManager } from '../lib/soundFx';
 
 const DEFAULT_QUARANTINE_RECORDS = [
   {
@@ -67,9 +57,7 @@ export default function QuarantineHub({
   onInspectRecord,
 }) {
   const [activeSubTab, setActiveSubTab] = useState('active');
-  const [searchTerm, setSearchTerm] = useState('');
 
-  // 1. Guaranteed effective records fallback to prevent 0 / 4 discrepancy
   const effectiveRecords = useMemo(() => {
     if (records && records.length > 0) return records;
     if (reconciliationData?.exceptions && reconciliationData.exceptions.length > 0) {
@@ -86,240 +74,151 @@ export default function QuarantineHub({
     return effectiveRecords.filter((r) => r.is_resolved || r.resolved);
   }, [effectiveRecords]);
 
-  const filteredActive = useMemo(() => {
-    if (!searchTerm) return activeRecords;
-    const term = searchTerm.toLowerCase();
-    return activeRecords.filter(
-      (r) =>
-        r.record_id?.toLowerCase().includes(term) ||
-        r.transaction_id?.toLowerCase().includes(term) ||
-        r.reason_code?.toLowerCase().includes(term) ||
-        r.reason_detail?.toLowerCase().includes(term) ||
-        r.diagnostic?.toLowerCase().includes(term)
-    );
-  }, [activeRecords, searchTerm]);
-
   const tabs = [
-    {
-      id: 'active',
-      label: 'Active Containment Queue',
-      icon: AlertOctagon,
-      badge: activeRecords.length,
-    },
-    {
-      id: 'recovery',
-      label: 'Autonomous Revenue Recovery',
-      icon: Zap,
-      badge: 'AI Loop',
-    },
-    {
-      id: 'resolved',
-      label: 'Resolved Archive',
-      icon: CheckCircle2,
-      badge: resolvedRecords.length,
-    },
-    {
-      id: 'rules',
-      label: 'Layer 1 Deterministic Rules',
-      icon: ShieldAlert,
-      badge: '8 Active',
-    },
+    { id: 'active', label: 'Active Queue', icon: AlertOctagon, badge: activeRecords.length },
+    { id: 'recovery', label: 'Recovery Engine', icon: Zap },
+    { id: 'resolved', label: 'Resolved', icon: CheckCircle2, badge: resolvedRecords.length },
+    { id: 'rules', label: 'Deterministic Rules', icon: ShieldAlert, badge: '6' },
   ];
 
   const DETERMINISTIC_RULES = [
-    {
-      code: 'IMPOSSIBLE_VALUE',
-      name: 'Non-Positive Amount Guard',
-      desc: 'Isolates transactions where gross or net credit amount is <= 0 or mathematically impossible.',
-      enforcedBy: 'Deterministic Rule Gate',
-      status: 'Active (Fail-Closed)',
-    },
-    {
-      code: 'INVALID_CURRENCY',
-      name: 'ISO Currency Whitelist',
-      desc: 'Traps unapproved currencies (e.g. crypto assets) outside INR, USD, EUR, GBP settlement accounts.',
-      enforcedBy: 'Deterministic Rule Gate',
-      status: 'Active (Fail-Closed)',
-    },
-    {
-      code: 'DUPLICATE_ID',
-      name: 'Batch Anti-Duplication',
-      desc: 'Detects previously settled payment IDs appearing multiple times across ledger uploads.',
-      enforcedBy: 'ACID Constraint Check',
-      status: 'Active (Fail-Closed)',
-    },
-    {
-      code: 'NET_GT_GROSS',
-      name: 'Net vs Gross Invariant',
-      desc: 'Flags transactions where net settlement credit received exceeds the gross customer payment.',
-      enforcedBy: 'Deterministic Rule Gate',
-      status: 'Active (Fail-Closed)',
-    },
-    {
-      code: 'MISSING_MANDATORY_FIELD',
-      name: 'Schema Integrity Guard',
-      desc: 'Traps CSV rows missing essential reconciliation columns (timestamp, currency, amount).',
-      enforcedBy: 'Dynamic Ingest Validator',
-      status: 'Active (Fail-Closed)',
-    },
-    {
-      code: 'UNAUTHORIZED_MDR',
-      name: 'Fee Schedule Boundary',
-      desc: 'Isolates transactions where payment gateway fee deduction deviates >50 bps from agreed rate card.',
-      enforcedBy: 'MDR Engine',
-      status: 'Active (Fail-Closed)',
-    },
+    { code: 'IMPOSSIBLE_VALUE', name: 'Non-Positive Amount Guard', desc: 'Isolates transactions where gross or net credit amount is ≤ 0 or mathematically impossible.', status: 'Active' },
+    { code: 'INVALID_CURRENCY', name: 'ISO Currency Whitelist', desc: 'Traps unapproved currencies outside INR, USD, EUR, GBP settlement accounts.', status: 'Active' },
+    { code: 'DUPLICATE_ID', name: 'Batch Anti-Duplication', desc: 'Detects previously settled payment IDs appearing multiple times across ledger uploads.', status: 'Active' },
+    { code: 'NET_GT_GROSS', name: 'Net vs Gross Invariant', desc: 'Flags transactions where net settlement credit received exceeds the gross customer payment.', status: 'Active' },
+    { code: 'MISSING_MANDATORY_FIELD', name: 'Schema Integrity Guard', desc: 'Traps CSV rows missing essential reconciliation columns (timestamp, currency, amount).', status: 'Active' },
+    { code: 'UNAUTHORIZED_MDR', name: 'Fee Schedule Boundary', desc: 'Isolates transactions where payment gateway fee deduction deviates >50 bps from agreed rate card.', status: 'Active' },
   ];
 
   const handleResolveAction = (recordId, action) => {
-    try { soundManager.playMatchChime(); } catch (_) {}
     if (onRecordResolved) onRecordResolved(recordId, action);
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
-      
-      {/* SubTabBar */}
+    <div className="space-y-5">
+
+      {/* Sub-Tab Bar */}
       <SubTabBar
         tabs={tabs}
         activeSubTab={activeSubTab}
-        onSubTabChange={(tab) => {
-          try { soundManager.playClick(); } catch (_) {}
-          setActiveSubTab(tab);
-        }}
+        onSubTabChange={setActiveSubTab}
         actions={
           <button
-            onClick={() => {
-              try { soundManager.playClick(); } catch (_) {}
-              if (onRefresh) onRefresh();
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 text-xs font-semibold shadow-xs transition-colors"
+            onClick={() => onRefresh && onRefresh()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 text-[12px] font-medium transition-colors"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Refresh Stream</span>
+            <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
+            <span>Refresh</span>
           </button>
         }
       />
 
-      {/* 🛡️ Quantum Anomaly Containment Banner */}
-      <div className="glass-3d-elevated p-5 rounded-3xl specular-top shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-start space-x-3.5">
-          <div className="p-2.5 rounded-2xl bg-rose-50 text-[#E8384F] border border-rose-200 shadow-xs mt-0.5">
-            <AlertOctagon className="w-5 h-5" />
+      {/* Status Banner */}
+      <div className="surface-inset p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 mt-0.5">
+            <AlertOctagon className="w-4 h-4" />
           </div>
           <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-[#E8384F] border border-rose-200 uppercase">
-                Containment Shield Active
-              </span>
-              <span className="text-xs font-mono text-slate-500 font-bold">
-                {activeRecords.length} Discrepancies Trapped
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200">
+                {activeRecords.length} Exceptions Trapped
               </span>
             </div>
-            <h3 className="text-base font-bold text-slate-900 mt-1 font-display">
-              Autonomous Human-In-The-Loop (HITL) Exception Shield
+            <h3 className="text-sm font-semibold text-slate-900 mt-1">
+              Exception Containment Shield
             </h3>
-            <p className="text-xs text-slate-500 font-sans mt-0.5 max-w-xl">
+            <p className="text-[12px] text-slate-500 mt-0.5 max-w-xl">
               Anomalous transactions are isolated from general ledgers with fail-closed safety until verified or adjusted.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 self-start md:self-auto font-mono text-xs">
-          <span className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold shadow-xs">
+        <div className="flex items-center gap-2 text-[11px] font-mono">
+          <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 font-semibold">
             0% System Halt
           </span>
-          <span className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold shadow-xs">
+          <span className="pill-matched px-2.5 py-1 rounded-lg font-semibold">
             100% Invariant Pass
           </span>
         </div>
       </div>
 
-      {/* Sub-View 1: Active Containment Queue */}
+      {/* Active Queue */}
       {activeSubTab === 'active' && (
-        <div className="space-y-4">
-          <QuarantineQueue
-            records={filteredActive}
-            quarantineRecords={filteredActive}
-            onResolve={handleResolveAction}
-            onRecordResolved={handleResolveAction}
-            onInspect={(rec) => {
-              try { soundManager.playClick(); } catch (_) {}
-              if (onInspectRecord) onInspectRecord(rec);
-            }}
-          />
-        </div>
+        <QuarantineQueue
+          records={activeRecords}
+          quarantineRecords={activeRecords}
+          onResolve={handleResolveAction}
+          onRecordResolved={handleResolveAction}
+          onInspect={(rec) => onInspectRecord && onInspectRecord(rec)}
+        />
       )}
 
-      {/* Sub-View 1.5: Autonomous Revenue Recovery Pipeline */}
+      {/* Recovery Engine */}
       {activeSubTab === 'recovery' && (
         <RecoveryEnginePanel onInspectRecord={onInspectRecord} />
       )}
 
-      {/* Sub-View 2: Resolved Archive */}
+      {/* Resolved Archive */}
       {activeSubTab === 'resolved' && (
-        <div className="glass-3d-elevated rounded-3xl p-6 specular-top shadow-sm space-y-4">
-          <h4 className="font-display font-bold text-base text-slate-900">
-            Resolved Exception Audit Trail
-          </h4>
-          <p className="text-xs text-slate-500 font-sans">
+        <div className="surface-elevated p-6 space-y-4">
+          <h4 className="text-sm font-semibold text-slate-900">Resolved Exception Trail</h4>
+          <p className="text-[12px] text-slate-500">
             Immutable log of manual overrides, fee write-offs, and ledger journal link adjustments.
           </p>
 
           {resolvedRecords.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {resolvedRecords.map((r, idx) => (
                 <div
                   key={idx}
-                  className="p-4 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-between text-xs font-mono shadow-xs"
+                  className="p-3.5 rounded-lg bg-white border border-slate-100 flex items-center justify-between text-[12px] font-mono"
                 >
                   <div className="flex items-center gap-3">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span className="font-bold text-slate-900">{r.record_id || r.transaction_id}</span>
-                    <span className="text-slate-400">|</span>
-                    <span className="text-slate-600">{r.resolution_action || 'Override Approved'}</span>
+                    <span className="font-semibold text-slate-800">{r.record_id || r.transaction_id}</span>
+                    <span className="text-slate-300">|</span>
+                    <span className="text-slate-500">{r.resolution_action || 'Override Approved'}</span>
                   </div>
-                  <span className="text-emerald-700 font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
+                  <span className="pill-matched px-2 py-0.5 rounded-full text-[10px] font-semibold">
                     RESOLVED
                   </span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="py-12 text-center text-slate-400 font-sans text-xs">
+            <div className="py-12 text-center text-slate-400 text-[12px]">
               No historical resolutions in current session. Active exceptions will appear here once cleared.
             </div>
           )}
         </div>
       )}
 
-      {/* Sub-View 3: Layer 1 Safety Rules */}
+      {/* Deterministic Rules */}
       {activeSubTab === 'rules' && (
-        <div className="glass-3d-elevated rounded-3xl p-6 specular-top shadow-sm space-y-4">
-          <h4 className="font-display font-bold text-base text-slate-900">
-            Layer 1 Deterministic Pre-Matching Rules
-          </h4>
-          <p className="text-xs text-slate-500 font-sans">
-            Vectorized invariants executed prior to consensus scoring. Zero AI hallucination risk.
+        <div className="surface-elevated p-6 space-y-4">
+          <h4 className="text-sm font-semibold text-slate-900">Layer 1 Deterministic Pre-Matching Rules</h4>
+          <p className="text-[12px] text-slate-500">
+            Vectorized invariants executed prior to consensus scoring. Zero false-positive risk.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {DETERMINISTIC_RULES.map((rule, idx) => (
-              <div key={idx} className="glass-3d hover-lift-3d p-4 rounded-2xl specular-top space-y-2">
+              <div key={idx} className="surface-card p-4 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-900">{rule.code}</span>
-                  <span className="text-[10px] font-mono font-bold text-emerald-700 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
+                  <span className="text-[11px] font-mono font-semibold text-slate-700">{rule.code}</span>
+                  <span className="pill-matched px-2 py-0.5 rounded-full text-[10px] font-semibold">
                     {rule.status}
                   </span>
                 </div>
-                <p className="text-xs font-bold text-slate-800">{rule.name}</p>
-                <p className="text-[11px] text-slate-500 font-sans leading-relaxed">{rule.desc}</p>
+                <p className="text-[12px] font-semibold text-slate-800">{rule.name}</p>
+                <p className="text-[11px] text-slate-500 leading-relaxed">{rule.desc}</p>
               </div>
             ))}
           </div>
         </div>
       )}
-
     </div>
   );
 }

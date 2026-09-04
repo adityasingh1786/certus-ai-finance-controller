@@ -17,6 +17,7 @@ import time
 from decimal import Decimal
 from datetime import date, datetime
 from pathlib import Path
+from typing import Any, Dict
 
 project_root = Path(__file__).resolve().parent.parent.parent
 backend_dir = Path(__file__).resolve().parent.parent
@@ -163,6 +164,7 @@ def run_benchmark():
         t_baseline = time.perf_counter() - t1
 
         # Run Certus AI engine
+        certus_results: dict[str, Any] = {}
         try:
             from app.services.reconciliation_service import MultiSourceReconciliationEngine
             engine = MultiSourceReconciliationEngine()
@@ -189,10 +191,15 @@ def run_benchmark():
         b_exceptions = baseline_results["total_exceptions"]
         
         summary = certus_results.get("summary", {})
-        c_matched = summary.get("matched", certus_results.get("matched", 0))
+        if isinstance(summary, dict):
+            c_matched = int(summary.get("matched", 0))
+        elif isinstance(certus_results.get("matched"), (int, float)):
+            c_matched = int(certus_results.get("matched", 0))
+        else:
+            c_matched = 0
         
         raw_exc = certus_results.get("exceptions", [])
-        c_exceptions = len(raw_exc) if isinstance(raw_exc, list) else int(raw_exc)
+        c_exceptions = len(raw_exc) if isinstance(raw_exc, (list, tuple)) else (int(raw_exc) if isinstance(raw_exc, (int, float, str)) else 0)
 
         c_match_rate = c_matched / size if size > 0 else 0.0
 

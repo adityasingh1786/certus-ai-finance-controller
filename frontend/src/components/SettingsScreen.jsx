@@ -1,121 +1,378 @@
-﻿import React, { useState } from "react";
-import { User, Shield, Bell, Database, Key, ChevronRight, Save } from "lucide-react";
+import React, { useState } from 'react';
+import {
+  User,
+  Shield,
+  Bell,
+  Database,
+  Key,
+  Save,
+  Check,
+  Sliders,
+  Building,
+  Webhook,
+  Lock,
+} from 'lucide-react';
 
 const SECTIONS = [
-  { id: "profile", label: "Profile", icon: User },
-  { id: "security", label: "Security", icon: Shield },
-  { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "data", label: "Data & Privacy", icon: Database },
-  { id: "api", label: "API Keys", icon: Key },
+  { id: 'general', label: 'Organization & Legal', icon: Building },
+  { id: 'invariants', label: 'Invariant Policy Rules', icon: Sliders },
+  { id: 'notifications', label: 'Webhooks & Alerts', icon: Bell },
+  { id: 'credentials', label: 'API Keys & Connectors', icon: Key },
+  { id: 'security', label: 'Security & Access', icon: Shield },
 ];
 
 function Toggle({ on, onChange }) {
   return (
-    <button onClick={() => onChange(!on)}
-      className="w-10 h-6 rounded-full transition-colors duration-200 relative flex items-center"
-      style={{ background: on ? "#E8384F" : "#E5E7EB" }}>
-      <span className="w-4 h-4 rounded-full bg-white shadow-sm absolute transition-transform duration-200"
-        style={{ transform: on ? "translateX(18px)" : "translateX(2px)" }} />
+    <button
+      type="button"
+      onClick={() => onChange(!on)}
+      className={`w-9 h-5 rounded-full transition-fast relative flex items-center p-0.5 ${
+        on ? 'bg-ink-primary' : 'bg-border-strong'
+      }`}
+    >
+      <span
+        className={`w-4 h-4 rounded-full bg-white shadow-subtle transition-transform duration-150 ${
+          on ? 'translate-x-4' : 'translate-x-0'
+        }`}
+      />
     </button>
   );
 }
 
 export default function SettingsScreen() {
-  const [activeSection, setActiveSection] = useState("profile");
-  const [notifications, setNotifications] = useState({ email: true, slack: false, exceptions: true, digest: true });
+  const [activeSection, setActiveSection] = useState('general');
+  const [savedSuccess, setSavedSuccess] = useState(false);
+
+  // Form State
+  const [orgData, setOrgData] = useState({
+    companyName: 'Certus Enterprise Corp India Pvt Ltd',
+    gstin: '29AAAAA0000A1Z5',
+    pan: 'AAAAA0000A',
+    fiscalYear: '2026-2027',
+    primaryCurrency: 'INR (₹)',
+    controllerEmail: 'treasury-controller@certus.ai',
+  });
+
+  const [policyData, setPolicyData] = useState({
+    rbiWindow: true, // COMP-01
+    mdrToleranceBps: '50', // COMP-06
+    tdsRatePct: '1.00', // COMP-08
+    idempotencyEnforced: true, // COMP-03
+    minDisputeFloor: '100', // COMP-04
+    doubleLockThreshold: '0.75',
+  });
+
+  const [notifData, setNotifData] = useState({
+    slackWebhook: 'https://hooks.slack.com/services/T00/B00/XXXX',
+    slackEnabled: true,
+    emailAlerts: true,
+    autoDisputeLetter: true,
+    digestDaily: true,
+  });
+
+  const handleSave = () => {
+    setSavedSuccess(true);
+    setTimeout(() => setSavedSuccess(false), 2500);
+  };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="font-display font-bold text-2xl text-ink-primary tracking-tight">Settings</h1>
-        <p className="text-sm text-ink-muted mt-1 font-sans">Manage your account, security, and application preferences.</p>
+    <div className="space-y-6 text-left">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-subtle">
+        <div>
+          <h1 className="font-display font-bold text-2xl text-ink-primary tracking-tight">
+            System Settings & Calibration
+          </h1>
+          <p className="text-xs text-ink-muted mt-0.5 font-sans">
+            Configure enterprise organization profiles, statutory invariant boundaries, and notification webhooks.
+          </p>
+        </div>
+
+        <button
+          onClick={handleSave}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-ink-primary hover:bg-slate-800 text-white text-xs font-semibold shadow-subtle transition-fast"
+        >
+          {savedSuccess ? (
+            <>
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Settings Saved</span>
+            </>
+          ) : (
+            <>
+              <Save className="w-3.5 h-3.5" />
+              <span>Save Changes</span>
+            </>
+          )}
+        </button>
       </div>
 
-      <div className="grid grid-cols-[200px_1fr] gap-6">
-        {/* Section Nav */}
-        <div className="bg-surface border border-border-subtle rounded-xl p-2 shadow-card h-fit">
+      {/* Main 2-Column Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6">
+        {/* Navigation Sidebar */}
+        <div className="bg-surface border border-border-subtle rounded-lg p-1.5 shadow-subtle h-fit space-y-0.5">
           {SECTIONS.map((s) => {
             const Icon = s.icon;
             const isActive = activeSection === s.id;
             return (
-              <button key={s.id} onClick={() => setActiveSection(s.id)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
-                style={{
-                  background: isActive ? "rgba(232,56,79,0.06)" : "transparent",
-                  color: isActive ? "#E8384F" : "#4B5563",
-                  borderLeft: isActive ? "2px solid #E8384F" : "2px solid transparent",
-                  paddingLeft: isActive ? "10px" : "12px",
-                }}>
-                <Icon className="w-4 h-4 flex-shrink-0" style={{ color: isActive ? "#E8384F" : "#9CA3AF" }} />
-                {s.label}
+              <button
+                key={s.id}
+                onClick={() => setActiveSection(s.id)}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium transition-fast text-left ${
+                  isActive
+                    ? 'bg-page text-ink-primary font-semibold border border-border-subtle shadow-subtle'
+                    : 'text-ink-secondary hover:text-ink-primary hover:bg-page'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-ink-primary' : 'text-ink-muted'}`} />
+                <span>{s.label}</span>
               </button>
             );
           })}
         </div>
 
         {/* Content Panel */}
-        <div className="bg-surface border border-border-subtle rounded-xl shadow-card overflow-hidden">
-          {activeSection === "profile" && (
-            <div>
-              <div className="px-6 py-4 border-b border-border-subtle">
-                <h2 className="font-display font-semibold text-base text-ink-primary">Profile Settings</h2>
+        <div className="bg-surface border border-border-subtle rounded-lg shadow-subtle p-6 space-y-6">
+          {/* 1. General Organization */}
+          {activeSection === 'general' && (
+            <div className="space-y-5">
+              <div className="pb-3 border-b border-border-subtle">
+                <h3 className="font-display font-bold text-sm text-ink-primary">
+                  Legal Entity & Financial Profile
+                </h3>
+                <p className="text-xs text-ink-muted">
+                  Corporate parameters used in statutory audit receipts and dispute notices.
+                </p>
               </div>
-              <div className="p-6 space-y-5">
-                <div className="flex items-center gap-5 pb-5 border-b border-border-subtle">
-                  <div className="w-16 h-16 rounded-full bg-sterling flex items-center justify-center text-white font-display font-bold text-2xl">
-                    A
-                  </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-secondary">Legal Entity Name</label>
+                  <input
+                    type="text"
+                    value={orgData.companyName}
+                    onChange={(e) => setOrgData({ ...orgData, companyName: e.target.value })}
+                    className="w-full px-3 py-2 bg-page border border-border-subtle rounded-md text-xs text-ink-primary font-sans focus:outline-none focus:border-border-strong"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-secondary">GSTIN (India)</label>
+                  <input
+                    type="text"
+                    value={orgData.gstin}
+                    onChange={(e) => setOrgData({ ...orgData, gstin: e.target.value })}
+                    className="w-full px-3 py-2 bg-page border border-border-subtle rounded-md text-xs text-ink-primary font-mono focus:outline-none focus:border-border-strong"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-secondary">Corporate PAN</label>
+                  <input
+                    type="text"
+                    value={orgData.pan}
+                    onChange={(e) => setOrgData({ ...orgData, pan: e.target.value })}
+                    className="w-full px-3 py-2 bg-page border border-border-subtle rounded-md text-xs text-ink-primary font-mono focus:outline-none focus:border-border-strong"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-secondary">Fiscal Year Calendar</label>
+                  <input
+                    type="text"
+                    value={orgData.fiscalYear}
+                    onChange={(e) => setOrgData({ ...orgData, fiscalYear: e.target.value })}
+                    className="w-full px-3 py-2 bg-page border border-border-subtle rounded-md text-xs text-ink-primary font-sans focus:outline-none focus:border-border-strong"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 2. Invariant Policies */}
+          {activeSection === 'invariants' && (
+            <div className="space-y-5">
+              <div className="pb-3 border-b border-border-subtle">
+                <h3 className="font-display font-bold text-sm text-ink-primary">
+                  Deterministic Invariant Engine Thresholds
+                </h3>
+                <p className="text-xs text-ink-muted">
+                  Formal boundary checks enforced at Layer 1 before data enters storage.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-4 rounded-md bg-page border border-border-subtle flex items-center justify-between gap-4">
                   <div>
-                    <p className="font-semibold text-ink-primary">Admin User</p>
-                    <p className="text-sm text-ink-muted font-sans">admin@certus.ai</p>
-                    <button className="mt-1.5 text-xs font-semibold" style={{ color: "#E8384F" }}>Change Photo</button>
+                    <p className="text-xs font-semibold text-ink-primary">
+                      COMP-01: RBI Fair Practices Contact Window (9 AM – 6 PM IST)
+                    </p>
+                    <p className="text-[11px] text-ink-muted">
+                      Blocks automated dispute transmission outside permitted statutory banking contact hours.
+                    </p>
+                  </div>
+                  <Toggle
+                    on={policyData.rbiWindow}
+                    onChange={(v) => setPolicyData({ ...policyData, rbiWindow: v })}
+                  />
+                </div>
+
+                <div className="p-4 rounded-md bg-page border border-border-subtle flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-ink-primary">
+                      COMP-03: Strict Cryptographic Idempotency Keying
+                    </p>
+                    <p className="text-[11px] text-ink-muted">
+                      Prevents duplicate journal entries and redundant gateway dispute tickets.
+                    </p>
+                  </div>
+                  <Toggle
+                    on={policyData.idempotencyEnforced}
+                    onChange={(v) => setPolicyData({ ...policyData, idempotencyEnforced: v })}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-secondary">
+                      COMP-06: MDR Fee Rate Card Tolerance (bps)
+                    </label>
+                    <input
+                      type="number"
+                      value={policyData.mdrToleranceBps}
+                      onChange={(e) => setPolicyData({ ...policyData, mdrToleranceBps: e.target.value })}
+                      className="w-full px-3 py-2 bg-page border border-border-subtle rounded-md text-xs text-ink-primary font-mono focus:outline-none focus:border-border-strong"
+                    />
+                    <p className="text-[10px] text-ink-muted">Default: ±50 bps above contracted rate card triggers quarantine.</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-ink-secondary">
+                      COMP-08: IT Act Section 194-O TDS Rate (%)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={policyData.tdsRatePct}
+                      onChange={(e) => setPolicyData({ ...policyData, tdsRatePct: e.target.value })}
+                      className="w-full px-3 py-2 bg-page border border-border-subtle rounded-md text-xs text-ink-primary font-mono focus:outline-none focus:border-border-strong"
+                    />
+                    <p className="text-[10px] text-ink-muted">Default: 1.00% gross deduction on marketplace e-commerce transactions.</p>
                   </div>
                 </div>
-                {[["Full Name", "Admin User"], ["Email", "admin@certus.ai"], ["Organization", "Certus AI"], ["Role", "Super Admin"]].map(([label, val]) => (
-                  <div key={label}>
-                    <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">{label}</label>
-                    <input type="text" defaultValue={val}
-                      className="w-full px-3 py-2.5 border border-border-subtle rounded-lg text-sm font-sans text-ink-primary outline-none focus:border-border-strong transition-colors"
-                    />
-                  </div>
-                ))}
-                <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all active:scale-95"
-                  style={{ background: "linear-gradient(135deg,#E8384F,#D02B41)", boxShadow: "0 2px 8px rgba(232,56,79,0.30)" }}>
-                  <Save className="w-4 h-4" />
-                  Save Changes
-                </button>
               </div>
             </div>
           )}
 
-          {activeSection === "notifications" && (
-            <div>
-              <div className="px-6 py-4 border-b border-border-subtle">
-                <h2 className="font-display font-semibold text-base text-ink-primary">Notification Preferences</h2>
+          {/* 3. Notifications */}
+          {activeSection === 'notifications' && (
+            <div className="space-y-5">
+              <div className="pb-3 border-b border-border-subtle">
+                <h3 className="font-display font-bold text-sm text-ink-primary">
+                  Webhook Endpoints & Incident Alerts
+                </h3>
+                <p className="text-xs text-ink-muted">
+                  Configure notification relays when anomalies are isolated to the Quarantine Hub.
+                </p>
               </div>
-              <div className="p-6 space-y-4">
+
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-ink-secondary">Slack Alert Webhook URL</label>
+                  <input
+                    type="text"
+                    value={notifData.slackWebhook}
+                    onChange={(e) => setNotifData({ ...notifData, slackWebhook: e.target.value })}
+                    className="w-full px-3 py-2 bg-page border border-border-subtle rounded-md text-xs text-ink-primary font-mono focus:outline-none focus:border-border-strong"
+                  />
+                </div>
+
+                <div className="p-4 rounded-md bg-page border border-border-subtle flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-ink-primary">Enable Slack Channel Notifications</p>
+                    <p className="text-[11px] text-ink-muted">Post structured JSON payloads on fee drift and missing UTRs.</p>
+                  </div>
+                  <Toggle
+                    on={notifData.slackEnabled}
+                    onChange={(v) => setNotifData({ ...notifData, slackEnabled: v })}
+                  />
+                </div>
+
+                <div className="p-4 rounded-md bg-page border border-border-subtle flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-ink-primary">Auto-Draft Razorpay Dispute Demand Notices</p>
+                    <p className="text-[11px] text-ink-muted">Automatically generates legal demand letters for fee variances exceeding ₹100.</p>
+                  </div>
+                  <Toggle
+                    on={notifData.autoDisputeLetter}
+                    onChange={(v) => setNotifData({ ...notifData, autoDisputeLetter: v })}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 4. Credentials */}
+          {activeSection === 'credentials' && (
+            <div className="space-y-5">
+              <div className="pb-3 border-b border-border-subtle">
+                <h3 className="font-display font-bold text-sm text-ink-primary">
+                  Connected API Credentials & Secrets
+                </h3>
+                <p className="text-xs text-ink-muted">
+                  Active connection keys and SFTP certificates for financial rails.
+                </p>
+              </div>
+
+              <div className="space-y-3">
                 {[
-                  { id: "email", label: "Email Alerts", desc: "Get notified of critical exceptions via email" },
-                  { id: "slack", label: "Slack Integration", desc: "Send notifications to your Slack workspace" },
-                  { id: "exceptions", label: "Exception Alerts", desc: "Immediate alerts for new mismatches or missing records" },
-                  { id: "digest", label: "Daily Digest", desc: "Summary of reconciliation activity every morning" },
-                ].map((n) => (
-                  <div key={n.id} className="flex items-center justify-between py-3 border-b border-border-subtle last:border-0">
+                  { name: 'Razorpay Gateway API', keyId: 'rzp_live_88291048201', status: 'ACTIVE', ping: '28ms' },
+                  { name: 'HDFC Corporate CMS SFTP', keyId: 'sftp.hdfcbank.com:22 (SSH-ED25519)', status: 'ACTIVE', ping: '62ms' },
+                  { name: 'Tally Prime 4.0 Local Mesh', keyId: 'localhost:9000 (XML/ODBC)', status: 'ACTIVE', ping: '12ms' },
+                ].map((c, i) => (
+                  <div key={i} className="p-3 rounded-md bg-page border border-border-subtle flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-sm text-ink-primary">{n.label}</p>
-                      <p className="text-xs text-ink-muted font-sans mt-0.5">{n.desc}</p>
+                      <p className="text-xs font-semibold text-ink-primary">{c.name}</p>
+                      <p className="font-mono text-[11px] text-ink-muted mt-0.5">{c.keyId}</p>
                     </div>
-                    <Toggle on={notifications[n.id]} onChange={(v) => setNotifications((prev) => ({ ...prev, [n.id]: v }))} />
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                        {c.status}
+                      </span>
+                      <span className="text-[11px] font-mono text-ink-muted">{c.ping}</span>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {(activeSection === "security" || activeSection === "data" || activeSection === "api") && (
-            <div className="flex flex-col items-center justify-center py-20 text-ink-muted">
-              <Shield className="w-12 h-12 mb-3 opacity-30" />
-              <p className="text-sm font-medium">This section is coming soon.</p>
+          {/* 5. Security */}
+          {activeSection === 'security' && (
+            <div className="space-y-5">
+              <div className="pb-3 border-b border-border-subtle">
+                <h3 className="font-display font-bold text-sm text-ink-primary">
+                  Security & Zero-Hallucination Air-Gap
+                </h3>
+                <p className="text-xs text-ink-muted">
+                  Multi-factor authentication and tamper-proof SQLite WAL encryption parameters.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="p-3.5 rounded-md bg-page border border-border-subtle space-y-1">
+                  <p className="text-xs font-semibold text-ink-primary">Double-Lock Gate Composite Threshold</p>
+                  <p className="text-[11px] text-ink-muted">
+                    Composite confidence score required before clearing records automatically: <strong className="text-ink-primary font-mono">0.75</strong>
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-md bg-page border border-border-subtle space-y-1">
+                  <p className="text-xs font-semibold text-ink-primary">Cryptographic Hash Function</p>
+                  <p className="text-[11px] text-ink-muted">
+                    Immutable state hashing: <strong className="text-ink-primary font-mono">SHA-256 Merkle Tree Proofs</strong>
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>

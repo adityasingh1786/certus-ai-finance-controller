@@ -5,12 +5,10 @@ import {
   User,
   ShieldCheck,
   Code,
-  Sparkles,
   Loader2,
   ChevronDown,
   ChevronUp,
   ExternalLink,
-  Zap,
   Activity,
   CheckCircle2,
   Lock,
@@ -22,7 +20,6 @@ import {
   Fingerprint,
 } from 'lucide-react';
 import { sendAgentQuery } from '../lib/api';
-import { soundManager } from '../lib/soundFx';
 
 export default function AgentChatPanel({
   reconciliationData,
@@ -39,11 +36,11 @@ export default function AgentChatPanel({
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `### ⚡ Executive Summary\nI am the **Certus Autonomous Financial Controller Copilot**.\n\nI have **live operational awareness** of **${scenarioName}** (${primaryBank} ↔ ${erpSystem}).\n\n### 📊 Verified Status Overview\n| Stream | System Status | Invariant Engine | Audit State |\n| :--- | :---: | :---: | :---: |\n| **Banking Rail** | ${primaryBank} | 55/55 Rules Locked | ✅ Active |\n| **ERP Ledger** | ${erpSystem} | 0.00ms Jitter Mesh | ✅ Synchronized |\n| **Exceptions** | ${quarantineRecords.length} Quarantined Batches | Fail-Closed Policy | ⚠️ Isolated at Layer 1 |\n\n### 🛠️ Suggested Investigations\n- Ask *"How do I fix the MDR fee mismatch on QR-001-MDR?"* for a forensic remediation guide.\n- Ask *"Stress-test 14-day cash runway"* for liquidity forecasting.\n- Ask *"Run Section 194-O TDS compliance audit"* for regulatory analysis.`,
+      content: `### Executive Overview\nI am the **Certus Autonomous Financial Controller Copilot**.\n\nI have **live operational awareness** of **${scenarioName}** (${primaryBank} ↔ ${erpSystem}).\n\n### Verified Status Overview\n| Stream | System Status | Invariant Engine | Audit State |\n| :--- | :---: | :---: | :---: |\n| **Banking Rail** | ${primaryBank} | 55/55 Rules Locked | Verified Active |\n| **ERP Ledger** | ${erpSystem} | 0.00ms Jitter Mesh | Synchronized |\n| **Exceptions** | ${quarantineRecords.length} Quarantined Batches | Fail-Closed Policy | Isolated at Layer 1 |\n\n### Suggested Inquiries\n- *"Explain root-cause variance on QR-001-MDR"* for forensic fee breakdown.\n- *"Forecast 14-day cash runway"* for liquidity distribution.\n- *"Audit Section 194-O TDS compliance"* for statutory deduction status.`,
       citations: ['QR-001-MDR', 'QR-002-UTR'],
       tool_calls: [{ tool_name: 'audit_live_operational_state', result_summary: `Scenario #${reconciliationData?.scenario_id || 1} live state loaded`, duration_ms: 12 }],
       confidence: 0.994,
-      provider: 'Certus Forensic Kernel v2.4',
+      provider: 'Certus Forensic Kernel v2.5',
       zk_proof_hash: '0x9E3F8A21B901C42D',
       direct_action: null,
     },
@@ -55,7 +52,6 @@ export default function AgentChatPanel({
   const [copiedIndex, setCopiedIndex] = useState(null);
   const chatEndRef = useRef(null);
 
-  // Trigger initial prompt if injected from library
   useEffect(() => {
     if (initialPrompt) {
       handleSend(initialPrompt);
@@ -69,8 +65,6 @@ export default function AgentChatPanel({
   const handleSend = async (queryText) => {
     const textToSend = queryText || inputQuery;
     if (!textToSend.trim() || isLoading) return;
-
-    try { soundManager.playClick(); } catch (_) {}
 
     const userMessage = { role: 'user', content: textToSend };
     setMessages((prev) => [...prev, userMessage]);
@@ -89,7 +83,6 @@ export default function AgentChatPanel({
 
     try {
       const response = await sendAgentQuery(textToSend, messages, contextPayload, modelMode);
-      try { soundManager.playMatchChime(); } catch (_) {}
 
       const assistantMessage = {
         role: 'assistant',
@@ -109,13 +102,13 @@ export default function AgentChatPanel({
         ...prev,
         {
           role: 'assistant',
-          content: `### ⚡ Executive Summary\nProcessed query using local **Certus Deterministic Kernel**.\n\n### 📊 Verified Ledger Evidence\n| Record ID | Rail | Variance | Status |\n| :--- | :---: | :---: | :---: |\n| **QR-001-MDR** | ${primaryBank} | +₹72.50 | ⚠️ Quarantined |\n| **QR-002-UTR** | Razorpay Gateway | ₹0.00 | ⏳ Missing Bank UTR |\n\n### 🛠️ Controller Remediation Playbook\n1. In **Tab 2 (Quarantine & Exceptions)**, select \`QR-001-MDR\` to authorize fee write-off.\n2. Invariant Gate #08 verified with ₹0.00 general ledger leakage.`,
+          content: `### Executive Overview\nProcessed query using local **Certus Deterministic Kernel**.\n\n### Verified Ledger Evidence\n| Record ID | Rail | Variance | Status |\n| :--- | :---: | :---: | :---: |\n| **QR-001-MDR** | ${primaryBank} | +₹72.50 | Quarantined |\n| **QR-002-UTR** | Razorpay Gateway | ₹0.00 | Missing Bank UTR |\n\n### Controller Remediation Playbook\n1. In **Quarantine & Exceptions**, select \`QR-001-MDR\` to review the MDR dispute draft.\n2. Invariant Gate #08 verified with ₹0.00 general ledger leakage.`,
           citations: ['QR-001-MDR', 'QR-002-UTR'],
           tool_calls: [{ tool_name: 'audit_live_operational_state', result_summary: 'Verified against local SQLite state.', duration_ms: 14 }],
           confidence: 0.99,
           provider: 'Certus Forensic Kernel (Air-Gapped)',
           zk_proof_hash: '0x9E3F_AIRGAP_001',
-          direct_action: { action: 'WRITE_OFF_MDR', record_id: 'QR-001-MDR', label: 'Resolve QR-001-MDR in Tab 2' },
+          direct_action: { action: 'WRITE_OFF_MDR', record_id: 'QR-001-MDR', label: 'Inspect QR-001-MDR Exception' },
         },
       ]);
     } finally {
@@ -126,45 +119,38 @@ export default function AgentChatPanel({
   const handleCopyMarkdown = (text, idx) => {
     navigator.clipboard.writeText(text);
     setCopiedIndex(idx);
-    try { soundManager.playClick(); } catch (_) {}
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  // Custom Markdown Table and Block Renderer
+  // Clean Markdown Table and Typography Renderer
   const renderMessageContent = (content) => {
-    // Split into sections or render with custom table styling
     return (
-      <div className="prose prose-sm max-w-none text-slate-800 space-y-3 font-sans leading-relaxed">
+      <div className="text-ink-primary space-y-2.5 font-sans leading-relaxed text-xs">
         {content.split('\n\n').map((block, bIdx) => {
           if (block.startsWith('|') && block.includes('---')) {
-            // Render Table
             const rows = block.trim().split('\n');
             const headers = rows[0].split('|').filter(c => c.trim()).map(c => c.trim());
             const dataRows = rows.slice(2).map(r => r.split('|').filter(c => c.trim()).map(c => c.trim()));
 
             return (
-              <div key={bIdx} className="overflow-x-auto my-3 rounded-2xl border border-slate-200/90 shadow-xs bg-white/95">
+              <div key={bIdx} className="overflow-x-auto my-2 rounded-md border border-border-subtle bg-surface">
                 <table className="w-full text-xs text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-100/90 border-b border-slate-200 text-slate-700 font-display font-bold">
+                    <tr className="bg-page border-b border-border-subtle text-ink-secondary font-medium">
                       {headers.map((h, hIdx) => (
-                        <th key={hIdx} className="py-2.5 px-3.5 font-mono uppercase text-[10px] tracking-wider">
+                        <th key={hIdx} className="py-2 px-3 font-mono uppercase text-[10px] tracking-wider">
                           {h.replace(/\*\*/g, '')}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-border-subtle font-mono text-[11px]">
                     {dataRows.map((row, rIdx) => (
-                      <tr key={rIdx} className="hover:bg-slate-50/80 transition-colors">
+                      <tr key={rIdx} className="hover:bg-page/50 transition-fast">
                         {row.map((cell, cIdx) => (
-                          <td key={cIdx} className="py-2 px-3.5 text-slate-700 font-sans">
-                            {cell.includes('✅') || cell.includes('⚠️') || cell.includes('⏳') ? (
-                              <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold">
-                                {cell.replace(/\*\*/g, '')}
-                              </span>
-                            ) : cell.startsWith('`') && cell.endsWith('`') ? (
-                              <code className="px-1.5 py-0.5 rounded bg-slate-100 text-[#E8384F] font-mono text-[10px] font-bold border border-slate-200">
+                          <td key={cIdx} className="py-2 px-3 text-ink-primary">
+                            {cell.startsWith('`') && cell.endsWith('`') ? (
+                              <code className="px-1.5 py-0.5 rounded bg-page text-ink-primary border border-border-subtle text-[10px]">
                                 {cell.replace(/`/g, '')}
                               </code>
                             ) : (
@@ -182,16 +168,16 @@ export default function AgentChatPanel({
 
           if (block.startsWith('### ')) {
             return (
-              <h4 key={bIdx} className="text-xs font-display font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5 pt-2 text-[#E8384F]">
+              <h4 key={bIdx} className="text-xs font-display font-semibold uppercase tracking-wider text-ink-secondary pt-1">
                 {block.replace('### ', '')}
               </h4>
             );
           }
 
           return (
-            <p key={bIdx} className="text-xs text-slate-700 leading-relaxed">
+            <p key={bIdx} className="text-xs text-ink-secondary leading-relaxed">
               {block.split('**').map((chunk, cIdx) => (
-                cIdx % 2 === 1 ? <strong key={cIdx} className="font-bold text-slate-900">{chunk}</strong> : chunk
+                cIdx % 2 === 1 ? <strong key={cIdx} className="font-semibold text-ink-primary">{chunk}</strong> : chunk
               ))}
             </p>
           );
@@ -201,118 +187,118 @@ export default function AgentChatPanel({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white/85 backdrop-blur-2xl border border-slate-200/80 rounded-3xl shadow-sm overflow-hidden text-left">
+    <div className="flex flex-col h-full bg-surface border border-border-subtle rounded-lg shadow-subtle overflow-hidden text-left">
       
-      {/* 🧭 Master Header & Model Mode Switcher */}
-      <div className="p-4 px-6 border-b border-slate-200/80 bg-slate-50/80 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E8384F] to-indigo-600 flex items-center justify-center text-white shadow-xs">
-            <Bot className="w-4 h-4" />
+      {/* Header & Model Mode Switcher */}
+      <div className="p-4 px-5 border-b border-border-subtle bg-page flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-md bg-surface border border-border-subtle flex items-center justify-center text-ink-primary">
+            <Bot className="w-3.5 h-3.5 text-ink-primary" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-xs font-display font-bold text-slate-900">
-                Certus Autonomous Copilot
+              <h3 className="text-xs font-display font-bold text-ink-primary">
+                Certus Autonomous Financial Copilot
               </h3>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                READ-ONLY SHIELD ACTIVE
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                Read-Only Provable Grounding
               </span>
             </div>
-            <p className="text-[10px] text-slate-500 font-sans">
-              Inspecting: <strong className="text-slate-700">{scenarioName}</strong>
+            <p className="text-[11px] text-ink-muted">
+              Active Context: <strong className="text-ink-secondary">{scenarioName}</strong>
             </p>
           </div>
         </div>
 
-        {/* ⚡ Multi-Model Selector Bar */}
-        <div className="flex items-center gap-1 p-1 bg-white border border-slate-200 rounded-xl shadow-2xs">
+        {/* Multi-Model Selector Bar */}
+        <div className="flex items-center gap-1 p-0.5 bg-surface border border-border-subtle rounded-md">
           <button
-            onClick={() => { setModelMode('auto'); soundManager.playClick(); }}
-            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all ${
+            onClick={() => setModelMode('auto')}
+            className={`px-2.5 py-1 rounded text-[10px] font-mono font-medium transition-fast ${
               modelMode === 'auto'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-ink-primary text-white shadow-subtle'
+                : 'text-ink-secondary hover:text-ink-primary'
             }`}
           >
-            ⚡ Auto Router
+            Auto Router
           </button>
           <button
-            onClick={() => { setModelMode('deep'); soundManager.playClick(); }}
-            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all ${
+            onClick={() => setModelMode('deep')}
+            className={`px-2.5 py-1 rounded text-[10px] font-mono font-medium transition-fast ${
               modelMode === 'deep'
-                ? 'bg-[#E8384F] text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-ink-primary text-white shadow-subtle'
+                : 'text-ink-secondary hover:text-ink-primary'
             }`}
           >
-            🧠 Deep Tax (Gemini)
+            Deep Tax (Gemini)
           </button>
           <button
-            onClick={() => { setModelMode('airgap'); soundManager.playClick(); }}
-            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all ${
+            onClick={() => setModelMode('airgap')}
+            className={`px-2.5 py-1 rounded text-[10px] font-mono font-medium transition-fast ${
               modelMode === 'airgap'
-                ? 'bg-indigo-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-ink-primary text-white shadow-subtle'
+                : 'text-ink-secondary hover:text-ink-primary'
             }`}
           >
-            🛡️ Air-Gap Kernel
+            Air-Gap Kernel
           </button>
         </div>
       </div>
 
-      {/* 💬 Conversation Message Stream */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-6">
+      {/* Conversation Message Stream */}
+      <div className="flex-1 p-5 overflow-y-auto space-y-5">
         {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={`flex items-start gap-3.5 ${
+            className={`flex items-start gap-3 ${
               msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'
             }`}
           >
             {/* Avatar Icon */}
             <div
-              className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 shadow-xs ${
+              className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 text-xs ${
                 msg.role === 'user'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-rose-50 border border-rose-200 text-[#E8384F]'
+                  ? 'bg-ink-primary text-white'
+                  : 'bg-page border border-border-subtle text-ink-primary'
               }`}
             >
-              {msg.role === 'user' ? <User className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
+              {msg.role === 'user' ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
             </div>
 
             {/* Message Bubble */}
             <div
-              className={`max-w-2xl rounded-2xl p-5 shadow-xs transition-all ${
+              className={`max-w-2xl rounded-lg p-4 transition-fast ${
                 msg.role === 'user'
-                  ? 'bg-slate-900 text-white rounded-tr-xs'
-                  : 'bg-white border border-slate-200/90 rounded-tl-xs space-y-4'
+                  ? 'bg-ink-primary text-white'
+                  : 'bg-surface border border-border-subtle shadow-subtle space-y-3'
               }`}
             >
               {msg.role === 'user' ? (
                 <p className="text-xs font-sans leading-relaxed">{msg.content}</p>
               ) : (
-                <div className="space-y-3.5">
+                <div className="space-y-3">
                   
-                  {/* Tool Execution ReAct Trace Pill (if tools were called) */}
+                  {/* Tool Execution ReAct Trace Pill */}
                   {msg.tool_calls && msg.tool_calls.length > 0 && (
-                    <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-2.5 space-y-1.5">
+                    <div className="rounded-md bg-page border border-border-subtle p-2 space-y-1">
                       <button
                         onClick={() => setActiveThinkingIndex(activeThinkingIndex === idx ? null : idx)}
-                        className="w-full flex items-center justify-between text-[10px] font-mono text-slate-500 hover:text-slate-800"
+                        className="w-full flex items-center justify-between text-[10px] font-mono text-ink-secondary hover:text-ink-primary"
                       >
-                        <span className="flex items-center gap-1.5 font-bold text-slate-700">
-                          <Terminal className="w-3 h-3 text-[#E8384F]" />
-                          Executed {msg.tool_calls.length} Autonomous Financial Tool{msg.tool_calls.length > 1 ? 's' : ''}
+                        <span className="flex items-center gap-1.5 font-medium text-ink-primary">
+                          <Terminal className="w-3 h-3 text-ink-secondary" />
+                          Executed {msg.tool_calls.length} Financial Tool{msg.tool_calls.length > 1 ? 's' : ''}
                         </span>
                         {activeThinkingIndex === idx ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                       </button>
 
                       {activeThinkingIndex === idx && (
-                        <div className="pt-2 border-t border-slate-200/60 space-y-1 text-[10px] font-mono">
+                        <div className="pt-1.5 border-t border-border-subtle space-y-1 text-[10px] font-mono">
                           {msg.tool_calls.map((t, tIdx) => (
-                            <div key={tIdx} className="flex items-center justify-between text-slate-600 bg-white p-1.5 rounded border border-slate-100">
-                              <span className="font-semibold text-slate-800">⚡ {t.tool_name}</span>
-                              <span className="text-emerald-600 font-bold">{t.duration_ms || 12}ms</span>
+                            <div key={tIdx} className="flex items-center justify-between text-ink-secondary bg-surface p-1.5 rounded border border-border-subtle">
+                              <span className="text-ink-primary">⚡ {t.tool_name}</span>
+                              <span className="text-emerald-700 font-medium">{t.duration_ms || 12}ms</span>
                             </div>
                           ))}
                         </div>
@@ -320,77 +306,75 @@ export default function AgentChatPanel({
                     </div>
                   )}
 
-                  {/* Render 4-Tier Structured Message */}
+                  {/* Render Structured Message */}
                   {renderMessageContent(msg.content)}
 
-                  {/* ⚡ One-Click Direct Action Bridge */}
+                  {/* Direct Action Bridge */}
                   {msg.direct_action && (
-                    <div className="p-3 rounded-xl bg-gradient-to-r from-rose-50 to-indigo-50 border border-rose-200/80 flex items-center justify-between gap-3">
+                    <div className="p-3 rounded-md bg-page border border-border-subtle flex items-center justify-between gap-3">
                       <div className="space-y-0.5">
-                        <span className="text-[10px] font-mono font-bold text-[#E8384F] uppercase">
-                          Recommended Action Bridge
+                        <span className="text-[10px] font-mono font-semibold text-ink-muted uppercase">
+                          Action Recommended
                         </span>
-                        <p className="text-xs font-display font-bold text-slate-900">
-                          {msg.direct_action.label || 'Authorize Resolution in Tab 2'}
+                        <p className="text-xs font-semibold text-ink-primary">
+                          {msg.direct_action.label || 'Inspect Exception Record'}
                         </p>
                       </div>
                       <button
                         onClick={() => {
-                          try { soundManager.playClick(); } catch (_) {}
                           if (onInspectRecord) {
                             onInspectRecord({ record_id: msg.direct_action.record_id });
                           }
                         }}
-                        className="shimmer-btn px-3 py-1.5 rounded-lg bg-[#E8384F] hover:bg-[#d42d43] text-white text-xs font-display font-bold shadow-xs inline-flex items-center gap-1.5 transition-transform hover:scale-105 active:scale-95"
+                        className="px-3 py-1.5 rounded-md bg-ink-primary hover:bg-slate-800 text-white text-xs font-medium shadow-subtle inline-flex items-center gap-1.5 transition-fast"
                       >
                         <span>Open Drawer</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <ArrowRight className="w-3 h-3" />
                       </button>
                     </div>
                   )}
 
-                  {/* Citations & ZK-STARK Proof Footer */}
-                  <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-slate-400">
+                  {/* Citations & Solvency Verification */}
+                  <div className="pt-2.5 border-t border-border-subtle flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono text-ink-muted">
                     
                     {/* Clickable Cited Record IDs */}
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="font-semibold text-slate-500">Citations:</span>
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="font-semibold text-ink-secondary">Citations:</span>
                       {msg.citations && msg.citations.length > 0 ? (
                         msg.citations.map((cid) => (
                           <button
                             key={cid}
                             onClick={() => {
-                              try { soundManager.playClick(); } catch (_) {}
                               if (onInspectRecord) onInspectRecord({ record_id: cid });
                             }}
-                            className="px-1.5 py-0.5 rounded bg-slate-100 hover:bg-rose-50 text-[#E8384F] border border-slate-200 hover:border-rose-300 font-bold transition-colors cursor-pointer"
+                            className="px-1.5 py-0.5 rounded bg-page hover:bg-border-subtle text-ink-primary border border-border-subtle font-mono text-[10px] transition-fast cursor-pointer"
                           >
                             {cid}
                           </button>
                         ))
                       ) : (
-                        <span className="text-slate-400">All Ledger Invariants</span>
+                        <span className="text-ink-muted">55 Invariant Rules</span>
                       )}
                     </div>
 
-                    {/* ZK-Proof Hash & Copy Action */}
-                    <div className="flex items-center gap-3">
+                    {/* Hash & Copy Action */}
+                    <div className="flex items-center gap-2.5">
                       {msg.zk_proof_hash && (
-                        <span className="hidden sm:inline-flex items-center gap-1 text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200 font-bold">
-                          <Fingerprint className="w-3 h-3" />
+                        <span className="hidden sm:inline-flex items-center gap-1 text-ink-secondary bg-page px-1.5 py-0.5 rounded border border-border-subtle">
+                          <Fingerprint className="w-3 h-3 text-ink-muted" />
                           {msg.zk_proof_hash}
                         </span>
                       )}
 
                       <button
                         onClick={() => handleCopyMarkdown(msg.content, idx)}
-                        className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 transition-colors"
+                        className="inline-flex items-center gap-1 text-ink-muted hover:text-ink-primary transition-fast"
                         title="Copy Markdown Report"
                       >
                         {copiedIndex === idx ? (
                           <>
                             <Check className="w-3 h-3 text-emerald-600" />
-                            <span className="text-emerald-600 font-bold">Copied</span>
+                            <span className="text-emerald-700 font-medium">Copied</span>
                           </>
                         ) : (
                           <>
@@ -411,13 +395,13 @@ export default function AgentChatPanel({
 
         {/* Loading Indicator */}
         {isLoading && (
-          <div className="flex items-start gap-3.5">
-            <div className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-200 text-[#E8384F] flex items-center justify-center shadow-xs">
-              <Bot className="w-3.5 h-3.5 animate-spin" />
+          <div className="flex items-start gap-3">
+            <div className="w-6 h-6 rounded-md bg-page border border-border-subtle text-ink-primary flex items-center justify-center">
+              <Bot className="w-3 h-3 animate-spin" />
             </div>
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex items-center gap-3 text-xs font-mono text-slate-600">
-              <Loader2 className="w-4 h-4 text-[#E8384F] animate-spin" />
-              <span>Synthesizing 4-Tier Forensic Ledger Proof...</span>
+            <div className="p-3 rounded-md bg-surface border border-border-subtle shadow-subtle flex items-center gap-2.5 text-xs font-mono text-ink-secondary">
+              <Loader2 className="w-3.5 h-3.5 text-ink-secondary animate-spin" />
+              <span>Querying verified financial ledger state...</span>
             </div>
           </div>
         )}
@@ -425,30 +409,30 @@ export default function AgentChatPanel({
         <div ref={chatEndRef} />
       </div>
 
-      {/* ⌨️ Interactive Input Station */}
-      <div className="p-4 px-6 border-t border-slate-200/80 bg-slate-50/60">
+      {/* Interactive Input Box */}
+      <div className="p-3 px-5 border-t border-border-subtle bg-page">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          className="flex items-center gap-2 bg-white border border-slate-300/80 rounded-2xl p-1.5 pl-4 shadow-xs focus-within:border-[#E8384F] focus-within:ring-2 focus-within:ring-rose-500/10 transition-all"
+          className="flex items-center gap-2 bg-surface border border-border-subtle rounded-md p-1 pl-3 shadow-subtle focus-within:border-border-strong transition-fast"
         >
           <input
             type="text"
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
-            placeholder="Ask a forensic question (e.g. 'How to resolve QR-001-MDR?', 'Calculate 14-day cash runway')..."
-            className="flex-1 bg-transparent text-xs font-sans text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            placeholder="Ask about cash float, exceptions, reconciliation rules, or audit citations..."
+            className="flex-1 bg-transparent text-xs font-sans text-ink-primary placeholder:text-ink-muted focus:outline-none"
             disabled={isLoading}
           />
           <button
             type="submit"
             disabled={!inputQuery.trim() || isLoading}
-            className={`p-2.5 rounded-xl transition-all ${
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-fast ${
               inputQuery.trim() && !isLoading
-                ? 'bg-[#E8384F] text-white shadow-sm hover:scale-105 active:scale-95'
-                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                ? 'bg-ink-primary hover:bg-slate-800 text-white shadow-subtle'
+                : 'bg-page text-ink-muted cursor-not-allowed'
             }`}
           >
             <Send className="w-3.5 h-3.5" />

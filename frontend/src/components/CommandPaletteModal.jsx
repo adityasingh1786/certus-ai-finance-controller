@@ -6,17 +6,18 @@ import {
   TrendingUp,
   Cpu,
   Shield,
-  Sparkles,
   ArrowRight,
   X,
-  FileText,
-  Key,
+  LayoutDashboard,
+  BarChart3,
+  Database,
+  Fingerprint,
+  Settings,
 } from 'lucide-react';
-import { soundManager } from '../lib/soundFx';
 
 /**
- * CommandPaletteModal — Global Financial Spotlight Search (Cmd/Ctrl + K)
- * Allows instant navigation between 20 Scenarios, 5 Hubs, and Transaction IDs.
+ * CommandPaletteModal — Sovereign Financial Spotlight Search (Cmd/Ctrl + K)
+ * Fast keyboard-first navigation between 20 Scenarios, 10 Screens/Hubs, and System Tools.
  */
 export default function CommandPaletteModal({
   isOpen,
@@ -29,17 +30,21 @@ export default function CommandPaletteModal({
 
   useEffect(() => {
     if (isOpen) {
-      soundManager.playClick();
       setQuery('');
     }
   }, [isOpen]);
 
   const hubs = [
+    { id: 'dashboard', name: 'Executive Dashboard', icon: LayoutDashboard, hotkey: '0', desc: 'Panoramic controller KPIs & working capital' },
     { id: 'recon', name: '3-Way Reconciliation Hub', icon: Layers, hotkey: '1', desc: 'Gateway ↔ Bank ↔ ERP Matrix' },
     { id: 'quarantine', name: 'Quarantine & Exceptions Hub', icon: ShieldAlert, hotkey: '2', desc: 'HITL anomaly resolution queue' },
     { id: 'treasury', name: 'Treasury & Liquidity Hub', icon: TrendingUp, hotkey: '3', desc: '14-day cash flow & transit tracker' },
     { id: 'copilot', name: 'Autonomous Financial Copilot', icon: Cpu, hotkey: '4', desc: 'Read-only MCP AI with citations' },
     { id: 'governance', name: 'System Governance & Rules', icon: Shield, hotkey: '5', desc: 'Invariant thresholds & weights' },
+    { id: 'ledger', name: 'Ledger Analysis & Variance', icon: BarChart3, desc: 'Variance analytics & monthly trends' },
+    { id: 'datasources', name: 'Data Sources & Connectors', icon: Database, desc: 'Multi-rail connectors & API telemetry' },
+    { id: 'audit', name: 'Audit Logs Ledger', icon: Fingerprint, desc: 'Cryptographic SHA-256 event trail' },
+    { id: 'settings', name: 'System & Policy Settings', icon: Settings, desc: 'Organization, policies & invariant rules' },
   ];
 
   const defaultScenarios = [
@@ -57,7 +62,6 @@ export default function CommandPaletteModal({
 
   const scenarioList = scenarios.length ? scenarios : defaultScenarios;
 
-  // Filter hubs and scenarios based on query
   const filteredHubs = useMemo(() => {
     if (!query) return hubs;
     const q = query.toLowerCase();
@@ -73,57 +77,56 @@ export default function CommandPaletteModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="w-full max-w-xl glass-3d-elevated rounded-3xl p-4 specular-top shadow-2xl space-y-4 border border-white/90">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4 bg-ink-primary/30 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="w-full max-w-xl bg-surface rounded-lg p-3 shadow-modal space-y-3 border border-border-subtle">
         
         {/* Search Bar Input */}
         <div className="relative flex items-center">
-          <Search className="w-5 h-5 text-slate-400 absolute left-4" />
+          <Search className="w-4 h-4 text-ink-muted absolute left-3.5" />
           <input
             type="text"
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Type a command, search scenario (1–20), or hub..."
-            className="w-full pl-12 pr-10 py-3.5 bg-white/90 border border-slate-200/80 rounded-2xl text-slate-900 text-sm font-sans focus:outline-none focus:border-[#E8384F] focus:ring-1 focus:ring-[#E8384F]/30 shadow-xs placeholder:text-slate-400"
+            placeholder="Type a command, scenario name (1–20), or jump to hub..."
+            className="w-full pl-10 pr-9 py-2.5 bg-page border border-border-subtle rounded-md text-ink-primary text-xs font-sans focus:outline-none focus:border-border-strong focus:bg-surface shadow-subtle placeholder:text-ink-muted transition-fast"
           />
           <button
             onClick={onClose}
-            className="absolute right-3.5 p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="absolute right-3 p-1 rounded text-ink-muted hover:text-ink-primary hover:bg-page transition-fast"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Results List */}
-        <div className="max-h-[380px] overflow-y-auto space-y-4 p-1">
+        <div className="max-h-[340px] overflow-y-auto space-y-3 p-1">
           {/* Section: Operational Hubs */}
           {filteredHubs.length > 0 && (
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider px-3">
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono font-semibold text-ink-muted uppercase tracking-wider px-2">
                 Operational Modules
               </span>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {filteredHubs.map((hub) => (
                   <button
                     key={hub.id}
                     onClick={() => {
-                      soundManager.playClick();
                       onSelectTab(hub.id);
                       onClose();
                     }}
-                    className="w-full flex items-center justify-between p-3 rounded-2xl bg-white/60 hover:bg-white border border-slate-100 hover:border-slate-300 transition-all text-left group hover:scale-[1.008] shadow-xs"
+                    className="w-full flex items-center justify-between p-2.5 rounded-md hover:bg-page border border-transparent hover:border-border-subtle transition-fast text-left group"
                   >
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-xl bg-slate-100 text-slate-700 group-hover:text-[#E8384F] group-hover:bg-rose-50 transition-colors">
-                        <hub.icon className="w-4 h-4" />
+                    <div className="flex items-center space-x-2.5">
+                      <div className="p-1.5 rounded-md bg-page border border-border-subtle text-ink-secondary group-hover:text-ink-primary transition-fast">
+                        <hub.icon className="w-3.5 h-3.5" />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-slate-900 group-hover:text-[#E8384F] transition-colors">{hub.name}</p>
-                        <p className="text-[11px] text-slate-500">{hub.desc}</p>
+                        <p className="text-xs font-medium text-ink-primary">{hub.name}</p>
+                        <p className="text-[11px] text-ink-muted">{hub.desc}</p>
                       </div>
                     </div>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-slate-100 text-slate-500 group-hover:bg-rose-50 group-hover:text-[#E8384F]">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-mono text-ink-muted bg-page border border-border-subtle">
                       Key {hub.hotkey}
                     </span>
                   </button>
@@ -134,32 +137,31 @@ export default function CommandPaletteModal({
 
           {/* Section: 20 Enterprise Scenarios */}
           {filteredScenarios.length > 0 && (
-            <div className="space-y-1.5 pt-2">
-              <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider px-3">
+            <div className="space-y-1 pt-1">
+              <span className="text-[10px] font-mono font-semibold text-ink-muted uppercase tracking-wider px-2">
                 Enterprise Financial Scenarios (20 Presets)
               </span>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {filteredScenarios.map((sc) => (
                   <button
                     key={sc.id}
                     onClick={() => {
-                      soundManager.playClick();
                       if (onRunScenario) onRunScenario(sc.id);
                       onSelectTab('recon');
                       onClose();
                     }}
-                    className="w-full flex items-center justify-between p-3 rounded-2xl bg-white/60 hover:bg-white border border-slate-100 hover:border-rose-300 transition-all text-left group hover:scale-[1.008] shadow-xs"
+                    className="w-full flex items-center justify-between p-2.5 rounded-md hover:bg-page border border-transparent hover:border-border-subtle transition-fast text-left group"
                   >
-                    <div className="flex items-center space-x-3 truncate">
-                      <div className="p-2 rounded-xl bg-rose-50 text-[#E8384F] font-mono text-[10px] font-bold">
+                    <div className="flex items-center space-x-2.5 truncate">
+                      <div className="p-1 rounded bg-page border border-border-subtle text-ink-secondary font-mono text-[10px] font-semibold">
                         #{String(sc.id).padStart(2, '0')}
                       </div>
                       <div className="truncate">
-                        <p className="text-xs font-bold text-slate-900 truncate group-hover:text-[#E8384F] transition-colors">{sc.name}</p>
-                        <p className="text-[10px] font-mono text-slate-400 uppercase">{sc.sector}</p>
+                        <p className="text-xs font-medium text-ink-primary truncate">{sc.name}</p>
+                        <p className="text-[10px] font-mono text-ink-muted uppercase">{sc.sector}</p>
                       </div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#E8384F] group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+                    <ArrowRight className="w-3.5 h-3.5 text-ink-muted group-hover:text-ink-primary transition-fast shrink-0 ml-2" />
                   </button>
                 ))}
               </div>
@@ -168,9 +170,9 @@ export default function CommandPaletteModal({
         </div>
 
         {/* Footer Shortcut Guide */}
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+        <div className="pt-2.5 border-t border-border-subtle flex items-center justify-between text-[11px] text-ink-muted font-mono px-1">
           <span>Press <strong>Esc</strong> to close</span>
-          <span>Navigation: <strong>Cmd/Ctrl + K</strong></span>
+          <span>Open anytime: <strong>⌘K</strong></span>
         </div>
 
       </div>

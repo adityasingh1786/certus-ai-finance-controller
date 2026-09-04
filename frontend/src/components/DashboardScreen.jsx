@@ -1,174 +1,171 @@
-import React, { useState } from "react";
+import React from 'react';
 import {
-  TrendingUp, AlertTriangle, DollarSign, Activity,
-  Sparkles, ArrowRight, CheckCircle2, XCircle, Clock, Copy
-} from "lucide-react";
-import BaselineComparisonWidget from "./BaselineComparisonWidget";
+  Layers,
+  ShieldAlert,
+  TrendingUp,
+  Bot,
+  Activity,
+  ArrowRight,
+  Zap,
+  Building,
+  CheckCircle2,
+  AlertTriangle,
+} from 'lucide-react';
 
-const statusBadge = {
-  Mismatched: { bg: "#FEF2F2", text: "#991B1B", border: "#FECACA", dot: "#E8384F" },
-  Matched:    { bg: "#ECFDF5", text: "#065F46", border: "#A7F3D0", dot: "#10B981" },
-  Duplicate:  { bg: "#EEF2FF", text: "#3730A3", border: "#C7D2FE", dot: "#6366F1" },
-  Missing:    { bg: "#FFFBEB", text: "#92400E", border: "#FDE68A", dot: "#F59E0B" },
-};
+export default function DashboardScreen({
+  reconciliationData,
+  cashPosition,
+  quarantineRecords = [],
+  onNavigateTab,
+}) {
+  const summary = reconciliationData?.summary || {
+    total_records: 60,
+    matched: 54,
+    mismatched: 2,
+    missing: 4,
+    match_rate_percentage: '90.0%',
+    avg_confidence: 0.984,
+  };
 
-function StatusPill({ status }) {
-  const s = statusBadge[status] || statusBadge.Matched;
+  const currentBalance = cashPosition?.current_balance || 48290000;
+  const pendingFloat = cashPosition?.pending_settlements_total || 3410500;
+  const quarantinedVal = cashPosition?.quarantined_amount_total || 71780;
+
+  const formatCurrency = (val) => `₹${Number(val).toLocaleString('en-IN')}`;
+
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border"
-      style={{ background: s.bg, color: s.text, borderColor: s.border }}>
-      <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.dot }} />
-      {status}
-    </span>
-  );
-}
-
-const KPI_CARDS = [
-  {
-    label: "Reconciliation Rate",
-    value: "98.4%",
-    delta: "+0.2%",
-    deltaUp: true,
-    bar: true,
-    barFill: 98.4,
-    accent: null,
-  },
-  {
-    label: "Open Exceptions",
-    value: "142",
-    sub: "/ 12,450 records",
-    note: "Requires immediate review",
-    noteBad: true,
-    badge: "Mismatched",
-    accent: "#E8384F",
-  },
-  {
-    label: "Total Processed Volume",
-    value: "$4.2B",
-    sub2: [{ label: "Inflow", val: "$2.15B" }, { label: "Outflow", val: "$2.05B" }],
-    accent: null,
-  },
-];
-
-const BATCHES = [
-  { id: "BCH-88291", route: "Stripe → JPM Operating", status: "Mismatched", volume: "$12,450.00", rate: "94.2%", rateGood: false },
-  { id: "BCH-88290", route: "Adyen → BofA Merchant",  status: "Matched",    volume: "$8,210.50",  rate: "100%", rateGood: true },
-  { id: "BCH-88289", route: "Internal Ledger → Custody A", status: "Matched", volume: "$450,000.00", rate: "100%", rateGood: true },
-  { id: "BCH-88288", route: "PayPal → JPM Operating",  status: "Duplicate",  volume: "$3,105.20",  rate: "99.1%", rateGood: true },
-];
-
-export default function DashboardScreen() {
-  const [visible, setVisible] = useState(true);
-  return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-start justify-between">
+    <div className="space-y-6 text-left">
+      {/* Top Welcome & KPI Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-subtle">
         <div>
-          <h1 className="font-display font-bold text-2xl text-ink-primary tracking-tight">Executive Dashboard</h1>
-          <p className="text-sm text-ink-muted mt-1 font-sans">Overview of reconciliation status and recent activity.</p>
-        </div>
-        <span className="font-mono text-xs text-ink-muted bg-surface-subtle border border-border-subtle px-3 py-1.5 rounded-md">
-          Last updated: 10:42 AM PST
-        </span>
-      </div>
-
-      {/* KPI Row */}
-      <div className="grid grid-cols-3 gap-4">
-        {/* Recon Rate */}
-        <div className="bg-surface border border-border-subtle rounded-xl p-5 shadow-card hover:shadow-md transition-shadow">
-          <p className="text-xs font-medium text-ink-muted uppercase tracking-wider font-sans">Reconciliation Rate</p>
-          <div className="mt-3 flex items-end gap-2">
-            <span className="font-display font-bold text-4xl tracking-tight text-ink-primary">98.4%</span>
-            <span className="text-xs font-semibold text-emerald-600 mb-1.5 flex items-center gap-0.5">
-              <TrendingUp className="w-3 h-3" /> +0.2%
-            </span>
-          </div>
-          <div className="mt-3 h-1.5 rounded-full bg-surface-subtle overflow-hidden">
-            <div className="h-full rounded-full bg-emerald-500 transition-all duration-700" style={{ width: "98.4%" }} />
-          </div>
-        </div>
-
-        {/* Open Exceptions */}
-        <div className="bg-surface border border-border-subtle rounded-xl p-5 shadow-card hover:shadow-md transition-shadow relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-1 h-full rounded-l-xl" style={{ background: "#E8384F" }} />
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-ink-muted uppercase tracking-wider font-sans">Open Exceptions</p>
-            <StatusPill status="Mismatched" />
-          </div>
-          <div className="mt-3 flex items-end gap-2">
-            <span className="font-display font-bold text-4xl tracking-tight" style={{ color: "#E8384F" }}>142</span>
-            <span className="text-sm text-ink-muted mb-1.5 font-mono">/ 12,450 records</span>
-          </div>
-          <p className="text-xs text-ink-muted mt-1 flex items-center gap-1">
-            <AlertTriangle className="w-3 h-3" style={{ color: "#E8384F" }} />
-            Requires immediate review
+          <h1 className="font-display font-bold text-2xl text-ink-primary tracking-tight">
+            Financial Controller Executive Dashboard
+          </h1>
+          <p className="text-xs text-ink-muted mt-0.5 font-sans">
+            Autonomous multi-rail reconciliation telemetry, working capital pipeline, and invariant gate status.
           </p>
         </div>
 
-        {/* Volume */}
-        <div className="bg-surface border border-border-subtle rounded-xl p-5 shadow-card hover:shadow-md transition-shadow">
-          <p className="text-xs font-medium text-ink-muted uppercase tracking-wider font-sans">Total Processed Volume</p>
-          <div className="mt-3">
-            <span className="font-display font-bold text-4xl tracking-tight text-ink-primary">$4.2B</span>
-          </div>
-          <div className="mt-3 flex gap-6">
-            {[{ l: "Inflow", v: "$2.15B" }, { l: "Outflow", v: "$2.05B" }].map((x) => (
-              <div key={x.l}>
-                <p className="text-xs text-ink-muted font-sans">{x.l}</p>
-                <p className="font-mono font-semibold text-sm text-ink-primary">{x.v}</p>
-              </div>
-            ))}
-          </div>
+        <div className="flex items-center gap-2 font-mono text-xs text-ink-muted">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span className="text-ink-primary font-medium">8,345 ops/s</span>
+          <span>•</span>
+          <span>55 Invariants Active</span>
         </div>
       </div>
 
-      {/* AI Insight Summary */}
-      <div className="bg-surface border border-border-subtle rounded-xl p-5 shadow-card"
-        style={{ borderLeft: "3px solid #E8384F" }}>
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="w-4 h-4" style={{ color: "#6366F1" }} />
-          <span className="font-display font-semibold text-sm text-ink-primary">AI Insight Summary</span>
+      {/* 4-Stat Metric Ticker */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div
+          onClick={() => onNavigateTab && onNavigateTab('recon')}
+          className="bg-surface border border-border-subtle rounded-lg p-4 shadow-subtle hover:border-border-strong transition-fast cursor-pointer space-y-1.5"
+        >
+          <div className="flex items-center justify-between text-[11px] text-ink-muted">
+            <span>3-Way Match Rate</span>
+            <Layers className="w-3.5 h-3.5 text-emerald-600" />
+          </div>
+          <p className="font-mono text-xl font-bold text-ink-primary tabular-nums">
+            {summary.match_rate_percentage}
+          </p>
+          <p className="text-[11px] text-emerald-700 font-medium">
+            {summary.matched} of {summary.total_records} Verified
+          </p>
         </div>
-        <p className="text-sm text-ink-secondary font-sans leading-relaxed">
-          Anomaly detected in Q3 cross-border settlements. 45 exceptions originate from European banking
-          partners due to a known timezone shift in SWIFT reporting. AI recommends applying rule{" "}
-          <code className="font-mono text-xs bg-surface-subtle px-1.5 py-0.5 rounded border border-border-subtle text-ink-primary">EU-SWIFT-TZ</code>{" "}
-          to auto-resolve 80% of these discrepancies.
-        </p>
-        <button className="mt-3 px-4 py-1.5 text-sm font-medium border border-border-strong rounded-lg hover:border-ink-secondary hover:text-ink-primary text-ink-secondary transition-all duration-150">
-          Review Suggested Rules
-        </button>
+
+        <div
+          onClick={() => onNavigateTab && onNavigateTab('treasury')}
+          className="bg-surface border border-border-subtle rounded-lg p-4 shadow-subtle hover:border-border-strong transition-fast cursor-pointer space-y-1.5"
+        >
+          <div className="flex items-center justify-between text-[11px] text-ink-muted">
+            <span>Liquid Bank Balance</span>
+            <TrendingUp className="w-3.5 h-3.5 text-ink-secondary" />
+          </div>
+          <p className="font-mono text-xl font-bold text-ink-primary tabular-nums">
+            {formatCurrency(currentBalance)}
+          </p>
+          <p className="text-[11px] text-ink-muted">HDFC / ICICI Verified</p>
+        </div>
+
+        <div
+          onClick={() => onNavigateTab && onNavigateTab('treasury')}
+          className="bg-surface border border-border-subtle rounded-lg p-4 shadow-subtle hover:border-border-strong transition-fast cursor-pointer space-y-1.5"
+        >
+          <div className="flex items-center justify-between text-[11px] text-ink-muted">
+            <span>In-Transit Gateway Float</span>
+            <Activity className="w-3.5 h-3.5 text-ink-secondary" />
+          </div>
+          <p className="font-mono text-xl font-bold text-ink-primary tabular-nums">
+            {formatCurrency(pendingFloat)}
+          </p>
+          <p className="text-[11px] text-emerald-700 font-medium">T+1 Clearing Transit</p>
+        </div>
+
+        <div
+          onClick={() => onNavigateTab && onNavigateTab('quarantine')}
+          className="bg-surface border border-border-subtle rounded-lg p-4 shadow-subtle hover:border-border-strong transition-fast cursor-pointer space-y-1.5"
+        >
+          <div className="flex items-center justify-between text-[11px] text-ink-muted">
+            <span>Quarantined at Risk</span>
+            <ShieldAlert className="w-3.5 h-3.5 text-sterling" />
+          </div>
+          <p className="font-mono text-xl font-bold text-sterling tabular-nums">
+            {formatCurrency(quarantinedVal)}
+          </p>
+          <p className="text-[11px] text-sterling font-medium">
+            {quarantineRecords.length} Exceptions Trapped
+          </p>
+        </div>
       </div>
 
-      {/* Naive Baseline vs Certus AI Benchmark */}
-      <BaselineComparisonWidget />
-
-      {/* Recent Batches Table */}
-      <div className="bg-surface border border-border-subtle rounded-xl shadow-card overflow-hidden">
-        <div className="px-5 py-4 flex items-center justify-between border-b border-border-subtle">
-          <h2 className="font-display font-semibold text-base text-ink-primary">Recent Reconciliation Batches</h2>
-          <button className="text-sm font-semibold hover:underline" style={{ color: "#E8384F" }}>View All</button>
+      {/* Operational Modules Quick Jump */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+        <div
+          onClick={() => onNavigateTab && onNavigateTab('recon')}
+          className="bg-surface border border-border-subtle rounded-lg p-5 shadow-subtle hover:border-border-strong transition-fast cursor-pointer space-y-2 group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="w-8 h-8 rounded-md bg-page border border-border-subtle flex items-center justify-center text-ink-primary">
+              <Layers className="w-4 h-4" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-ink-muted group-hover:text-ink-primary transition-fast" />
+          </div>
+          <h3 className="font-display font-bold text-sm text-ink-primary">3-Way Match Matrix</h3>
+          <p className="text-xs text-ink-muted leading-relaxed">
+            Inspect side-by-side reconciliation across Gateway IDs, Bank CMS UTR numbers, and ERP invoice general ledgers.
+          </p>
         </div>
-        <table className="w-full">
-          <thead>
-            <tr className="bg-surface-subtle">
-              {["Batch ID", "Source / Destination", "Status", "Volume", "Match Rate"].map((h) => (
-                <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider font-sans">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border-subtle">
-            {BATCHES.map((b) => (
-              <tr key={b.id} className="hover:bg-surface-subtle/60 transition-colors cursor-pointer group">
-                <td className="px-5 py-4 font-mono text-sm font-semibold text-ink-primary">{b.id}</td>
-                <td className="px-5 py-4 text-sm text-ink-secondary font-sans">{b.route}</td>
-                <td className="px-5 py-4"><StatusPill status={b.status} /></td>
-                <td className="px-5 py-4 font-mono text-sm text-ink-primary">{b.volume}</td>
-                <td className="px-5 py-4 font-mono text-sm font-semibold" style={{ color: b.rateGood ? "#065F46" : "#E8384F" }}>{b.rate}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+        <div
+          onClick={() => onNavigateTab && onNavigateTab('quarantine')}
+          className="bg-surface border border-border-subtle rounded-lg p-5 shadow-subtle hover:border-border-strong transition-fast cursor-pointer space-y-2 group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="w-8 h-8 rounded-md bg-page border border-border-subtle flex items-center justify-center text-ink-primary">
+              <ShieldAlert className="w-4 h-4 text-sterling" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-ink-muted group-hover:text-ink-primary transition-fast" />
+          </div>
+          <h3 className="font-display font-bold text-sm text-ink-primary">Quarantine & Anomaly Recovery</h3>
+          <p className="text-xs text-ink-muted leading-relaxed">
+            Forensic mathematical diagnosis of MDR rate hikes, missing UTR credits, and one-click dispute letter generation.
+          </p>
+        </div>
+
+        <div
+          onClick={() => onNavigateTab && onNavigateTab('copilot')}
+          className="bg-surface border border-border-subtle rounded-lg p-5 shadow-subtle hover:border-border-strong transition-fast cursor-pointer space-y-2 group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="w-8 h-8 rounded-md bg-page border border-border-subtle flex items-center justify-center text-ink-primary">
+              <Bot className="w-4 h-4" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-ink-muted group-hover:text-ink-primary transition-fast" />
+          </div>
+          <h3 className="font-display font-bold text-sm text-ink-primary">Autonomous AI Copilot</h3>
+          <p className="text-xs text-ink-muted leading-relaxed">
+            Query financial status with verifiable source citations and provable grounding against immutable SQLite state.
+          </p>
+        </div>
       </div>
     </div>
   );
