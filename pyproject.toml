@@ -46,6 +46,13 @@ addopts = "-q"
 testpaths = ["backend/tests"]
 pythonpath = ["backend"]
 asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::FutureWarning:google.generativeai.*",
+    "ignore:.*google.generativeai.*:FutureWarning",
+    "ignore:.*httpx.*starlette.testclient.*",
+    "ignore:.*starlette.testclient.*",
+    "ignore::DeprecationWarning:fastapi.testclient.*",
+]
 
 [tool.ruff]
 src = ["backend"]

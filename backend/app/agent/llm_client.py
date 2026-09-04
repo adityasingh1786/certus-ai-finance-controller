@@ -104,7 +104,10 @@ class UnifiedLLMClient:
         # Gemini
         if self.settings.gemini_api_key:
             try:
-                import google.generativeai as genai
+                import warnings
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=FutureWarning)
+                    import google.generativeai as genai
                 genai.configure(api_key=self.settings.gemini_api_key)
                 self._gemini_client = genai.GenerativeModel('gemini-1.5-flash')
                 logger.info("✅ Gemini client initialized")
