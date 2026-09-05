@@ -114,6 +114,8 @@ docs/*slides*.md
 docs/*SLIDES*.md
 docs/*competitive*.md
 docs/*COMPETITIVE*.md
+docs/*.pdf
+backend/scripts/generate_demo_script_pdf.py
 
 # Ensure core python files and scripts are tracked
 !backend/scripts/calibration_audit.py
