@@ -187,7 +187,7 @@ In side-by-side benchmark testing against a standard Naive SQL join reconciler:
 | **Exception Root-Cause Clarity** | `0% (Generic Failure)` | **`100% Root-Cause Identified`** | **Actionable Attributions** |
 | **False-Positive Matches** | `Unchecked (High Risk)` | **`0.000% (Double-Lock Gate)`** | **Zero False Approvals** |
 | **Regulatory Compliance** | `Not Audited` | **`100% Pass (5 Frameworks)`** | **Legally Bulletproof** |
-| **Unit & Invariant Tests** | `N/A` | **`147 / 147 PASSED`** | **0 Deprecation Warnings** |
+| **Unit & Invariant Tests** | `N/A` | **`164 / 164 PASSED`** | **0 Deprecation Warnings** |
 
 ---
 

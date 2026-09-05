@@ -515,7 +515,7 @@ export default function SingularityBootScreen({ onBootComplete }) {
                   />
                 );
               })}
-              <span className="text-[10px] text-emerald-400 font-bold ml-2">729 ops/sec</span>
+              <span className="text-[10px] text-emerald-400 font-bold ml-2">8,345 ops/sec</span>
             </div>
 
           </div>

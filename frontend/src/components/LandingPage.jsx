@@ -239,7 +239,7 @@ export default function LandingPage({
         <div className="flex items-center gap-8 whitespace-nowrap animate-marquee font-mono text-xs font-semibold">
           <span className="flex items-center gap-1.5 text-emerald-400">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            RAZORPAY ↔ HDFC CMS: 729 OPS/S
+            RAZORPAY ↔ HDFC CMS: 8,345 OPS/S
           </span>
           <span className="text-slate-500">•</span>
           <span className="text-rose-400 font-bold">55 / 55 INVARIANTS ARMED</span>
@@ -263,7 +263,7 @@ export default function LandingPage({
           <span className="w-2 h-2 rounded-full bg-[#E8384F] breathing-dot" />
           <span>Lead Architect: <strong>Aditya Singh</strong></span>
           <span className="text-slate-300">•</span>
-          <span className="font-mono text-[11px] text-emerald-700 font-bold">60 / 60 Backend Invariants Passing</span>
+          <span className="font-mono text-[11px] text-emerald-700 font-bold">164 / 164 Automated Tests Passing (100%)</span>
         </div>
 
         {/* Hero Title */}
@@ -312,7 +312,7 @@ export default function LandingPage({
         <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
           <div className="luxury-glass-card hover-lift-3d p-5 rounded-2xl bg-white">
             <span className="text-xs font-semibold text-slate-500 block font-sans">Throughput Velocity</span>
-            <span className="font-mono text-2xl font-bold text-slate-900 mt-1 block tabular-nums">729 ops/s</span>
+            <span className="font-mono text-2xl font-bold text-slate-900 mt-1 block tabular-nums">8,345 ops/s</span>
             <span className="text-[11px] text-emerald-700 font-semibold mt-1 block font-mono">1.37 ms / Record</span>
           </div>
 

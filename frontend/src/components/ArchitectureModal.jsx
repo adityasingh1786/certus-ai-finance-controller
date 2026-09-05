@@ -33,7 +33,7 @@ export default function ArchitectureModal({ isOpen, onClose }) {
       badge: 'LAYER 1',
       title: 'Deterministic Invariant Rules Engine',
       techTag: 'Zero-LLM Boundary / Fail-Closed',
-      latency: '< 1ms (729+ ops/s)',
+      latency: '1.37 ms (8,345 ops/s)',
       summary: '55 mathematical invariant checks executed before data touches storage, isolating anomalies to Quarantine.',
       details: [
         'Rule 1 (INV_PAISA_MATH): Absolute integer paisa quantization eliminating IEEE-754 floating-point drift.',

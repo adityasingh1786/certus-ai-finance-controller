@@ -98,6 +98,23 @@ walkthrough.md
 *.timestamp*
 .gemini/
 
+# Video recording scripts, demo pitches & presentation decks (Local only - do not push to GitHub)
+docs/VIDEO_SCRIPT.md
+docs/demo-script.md
+docs/PITCH_SLIDES_OUTLINE.md
+docs/PITCH_DECK.md
+docs/COMPETITIVE_ANALYSIS.md
+docs/COMPETITIVE_ANALYSIS.pdf
+docs/*video*.md
+docs/*VIDEO*.md
+docs/*demo-script*.md
+docs/*pitch*.md
+docs/*PITCH*.md
+docs/*slides*.md
+docs/*SLIDES*.md
+docs/*competitive*.md
+docs/*COMPETITIVE*.md
+
 # Ensure core python files and scripts are tracked
 !backend/scripts/calibration_audit.py
 !backend/app/api/v1/audit.py

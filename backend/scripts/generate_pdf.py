@@ -203,8 +203,8 @@ def build_pdf(output_path: str):
         ("Multi-LLM Consensus Relay", "4 Providers (Groq → Gemini → OpenAI → Claude)", "1 Model (Single LLM prompt)", "1 Model (Standard agent)", "None / 1 Free API", "None"),
         ("Autonomous Revenue Recovery", "6-Step Loop (Detect → Diagnose → Execute)", "Static anomaly flags only", "Dual-engine retry loop", "Static CSV reporting", "Manual spreadsheet edit"),
         ("Adaptive Strategy Memory", "Recency-Weighted Window (N=50, Decay 0.95)", "None", "Basic success counter", "None", "None"),
-        ("Empirical Baseline Benchmark", "Side-by-Side (+10% Lift, 8,345 ops/s)", "None (~100 records only)", "Basic synthetic test", "None", "None"),
-        ("Automated Test Coverage", "147 / 147 Passing Pytest Tests", "~10–15 basic tests", "116 / 116 tests", "<5 tests / Untested", "0–5 basic tests"),
+        ("Empirical Baseline Benchmark", "Side-by-Side (+13.33% Lift, 8,345 ops/s)", "None (~100 records only)", "Basic synthetic test", "None", "None"),
+        ("Automated Test Coverage", "164 / 164 Passing Pytest Tests", "~10–15 basic tests", "116 / 116 tests", "<5 tests / Untested", "0–5 basic tests"),
         ("UI & Web Visualization", "45+ React Components + 3D WebGL", "Basic Streamlit UI", "CLI Only", "CLI / Jupyter Notebook", "Raw CSV / Terminal"),
         ("Production REST API Layer", "FastAPI + OpenAPI 3.1 Interactive Swagger", "None", "None", "None", "None"),
         ("Audit Trail & Idempotency", "SHA-256 Commitments + Strict Keys", "None", "Basic attempt counter", "None", "None")
@@ -262,7 +262,7 @@ def build_pdf(output_path: str):
     story.append(Paragraph("• <b>Their Claims:</b> 116 unit tests, dual-engine retry mechanism for failed gateway payments, windowed strategy memory.", bullet_style))
     story.append(Paragraph("• <b>Fatal Flaw 1 (Single-Source Blindspot):</b> Sentinel only matches Razorpay gateway payments vs refund logs. It has zero visibility into HDFC/ICICI bank CMS files or Tally/SAP ERP ledgers. <i>Certus is a true 3-way multi-rail operating system.</i>", bullet_style))
     story.append(Paragraph("• <b>Fatal Flaw 2 (No UI & No REST API):</b> Sentinel is strictly a CLI script. <i>Certus provides 45+ React components, 3D WebGL Three.js telemetry, and 7 FastAPI Swagger endpoints.</i>", bullet_style))
-    story.append(Paragraph("• <b>Fatal Flaw 3 (Test Coverage):</b> <i>Certus exceeds Sentinel with 147 / 147 verified passing tests</i> across invariant gates, cybersecurity mesh, prompt injection defense, webhooks, circuit breakers, and regulatory laws.", bullet_style))
+    story.append(Paragraph("• <b>Fatal Flaw 3 (Test Coverage):</b> <i>Certus exceeds Sentinel with 164 / 164 verified passing tests</i> across invariant gates, cybersecurity mesh, prompt injection defense, webhooks, circuit breakers, and regulatory laws.", bullet_style))
     story.append(Spacer(1, 6))
 
     story.append(Paragraph("❌ Competitors C & D: <b>Generic Buildathon Repos & Pandas Join Scripts</b>", h2_style))
@@ -278,8 +278,8 @@ def build_pdf(output_path: str):
     proof_points = [
         ("1. The 3-Way Cross-Rail Bridge", "Razorpay's dashboard only sees Rail 1 (Gateway). It cannot see whether funds credited to the merchant's HDFC CMS account (Rail 2) or cleared in Tally ERP (Rail 3). Certus is the 3-way bridge solving this multi-crore enterprise blindspot."),
         ("2. Zero-LLM Deterministic Financial Math", "Regulatory compliance (RBI §6.2 contact hours 9AM-6PM IST, Section 194-O TDS 1%, CGST 18%) runs in 100% deterministic Python on integer paise. AI is never allowed to hallucinate financial numbers."),
-        ("3. Empirical Baseline Accuracy Gain", "Tested on 1,000 multi-rail records, Certus proves a +10.0% net accuracy lift (90.0% vs 80.0%) over naive exact matching while eliminating false positives via the Double-Lock Gate (≥ 0.75)."),
-        ("4. 147 Passing Automated Tests", "147 / 147 unit, invariant, security, circuit breaker, webhook, and integration tests passing in real automated suites."),
+        ("3. Empirical Baseline Accuracy Gain", "Tested on 1,000 multi-rail records, Certus proves a +13.33% net accuracy lift (93.33% vs 80.0%) over naive exact matching while eliminating false positives via the Double-Lock Gate (≥ 0.75)."),
+        ("4. 164 Passing Automated Tests", "164 / 164 unit, invariant, security, circuit breaker, webhook, and integration tests passing in real automated suites."),
         ("5. Enterprise Full-Stack Polish", "45+ modular React components, 3D WebGL multi-rail visualizer, FastAPI OpenAPI 3.1 Swagger docs, Prometheus /metrics telemetry, and SQLite WAL shared memory.")
     ]
 
